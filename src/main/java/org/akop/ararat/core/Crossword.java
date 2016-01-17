@@ -1093,7 +1093,7 @@ public class Crossword
 			return false;
 		}
 
-		private static Cell readFromStream(ObjectInputStream ois)
+		static Cell readFromStream(ObjectInputStream ois)
 				throws IOException, ClassNotFoundException
 		{
 			Cell cell = new Cell();

@@ -31,6 +31,7 @@ import android.graphics.Path;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.graphics.Typeface;
 import android.os.AsyncTask;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -100,10 +101,10 @@ public class CrosswordView
 
 	private static final float FLING_VELOCITY_DOWNSCALE = 2.0f;
 	private static final float CELL_SIZE = 10;
-	private static final float NUMBER_TEXT_PADDING = 2;
-	private static final float NUMBER_TEXT_SIZE = 5;
+	private static final float NUMBER_TEXT_PADDING = 1;
+	private static final float NUMBER_TEXT_SIZE = 3;
 	private static final float ANSWER_TEXT_PADDING = 2;
-	private static final float ANSWER_TEXT_SIZE = 10;
+	private static final float ANSWER_TEXT_SIZE = 7;
 	private static final float NUMBER_TEXT_STROKE_WIDTH = 1;
 
 	private static final int NORMAL_CELL_FILL_COLOR = Color.parseColor("#ffffff");
@@ -137,6 +138,8 @@ public class CrosswordView
 	private float mCircleRadius;
 	private float mNumberTextPadding;
 	private float mAnswerTextPadding;
+	private float mAnswerTextHeight;
+	private float mNumberTextHeight;
 	private Stack<UndoItem> mUndoBuffer;
 
 	private int mPuzzleWidth; // Total number of cells across
@@ -355,22 +358,24 @@ public class CrosswordView
 		mNumberTextPaint.setTextAlign(Paint.Align.CENTER);
 		mNumberTextPaint.setTextSize(numberTextSize);
 
+		// Compute number height
+		mNumberTextPaint.getTextBounds("0", 0, "0".length(), mTempRect);
+		mNumberTextHeight = mTempRect.height();
+
 		mNumberStrokePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 		mNumberStrokePaint.setColor(cellFillColor);
 		mNumberStrokePaint.setTextAlign(Paint.Align.CENTER);
 		mNumberStrokePaint.setTextSize(numberTextSize);
 		mNumberStrokePaint.setStyle(Paint.Style.STROKE);
-		mNumberStrokePaint.setStrokeWidth(NUMBER_TEXT_STROKE_WIDTH
-				* dm.scaledDensity);
+		mNumberStrokePaint.setStrokeWidth(NUMBER_TEXT_STROKE_WIDTH * dm.scaledDensity);
 
  		mAnswerTextPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 		mAnswerTextPaint.setColor(textColor);
 		mAnswerTextPaint.setTextSize(answerTextSize);
 		mAnswerTextPaint.setTextAlign(Paint.Align.CENTER);
 
-		// FIXME: allow setting of typeface
-//		Typeface typeface = TypefaceCache.getInstance().get("kalam-regular.ttf");
-//		mAnswerTextPaint.setTypeface(typeface);
+		mAnswerTextPaint.getTextBounds("A", 0, "A".length(), mTempRect);
+		mAnswerTextHeight = mTempRect.height();
 
 		// Init rest of the values
 		mCircleRadius = (mCellSize / 2) - mCircleStrokePaint.getStrokeWidth();
@@ -865,6 +870,20 @@ public class CrosswordView
 	public Rect getCellRect(Crossword.Word word, int cell)
 	{
 		return getCellRect(new Selectable(word, cell));
+	}
+
+	public Typeface getAnswerTypeface()
+	{
+		return mAnswerTextPaint.getTypeface();
+	}
+
+	public void setAnswerTypeface(Typeface typeface)
+	{
+		mAnswerTextPaint.setTypeface(typeface);
+		mAnswerTextPaint.getTextBounds("A", 0, "A".length(), mTempRect);
+		mAnswerTextHeight = mTempRect.height();
+
+		redrawInPlace();
 	}
 
 	public int getMarkerDisplayMode()
@@ -1432,17 +1451,12 @@ public class CrosswordView
 		}
 
 		if (cell.mNumber != null) {
-			mNumberTextPaint.getTextBounds(cell.mNumber, 0,
-					cell.mNumber.length(), mTempRect);
-
-			float numberX = cellRect.left + mNumberTextPadding
-					+ (mTempRect.width() / 2);
-			float numberY = cellRect.top + mNumberTextPadding
-					+ mTempRect.height();
+			float textWidth = mNumberTextPaint.measureText(cell.mNumber);
+			float numberX = cellRect.left + mNumberTextPadding + (textWidth / 2);
+			float numberY = cellRect.top + mNumberTextPadding + mNumberTextHeight;
 
 			if (cell.isFlagSet(Cell.FLAG_CIRCLED)) {
-				canvas.drawText(cell.mNumber,
-						numberX, numberY, mNumberStrokePaint);
+				canvas.drawText(cell.mNumber, numberX, numberY, mNumberStrokePaint);
 			}
 
 			canvas.drawText(cell.mNumber, numberX, numberY, mNumberTextPaint);
@@ -1450,9 +1464,9 @@ public class CrosswordView
 
 		if (cell.isFlagSet(Cell.FLAG_MARKED) && (mMarkerDisplayMode & MARKER_CUSTOM) != 0) {
 			Path path = new Path();
-			path.moveTo(cellRect.left, cellRect.top);
-			path.lineTo(cellRect.left + mMarkerSideLength, cellRect.top);
-			path.lineTo(cellRect.left, cellRect.top + mMarkerSideLength);
+			path.moveTo(cellRect.right - mMarkerSideLength, cellRect.top);
+			path.lineTo(cellRect.right, cellRect.top);
+			path.lineTo(cellRect.right, cellRect.top + mMarkerSideLength);
 			path.close();
 
 			canvas.drawPath(path, mMarkedCellFillPaint);
@@ -1482,10 +1496,8 @@ public class CrosswordView
 		}
 
 		if (!cell.isEmpty()) {
-			mAnswerTextPaint.getTextBounds(cell.mCharStr, 0, cell.mCharStr.length(), mTempRect);
 			canvas.drawText(cell.mCharStr, cellRect.left + mCellSize / 2,
-					cellRect.top + mCellSize - mAnswerTextPadding,
-					mAnswerTextPaint);
+					cellRect.top + mCellSize - mAnswerTextPadding, mAnswerTextPaint);
 		}
 	}
 
