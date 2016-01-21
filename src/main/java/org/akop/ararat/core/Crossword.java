@@ -302,7 +302,6 @@ public class Crossword
 		return new State(mWidth, mHeight);
 	}
 
-	@SuppressWarnings("unused")
 	public String getDescription()
 	{
 		return mDescription;
