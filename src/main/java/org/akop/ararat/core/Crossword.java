@@ -25,11 +25,6 @@ import android.os.Parcelable;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.OutputStream;
-import java.io.Serializable;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -235,21 +230,23 @@ public class Crossword
 		}
 	};
 
-	private int mWidth;
-	private int mHeight;
-	private int mSquareCount;
-	private String mTitle;
-	private String mDescription;
-	private String mAuthor;
-	private String mCopyright;
-	private long mDate;
-	private List<Word> mWordsAcross;
-	private List<Word> mWordsDown;
-	private char[] mAlphabet;
+	int mWidth;
+	int mHeight;
+	int mSquareCount;
+	String mTitle;
+	String mDescription;
+	String mAuthor;
+	String mCopyright;
+	long mDate;
+	List<Word> mWordsAcross;
+	List<Word> mWordsDown;
+	char[] mAlphabet;
 
+	// Computed and cached on demand
+	private String mHash;
 	private Cell[][] mCellMap;
 
-	public Crossword()
+	Crossword()
 	{
 		mWordsAcross = new ArrayList<>();
 		mWordsDown = new ArrayList<>();
@@ -519,7 +516,8 @@ public class Crossword
 		ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
 
 		try {
-			writeToStream(byteStream);
+			CrosswordWriter writer = new CrosswordWriter(byteStream);
+			writer.write(this);
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		} finally {
@@ -601,71 +599,6 @@ public class Crossword
 		state.setSquareStats(solvedCount, cheatedCount, wrongCount, totalCount);
 	}
 
-	public static Crossword readFromStream(InputStream in)
-			throws IOException
-	{
-		Crossword crossword = new Crossword();
-		ObjectInputStream ois = new ObjectInputStream(in);
-
-		try {
-			ois.readByte(); // version
-
-			crossword.mWidth = ois.readInt();
-			crossword.mHeight = ois.readInt();
-			crossword.mSquareCount = ois.readInt();
-			crossword.mTitle = (String) ois.readObject();
-			crossword.mDescription = (String) ois.readObject();
-			crossword.mAuthor = (String) ois.readObject();
-			crossword.mCopyright = (String) ois.readObject();
-			crossword.mAlphabet = (char[]) ois.readObject();
-			crossword.mDate = ois.readLong();
-
-			for (int i = ois.readInt(); i > 0; i--) {
-				Word word = Word.readFromStream(ois);
-				word.mDirection = Word.DIR_ACROSS;
-
-				crossword.mWordsAcross.add(word);
-			}
-			for (int i = ois.readInt(); i > 0; i--) {
-				Word word = Word.readFromStream(ois);
-				word.mDirection = Word.DIR_DOWN;
-
-				crossword.mWordsDown.add(word);
-			}
-		} catch (ClassNotFoundException e) {
-			throw new RuntimeException(e);
-		}
-
-		return crossword;
-	}
-
-	public void writeToStream(OutputStream out)
-			throws IOException
-	{
-		ObjectOutputStream oos = new ObjectOutputStream(out);
-
-		oos.writeByte(1); // version
-
-		oos.writeInt(mWidth);
-		oos.writeInt(mHeight);
-		oos.writeInt(mSquareCount);
-		oos.writeObject(mTitle);
-		oos.writeObject(mDescription);
-		oos.writeObject(mAuthor);
-		oos.writeObject(mCopyright);
-		oos.writeObject(mAlphabet);
-		oos.writeLong(mDate);
-
-		oos.writeInt(mWordsAcross.size());
-		for (Word word: mWordsAcross) {
-			word.writeToStream(oos);
-		}
-		oos.writeInt(mWordsDown.size());
-		for (Word word: mWordsDown) {
-			word.writeToStream(oos);
-		}
-	}
-
 	@Override
 	public int describeContents()
 	{
@@ -691,6 +624,15 @@ public class Crossword
 		dest.writeCharArray(mAlphabet);
 	}
 
+	public String getHash()
+	{
+		if (mHash == null) {
+			mHash = computeHash();
+		}
+
+		return mHash;
+	}
+
 	public static boolean equals(Crossword one, Crossword two)
 	{
 		if (one == null || two == null) {
@@ -698,6 +640,12 @@ public class Crossword
 		}
 
 		return one.computeHash().equals(two.computeHash());
+	}
+
+	@Override
+	public int hashCode()
+	{
+		return getHash().hashCode();
 	}
 
 	@Override
@@ -743,16 +691,16 @@ public class Crossword
 			}
 		};
 
-		private int mHeight;
-		private int mWidth;
-		private long mSquareCounts;
-		private long mPlayTimeMillis;
-		private long mLastPlayed;
-		private int mSelection;
-		private char[][] mCharMatrix;
-		private int[][] mAttrMatrix;
+		int mHeight;
+		int mWidth;
+		long mSquareCounts;
+		long mPlayTimeMillis;
+		long mLastPlayed;
+		int mSelection;
+		char[][] mCharMatrix;
+		int[][] mAttrMatrix;
 
-		public State()
+		State()
 		{
 		}
 
@@ -945,67 +893,6 @@ public class Crossword
 			}
 		}
 
-		public static State readFromStream(InputStream in)
-				throws IOException
-		{
-			State state = new State();
-			ObjectInputStream ois = new ObjectInputStream(in);
-
-			try {
-				ois.readByte(); // version
-
-				state.mWidth = ois.readInt();
-				state.mHeight = ois.readInt();
-				state.mSquareCounts = ois.readLong();
-				state.mPlayTimeMillis = ois.readLong();
-				state.mLastPlayed = ois.readLong();
-				state.mSelection = ois.readInt();
-
-				// Un-flatten the matrices
-				char[] flatChars = (char[]) ois.readObject();
-				int[] flatAttrs = (int[]) ois.readObject();
-
-				state.mCharMatrix = new char[state.mHeight][state.mWidth];
-				state.mAttrMatrix = new int[state.mHeight][state.mWidth];
-
-				for (int i = 0, j = 0; i < state.mHeight; i++, j += state.mWidth) {
-					System.arraycopy(flatChars, j, state.mCharMatrix[i], 0, state.mWidth);
-					System.arraycopy(flatAttrs, j, state.mAttrMatrix[i], 0, state.mWidth);
-				}
-			} catch (ClassNotFoundException e) {
-				throw new RuntimeException(e);
-			}
-
-			return state;
-		}
-
-		public void writeToStream(OutputStream out)
-				throws IOException
-		{
-			ObjectOutputStream oos = new ObjectOutputStream(out);
-
-			oos.writeByte(1); // version
-
-			oos.writeInt(mWidth);
-			oos.writeInt(mHeight);
-			oos.writeLong(mSquareCounts);
-			oos.writeLong(mPlayTimeMillis);
-			oos.writeLong(mLastPlayed);
-			oos.writeInt(mSelection);
-
-			// Flatten the matrices
-			char[] flatChars = new char[mWidth * mHeight];
-			int[] flatAttrs = new int[mWidth * mHeight];
-
-			for (int i = 0, j = 0; i < mHeight; i++, j += mWidth) {
-				System.arraycopy(mCharMatrix[i], 0, flatChars, j, mWidth);
-				System.arraycopy(mAttrMatrix[i], 0, flatAttrs, j, mWidth);
-			}
-
-			oos.writeObject(flatChars);
-			oos.writeObject(flatAttrs);
-		}
-
 		@Override
 		public int describeContents()
 		{
@@ -1037,7 +924,7 @@ public class Crossword
 	}
 
 	public static class Cell
-			implements Parcelable, Serializable
+			implements Parcelable
 	{
 		private static final char[] EMPTY_CHAR = new char[] { '\0' };
 
@@ -1056,10 +943,10 @@ public class Crossword
 			}
 		};
 
-		private char[] mChars;
-		private byte mAttrFlags;
+		char[] mChars;
+		byte mAttrFlags;
 
-		public Cell()
+		Cell()
 		{
 			mChars = EMPTY_CHAR;
 			mAttrFlags = 0;
@@ -1090,24 +977,6 @@ public class Crossword
 			}
 
 			return false;
-		}
-
-		static Cell readFromStream(ObjectInputStream ois)
-				throws IOException, ClassNotFoundException
-		{
-			Cell cell = new Cell();
-
-			cell.mAttrFlags = ois.readByte();
-			cell.mChars = (char[]) ois.readObject();
-
-			return cell;
-		}
-
-		private void writeToStream(ObjectOutputStream out)
-				throws IOException
-		{
-			out.writeByte(mAttrFlags);
-			out.writeObject(mChars);
 		}
 
 		@Override
@@ -1248,16 +1117,16 @@ public class Crossword
 			}
 		};
 
-		private int mNumber;
-		private String mHint;
-		private int mStartRow;
-		private int mStartColumn;
-		private int mDirection;
-		private String mHintUrl;
-		private String mCitation;
-		private Cell[] mCells;
+		int mNumber;
+		String mHint;
+		int mStartRow;
+		int mStartColumn;
+		int mDirection;
+		String mHintUrl;
+		String mCitation;
+		Cell[] mCells;
 
-		public Word()
+		Word()
 		{
 			mCells = EMPTY_CELL;
 		}
@@ -1322,42 +1191,6 @@ public class Crossword
 			return mDirection;
 		}
 
-		private static Word readFromStream(ObjectInputStream ois)
-				throws IOException, ClassNotFoundException
-		{
-			Word word = new Word();
-
-			word.mNumber = ois.readShort();
-			word.mHint = (String) ois.readObject();
-			word.mStartRow = ois.readShort();
-			word.mStartColumn = ois.readShort();
-			word.mHintUrl = (String) ois.readObject();
-			word.mCitation = (String) ois.readObject();
-
-			word.mCells = new Cell[ois.readInt()];
-			for (int i = 0; i < word.mCells.length; i++) {
-				word.mCells[i] = Cell.readFromStream(ois);
-			}
-
-			return word;
-		}
-
-		private void writeToStream(ObjectOutputStream oos)
-				throws IOException
-		{
-			oos.writeShort(mNumber);
-			oos.writeObject(mHint);
-			oos.writeShort(mStartRow);
-			oos.writeShort(mStartColumn);
-			oos.writeObject(mHintUrl);
-			oos.writeObject(mCitation);
-
-			oos.writeInt(mCells.length);
-			for (Cell cell: mCells) {
-				cell.writeToStream(oos);
-			}
-		}
-
 		@Override
 		public int describeContents()
 		{
@@ -1383,7 +1216,8 @@ public class Crossword
 				return false;
 			}
 
-			return one.mDirection == two.mDirection && one.mNumber == two.mNumber;
+			return one.mDirection == two.mDirection
+					&& one.mNumber == two.mNumber;
 		}
 
 		@Override

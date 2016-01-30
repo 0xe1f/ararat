@@ -264,10 +264,10 @@ public class PuzFormatter
 		}
 
 		if (found) {
-			Log.v(LOG_TAG, String.format("Found a key (%d) in %.02fs",
+			Log.d(LOG_TAG, String.format("Found a key (%d) in %.02fs",
 					code, (SystemClock.uptimeMillis() - started) / 1000f));
 		} else {
-			Log.v(LOG_TAG, String.format("Key not found after %.02fs",
+			Log.d(LOG_TAG, String.format("Key not found after %.02fs",
 					(SystemClock.uptimeMillis() - started) / 1000f));
 		}
 

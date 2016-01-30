@@ -2186,7 +2186,7 @@ public class CrosswordView
 				int width = (int) mPuzzleRect.width();
 				int height = (int) mPuzzleRect.height();
 
-				Log.v(LOG_TAG, String.format("Creating a new %dx%d puzzle bitmap...",
+				Log.d(LOG_TAG, String.format("Creating a new %dx%d puzzle bitmap...",
 						width, height));
 
 				puzzleBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
@@ -2194,7 +2194,7 @@ public class CrosswordView
 
 				renderPuzzle(canvas);
 			} else {
-				Log.v(LOG_TAG, "Not creating an empty puzzle bitmap");
+				Log.d(LOG_TAG, "Not creating an empty puzzle bitmap");
 			}
 
 			mRenderedPuzzle = puzzleBitmap;
@@ -2212,7 +2212,7 @@ public class CrosswordView
 			mPuzzleBitmap = mRenderedPuzzle;
 			mBitmapScale = 1.0f;
 
-			Log.v(LOG_TAG, "Invalidating...");
+			Log.d(LOG_TAG, "Invalidating...");
 			ViewCompat.postInvalidateOnAnimation(CrosswordView.this);
 
 			synchronized (mRendererLock) {
@@ -2225,7 +2225,7 @@ public class CrosswordView
 		{
 			super.onCancelled(aVoid);
 
-			Log.v(LOG_TAG, "Task cancelled");
+			Log.d(LOG_TAG, "Task cancelled");
 
 			synchronized (mRendererLock) {
 				mAsyncRenderer = null;
@@ -2236,7 +2236,7 @@ public class CrosswordView
 		{
 			RectF cellRect = new RectF();
 
-			Log.v(LOG_TAG, "Rendering puzzle...");
+			Log.d(LOG_TAG, "Rendering puzzle...");
 
 			canvas.save();
 			canvas.scale(mScale, mScale);
