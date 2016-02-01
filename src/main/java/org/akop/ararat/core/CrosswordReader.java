@@ -29,8 +29,6 @@ import java.io.ObjectInputStream;
 public class CrosswordReader
 		implements Closeable
 {
-	private static final int VERSION_CURRENT = 1;
-
 	private ObjectInputStream mInStream;
 
 	public CrosswordReader(InputStream in)
@@ -43,10 +41,17 @@ public class CrosswordReader
 			throws IOException
 	{
 		Crossword crossword;
-		int version = mInStream.readByte();
+
+		// Check magic number
+		if (mInStream.readInt() != CrosswordWriter.MAGIC_NUMBER) {
+			throw new IllegalArgumentException("Magic number mismatch");
+		}
 
 		// Check version number
-		validateVersion(version);
+		int version = mInStream.readByte();
+		if (version != CrosswordWriter.VERSION_CURRENT) {
+			throw new IllegalArgumentException("Version " + version + " not supported");
+		}
 
 		// Read the puzzle
 		try {
@@ -118,13 +123,6 @@ public class CrosswordReader
 		cell.mChars = (char[]) mInStream.readObject();
 
 		return cell;
-	}
-
-	private void validateVersion(int version)
-	{
-		if (version != VERSION_CURRENT) {
-			throw new IllegalArgumentException("Version " + version + " not supported");
-		}
 	}
 
 	@Override

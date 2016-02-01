@@ -29,8 +29,6 @@ import java.io.ObjectInputStream;
 public class CrosswordStateReader
 		implements Closeable
 {
-	private static final int VERSION_CURRENT = 1;
-
 	private ObjectInputStream mInStream;
 
 	public CrosswordStateReader(InputStream in)
@@ -44,8 +42,14 @@ public class CrosswordStateReader
 	{
 		Crossword.State state;
 
+		if (mInStream.readInt() != CrosswordStateWriter.MAGIC_NUMBER) {
+			throw new IllegalArgumentException("Magic number mismatch");
+		}
+
 		int version = mInStream.readByte();
-		validateVersion(version);
+		if (version != CrosswordStateWriter.VERSION_CURRENT) {
+			throw new IllegalArgumentException("State version " + version + " not supported");
+		}
 
 		try {
 			state = readState(version);
@@ -81,13 +85,6 @@ public class CrosswordStateReader
 		}
 
 		return state;
-	}
-
-	private void validateVersion(int version)
-	{
-		if (version != VERSION_CURRENT) {
-			throw new IllegalArgumentException("State version " + version + " not supported");
-		}
 	}
 
 	@Override

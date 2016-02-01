@@ -29,7 +29,8 @@ import java.io.OutputStream;
 public class CrosswordStateWriter
 		implements Closeable
 {
-	private static final int VERSION_CURRENT = 1;
+	static final int VERSION_CURRENT = 1;
+	static final int MAGIC_NUMBER = 0xbaaddeed;
 
 	private ObjectOutputStream mOutStream;
 
@@ -42,7 +43,9 @@ public class CrosswordStateWriter
 	public void write(Crossword.State state)
 			throws IOException
 	{
+		mOutStream.writeInt(MAGIC_NUMBER);
 		mOutStream.writeByte(VERSION_CURRENT);
+
 		writeState(state);
 	}
 
