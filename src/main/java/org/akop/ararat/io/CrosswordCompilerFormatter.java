@@ -20,9 +20,8 @@
 
 package org.akop.ararat.io;
 
-import android.util.SparseArray;
-
 import org.akop.ararat.core.Crossword;
+import org.akop.ararat.util.SparseArray;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -165,7 +164,7 @@ public class CrosswordCompilerFormatter
 						}
 					}
 
-					mWordBuilders.append(id, wb);
+					mWordBuilders.put(id, wb);
 				} else if (path.isEqualTo("clues", "clue")) {
 					// ?/rectangular-puzzle/crossword/clues/clue
 					int wordId = getIntValue(parser, "word", -1);

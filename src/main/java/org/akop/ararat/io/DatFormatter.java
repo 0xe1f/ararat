@@ -21,9 +21,9 @@
 package org.akop.ararat.io;
 
 import android.text.TextUtils;
-import android.util.SparseArray;
 
 import org.akop.ararat.core.Crossword;
+import org.akop.ararat.util.SparseArray;
 
 import java.io.BufferedReader;
 import java.io.IOException;
