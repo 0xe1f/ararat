@@ -195,7 +195,7 @@ public class CrosswordView
 		public void onWordEntered(CharSequence text)
 		{
 			if (text != null && mSelection != null) {
-				// Words like "ain't" contain punctuation marks that aren't
+				// Words like "ain't" contain punctuation marks that ain't
 				// valid, but may appear in a crossword in punctuation-less
 				// form. For this reason, we strip out invalid characters
 				// before considering whether we want to fill them into the
@@ -209,6 +209,10 @@ public class CrosswordView
 					if (isAcceptableChar(ch)) {
 						filtered[k++] = ch;
 					}
+				}
+
+				if (k == 0) {
+					return; // No valid chars
 				}
 
 				char[][] matrix;
