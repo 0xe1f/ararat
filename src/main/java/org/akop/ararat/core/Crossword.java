@@ -963,6 +963,11 @@ public class Crossword
 			return mChars[pos];
 		}
 
+		public boolean isEmpty()
+		{
+			return mChars == EMPTY_CHAR;
+		}
+
 		public boolean isCircled()
 		{
 			return (mAttrFlags & ATTR_CIRCLED) == ATTR_CIRCLED;
