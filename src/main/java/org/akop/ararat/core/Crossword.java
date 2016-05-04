@@ -737,7 +737,7 @@ public class Crossword
 			mCharMatrix = new char[mHeight][mWidth];
 			char[] charArray = in.createCharArray();
 
-			for (int i = 0, k = 0; i < mHeight; i++) {
+			for (int i = 0, k = 0; i < mHeight; i++, k+= mWidth) {
 				System.arraycopy(charArray, k, mCharMatrix[i], 0, mWidth);
 			}
 
