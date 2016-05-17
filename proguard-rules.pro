@@ -15,3 +15,12 @@
 #-keepclassmembers class fqcn.of.javascript.interface.for.webview {
 #   public *;
 #}
+-printseeds
+
+-keep class * implements org.akop.crosswords.service.Locator
+-keep class org.akop.crosswords.locator.**
+
+#-keepnames class * implements org.akop.crosswords.service.Locator { *; }
+#-keepnames class * implements org.akop.crosswords.service.Parser { *; }
+#-keepnames class * implements org.akop.crosswords.service.Authenticator { *; }
+#-keepnames class * implements org.akop.ararat.io.CrosswordFormatter { *; }
