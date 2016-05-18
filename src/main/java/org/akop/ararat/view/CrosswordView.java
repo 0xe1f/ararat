@@ -33,6 +33,7 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
@@ -2190,11 +2191,17 @@ public class CrosswordView
 				int width = (int) mPuzzleRect.width();
 				int height = (int) mPuzzleRect.height();
 
-				Log.d(LOG_TAG, String.format("Creating a new %dx%d puzzle bitmap...",
-						width, height));
-
-				puzzleBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+				puzzleBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565);
 				canvas = new Canvas(puzzleBitmap);
+
+				int sizeBytes;
+				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+					sizeBytes = puzzleBitmap.getAllocationByteCount();
+				} else {
+					sizeBytes = puzzleBitmap.getByteCount();
+				}
+				Log.d(LOG_TAG, String.format("Created a new %dx%d puzzle bitmap (%,dkB)...",
+						width, height, sizeBytes / 1024));
 
 				renderPuzzle(canvas);
 			} else {
