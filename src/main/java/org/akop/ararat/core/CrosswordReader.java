@@ -49,7 +49,7 @@ public class CrosswordReader
 
 		// Check version number
 		int version = mInStream.readByte();
-		if (version != CrosswordWriter.VERSION_CURRENT) {
+		if (version != 1 && version != 2) {
 			throw new IllegalArgumentException("Version " + version + " not supported");
 		}
 
@@ -67,25 +67,16 @@ public class CrosswordReader
 			throws IOException, ClassNotFoundException
 	{
 		Crossword crossword = new Crossword();
-
-		crossword.mWidth = mInStream.readInt();
-		crossword.mHeight = mInStream.readInt();
-		crossword.mSquareCount = mInStream.readInt();
-		crossword.mTitle = (String) mInStream.readObject();
-		crossword.mDescription = (String) mInStream.readObject();
-		crossword.mAuthor = (String) mInStream.readObject();
-		crossword.mCopyright = (String) mInStream.readObject();
-		crossword.mAlphabet = (char[]) mInStream.readObject();
-		crossword.mDate = mInStream.readLong();
+		readMetadata(crossword, version);
 
 		for (int i = mInStream.readInt(); i > 0; i--) {
-			Crossword.Word word = readWord(version);
+			Crossword.Word word = readWord();
 			word.mDirection = Crossword.Word.DIR_ACROSS;
 
 			crossword.mWordsAcross.add(word);
 		}
 		for (int i = mInStream.readInt(); i > 0; i--) {
-			Crossword.Word word = readWord(version);
+			Crossword.Word word = readWord();
 			word.mDirection = Crossword.Word.DIR_DOWN;
 
 			crossword.mWordsDown.add(word);
@@ -94,7 +85,24 @@ public class CrosswordReader
 		return crossword;
 	}
 
-	private Crossword.Word readWord(int version)
+	private void readMetadata(Crossword crossword, int version)
+			throws IOException, ClassNotFoundException
+	{
+		crossword.mWidth = mInStream.readInt();
+		crossword.mHeight = mInStream.readInt();
+		crossword.mSquareCount = mInStream.readInt();
+		crossword.mTitle = (String) mInStream.readObject();
+		crossword.mDescription = (String) mInStream.readObject();
+		crossword.mAuthor = (String) mInStream.readObject();
+		crossword.mCopyright = (String) mInStream.readObject();
+		if (version == 2) {
+			crossword.mComment = (String) mInStream.readObject();
+		}
+		crossword.mAlphabet = (char[]) mInStream.readObject();
+		crossword.mDate = mInStream.readLong();
+	}
+
+	private Crossword.Word readWord()
 			throws IOException, ClassNotFoundException
 	{
 		Crossword.Word word = new Crossword.Word();
@@ -108,13 +116,13 @@ public class CrosswordReader
 
 		word.mCells = new Crossword.Cell[mInStream.readInt()];
 		for (int i = 0; i < word.mCells.length; i++) {
-			word.mCells[i] = readCell(version);
+			word.mCells[i] = readCell();
 		}
 
 		return word;
 	}
 
-	private Crossword.Cell readCell(int version)
+	private Crossword.Cell readCell()
 			throws IOException, ClassNotFoundException
 	{
 		Crossword.Cell cell = new Crossword.Cell();

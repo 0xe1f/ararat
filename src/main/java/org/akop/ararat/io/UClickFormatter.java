@@ -61,7 +61,7 @@ public class UClickFormatter
 		try {
 			parseXml(inputStream);
 		} catch (XmlPullParserException e) {
-			throw new RuntimeException("Malformed XML", e);
+			throw new FormatException("Malformed XML", e);
 		}
 	}
 
@@ -148,12 +148,12 @@ public class UClickFormatter
 		} else if (name.startsWith("d")) {
 			direction = Crossword.Word.DIR_DOWN;
 		} else {
-			throw new IllegalArgumentException("Unexpected word indicator: " + name);
+			throw new FormatException("Unexpected word indicator: " + name);
 		}
 
 		int number = getIntValue(parser, "cn", 0);
 		if (number < 1) {
-			throw new IllegalArgumentException("Number "
+			throw new FormatException("Number "
 					+ parser.getAttributeValue(null, "cn") + " is not valid");
 		}
 

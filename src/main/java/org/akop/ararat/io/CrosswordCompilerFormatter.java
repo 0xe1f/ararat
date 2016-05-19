@@ -65,7 +65,7 @@ public class CrosswordCompilerFormatter
 		try {
 			parseXml(inputStream);
 		} catch (XmlPullParserException e) {
-			throw new RuntimeException("Malformed XML", e);
+			throw new FormatException("Malformed XML", e);
 		}
 
 		for (int i = 0, n = mWordBuilders.size(); i < n; i++) {

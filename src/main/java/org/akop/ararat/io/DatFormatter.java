@@ -86,7 +86,7 @@ public class DatFormatter
 			if (lineNo == LINE_DIMENSIONS) {
 				String[] dims = line.split("\\|");
 				if (dims.length != 2) {
-					throw new IllegalArgumentException("Dimension format unrecognized");
+					throw new FormatException("Dimension format unrecognized");
 				}
 				width = Integer.parseInt(dims[0]);
 				height = Integer.parseInt(dims[1]);
@@ -114,7 +114,7 @@ public class DatFormatter
 			} else if (lineNo == LINE_HINTS) {
 				String[] parts = PIPE_SPLITTER.split(line, -1);
 				if (parts.length % 3 != 1) { // superfluous pipe at the end
-					throw new IllegalArgumentException("Invalid length for hints: " + parts.length);
+					throw new FormatException("Invalid length for hints: " + parts.length);
 				}
 
 				for (int i = 0; i + 2 < parts.length; i += 3) {
@@ -131,7 +131,7 @@ public class DatFormatter
 			} else if (lineNo == LINE_DESCRIPTION) {
 				String[] parts = line.split("\\|");
 				if (parts.length != 2) {
-					throw new IllegalStateException("Unexpected description count");
+					throw new FormatException("Unexpected description count");
 				}
 
 				title = parts[0];

@@ -24,8 +24,8 @@ import android.os.SystemClock;
 import android.util.Log;
 
 import org.akop.ararat.core.Crossword;
+import org.akop.ararat.util.SparseArray;
 
-import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -39,6 +39,8 @@ public class PuzFormatter
 		implements CrosswordFormatter
 {
 	private static final String LOG_TAG = CrosswordFormatter.class.getSimpleName();
+
+	private static final char GEXT_CIRCLED = 0x80;
 
 	private static final char EMPTY = '.';
 	private static final String DEFAULT_ENCODING = "ISO-8859-1";
@@ -59,33 +61,33 @@ public class PuzFormatter
 
 		// Overall checksum
 		if (reader.skip(2) != 2) {
-			throw new EOFException("Overall checksum incomplete");
+			throw new FormatException("Overall checksum incomplete");
 		}
 
 		// Magic string
 		char[] temp = new char[128];
 		if (reader.read(temp, 0, 12) != 12) {
-			throw new EOFException("Magic string incomplete");
+			throw new FormatException("Magic string incomplete");
 		}
 
 		if ("ACROSS&DOWN".equals(new String(temp, 0, 12))) {
-			throw new IllegalArgumentException("Magic string mismatch");
+			throw new FormatException("Magic string mismatch");
 		}
 
 		// Checksums
 		if (reader.skip(2) != 2) {
-			throw new EOFException("CIB checksum incomplete");
+			throw new FormatException("CIB checksum incomplete");
 		}
 		if (reader.skip(4) != 4) {
-			throw new EOFException("Masked low checksum incomplete");
+			throw new FormatException("Masked low checksum incomplete");
 		}
 		if (reader.skip(4) != 4) {
-			throw new EOFException("Masked high checksum incomplete");
+			throw new FormatException("Masked high checksum incomplete");
 		}
 
 		// Version
 		if (reader.read(temp, 0, 4) != 4) {
-			throw new EOFException("Version information incomplete");
+			throw new FormatException("Version information incomplete");
 		}
 
 		// Garbage
@@ -99,7 +101,7 @@ public class PuzFormatter
 
 		// Width, height
 		if (reader.read(temp, 0, 2) != 2) {
-			throw new EOFException("Board dimensions incomplete");
+			throw new FormatException("Board dimensions incomplete");
 		}
 
 		int width = temp[0];
@@ -111,7 +113,7 @@ public class PuzFormatter
 		// Unknown
 		reader.skip(2);
 
-		// Scrambed/unscrambled
+		// Scrambled/unscrambled
 		boolean scrambled = readShort(reader) != 0;
 
 		// The layout
@@ -119,14 +121,14 @@ public class PuzFormatter
 		for (int i = 0; i < height; i++) {
 			int read;
 			if ((read = reader.read(charMap[i], 0, width)) != width) {
-				throw new EOFException("Line " + i + " incomplete (read "
+				throw new FormatException("Line " + i + " incomplete (read "
 						+ read + " expected " + width + ")");
 			}
 		}
 
 		// State (skip for now)
 		if (reader.skip(width * height) != width * height) {
-			throw new EOFException("State information incomplete");
+			throw new FormatException("State information incomplete");
 		}
 
 		// Title
@@ -143,7 +145,77 @@ public class PuzFormatter
 		}
 
 		// Notes
-		// (omitted)
+		String notes = readNullTerminatedString(reader);
+
+		// Sections
+		int[][] rebusMap = null;
+		SparseArray<String> rebusSols = null;
+		byte[][] attrMap = new byte[height][width];
+		char[] sect = new char[4];
+		while (reader.read(sect, 0, sect.length) == sect.length) {
+			int dataLength = readShort(reader);
+			reader.skip(2); // checksum FIXME: verify
+
+			// Read the data
+			char[] data = new char[dataLength];
+			reader.read(data, 0, dataLength);
+
+			// Handle sections
+			String sectionName = new String(sect);
+			if ("GEXT".equals(sectionName)) {
+				for (int i = 0, d = 0; i < height; i++) {
+					for (int j = 0; j < width; j++) {
+						attrMap[i][j] |= data[d++];
+					}
+				}
+			} else if ("GRBS".equals(sectionName)) {
+				rebusMap = new int[height][width];
+				for (int i = 0, r = 0; i < height; i++) {
+					for (int j = 0; j < width; j++) {
+						rebusMap[i][j] = data[r++];
+					}
+				}
+			} else if ("RTBL".equals(sectionName)) {
+				rebusSols = new SparseArray<>();
+				String rebusSpec = new String(data);
+				for (String rebus: rebusSpec.split(";")) {
+					int sep = rebus.indexOf(':');
+					if (sep == -1) {
+						throw new FormatException("Missing rebus delimiter");
+					} else if (sep < 2) {
+						throw new FormatException("Invalid rebus index");
+					} else if (sep + 1 >= rebus.length()) {
+						throw new FormatException("Missing rebus solution");
+					}
+
+					int ixStart = 0;
+					while (rebus.charAt(ixStart) == ' ') {
+						ixStart++;
+					}
+
+					int index = Integer.parseInt(rebus.substring(ixStart, sep));
+					rebusSols.put(index + 1, rebus.substring(sep + 1));
+				}
+			}
+
+			reader.skip(1); // trailing null
+		}
+
+		if (rebusMap != null && rebusSols != null) {
+			// Verify rebus solutions
+			for (int i = 0; i < height; i++) {
+				for (int j = 0; j < width; j++) {
+					int key = rebusMap[i][j];
+					if (key != 0) {
+						if (rebusSols.get(key) == null) {
+							throw new FormatException("Missing rebus solution for key " + key);
+						}
+					}
+				}
+			}
+		}
+
+		// FIXME: complete rebus implementation
 
 		// Unscramble
 		// FIXME: allow passing of key
@@ -158,8 +230,9 @@ public class PuzFormatter
 		builder.setTitle(title);
 		builder.setAuthor(author);
 		builder.setCopyright(copyright);
+		builder.setComment(notes);
 
-		buildWords(builder, clues, charMap);
+		buildWords(builder, clues, charMap, attrMap);
 	}
 
 	@Override
@@ -181,15 +254,14 @@ public class PuzFormatter
 		return false;
 	}
 
-	private static void buildWords(Crossword.Builder cb, List<String> clues, char[][] map)
+	private static void buildWords(Crossword.Builder cb, List<String> clues,
+			char[][] charMap, byte[][] attrMap)
 	{
-		int clue = 0;
-		int number = 0;
-		for (int i = 0; i < map.length; i++) {
-			for (int j = 0; j < map[i].length; j++) {
-				if (map[i][j] != EMPTY) {
+		for (int i = 0, clue = 0, number = 0; i < charMap.length; i++) {
+			for (int j = 0; j < charMap[i].length; j++) {
+				if (charMap[i][j] != EMPTY) {
 					boolean incremented = false;
-					if (j == 0 || (j > 0 && map[i][j - 1] == EMPTY)) {
+					if (j == 0 || (j > 0 && charMap[i][j - 1] == EMPTY)) {
 						// Start of a new Across word
 						number++;
 						incremented = true;
@@ -202,14 +274,18 @@ public class PuzFormatter
 								.setStartColumn(j);
 
 						// Copy contents to a temp buffer
-						for (int k = j; k < map[i].length && map[i][k] != EMPTY; k++) {
-							wb.addCell(map[i][k]);
+						for (int k = j; k < charMap[i].length && charMap[i][k] != EMPTY; k++) {
+							int attrs = 0;
+							if ((attrMap[i][k] & GEXT_CIRCLED) != 0) {
+								attrs |= Crossword.Cell.ATTR_CIRCLED;
+							}
+							wb.addCell(new char[] { charMap[i][k] }, attrs);
 						}
 
 						cb.addWord(wb.build());
 					}
 
-					if (i == 0 || (i > 0 && map[i - 1][j] == EMPTY)) {
+					if (i == 0 || (i > 0 && charMap[i - 1][j] == EMPTY)) {
 						// Start of a new Down word
 						if (!incremented) {
 							number++;
@@ -222,8 +298,12 @@ public class PuzFormatter
 								.setStartRow(i)
 								.setStartColumn(j);
 
-						for (int k = i; k < map.length && map[k][j] != EMPTY; k++) {
-							wb.addCell(map[k][j]);
+						for (int k = i; k < charMap.length && charMap[k][j] != EMPTY; k++) {
+							int attrs = 0;
+							if ((attrMap[k][j] & GEXT_CIRCLED) != 0) {
+								attrs |= Crossword.Cell.ATTR_CIRCLED;
+							}
+							wb.addCell(new char[] { charMap[k][j] }, attrs);
 						}
 
 						cb.addWord(wb.build());
@@ -403,7 +483,7 @@ public class PuzFormatter
 	{
 		char[] buf = new char[2];
 		if (reader.read(buf, 0, 2) != 2) {
-			throw new EOFException("16-bit value incomplete");
+			throw new FormatException("16-bit value incomplete");
 		}
 
 		// little-endian
@@ -422,7 +502,7 @@ public class PuzFormatter
 		}
 
 		if (read != 1) {
-			throw new EOFException("Unexpected end of null-terminated string");
+			throw new FormatException("Unexpected end of null-terminated string");
 		}
 
 		return sb.toString();

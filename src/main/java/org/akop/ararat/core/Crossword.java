@@ -50,6 +50,7 @@ public class Crossword
 		private String mDescription;
 		private String mAuthor;
 		private String mCopyright;
+		private String mComment;
 		private long mDate;
 		private List<Word> mWords;
 		private char[] mAlphabet;
@@ -93,6 +94,12 @@ public class Crossword
 		public Builder setCopyright(String copyright)
 		{
 			mCopyright = copyright;
+			return this;
+		}
+
+		public Builder setComment(String comment)
+		{
+			mComment = comment;
 			return this;
 		}
 
@@ -200,6 +207,7 @@ public class Crossword
 			crossword.mTitle = mTitle;
 			crossword.mDescription = mDescription;
 			crossword.mAuthor = mAuthor;
+			crossword.mComment = mComment;
 			crossword.mCopyright = mCopyright;
 			crossword.mDate = mDate;
 			crossword.mAlphabet = mAlphabet;
@@ -237,6 +245,7 @@ public class Crossword
 	String mDescription;
 	String mAuthor;
 	String mCopyright;
+	String mComment;
 	long mDate;
 	List<Word> mWordsAcross;
 	List<Word> mWordsDown;
@@ -263,7 +272,7 @@ public class Crossword
 		mDescription = in.readString();
 		mAuthor = in.readString();
 		mCopyright = in.readString();
-
+		mComment = in.readString();
 		mDate = in.readLong();
 
 		mWordsAcross = new ArrayList<>();
@@ -312,6 +321,11 @@ public class Crossword
 	public String getCopyright()
 	{
 		return mCopyright;
+	}
+
+	public String getComment()
+	{
+		return mComment;
 	}
 
 	public long getDate()
@@ -616,6 +630,7 @@ public class Crossword
 		dest.writeString(mDescription);
 		dest.writeString(mAuthor);
 		dest.writeString(mCopyright);
+		dest.writeString(mComment);
 		dest.writeLong(mDate);
 
 		dest.writeTypedList(mWordsAcross);

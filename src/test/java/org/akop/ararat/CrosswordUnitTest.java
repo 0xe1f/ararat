@@ -73,6 +73,7 @@ public class CrosswordUnitTest
 		assertEquals(crossword.getDescription(), clone.getDescription());
 		assertEquals(crossword.getAuthor(), clone.getAuthor());
 		assertEquals(crossword.getCopyright(), clone.getCopyright());
+		assertEquals(crossword.getComment(), clone.getComment());
 		assertEquals(crossword.getDate(), clone.getDate());
 		assertEquals(crossword.getHash(), clone.getHash());
 	}
@@ -88,6 +89,7 @@ public class CrosswordUnitTest
 		String author = "Test author";
 		String copyright = "Test copyright";
 		String alphabet = "ABCDEFGHIJ";
+		String comment = "Test comment";
 		long date = System.currentTimeMillis();
 
 		W[] across = new W[] {
@@ -168,6 +170,7 @@ public class CrosswordUnitTest
 				.setDescription(description)
 				.setAuthor(author)
 				.setCopyright(copyright)
+				.setComment(comment)
 				.setAlphabet(alphabet.toCharArray())
 				.setDate(date);
 
