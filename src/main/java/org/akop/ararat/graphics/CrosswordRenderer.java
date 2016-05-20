@@ -151,7 +151,7 @@ public class CrosswordRenderer
 			int width, int height, int flags)
 			throws IOException
 	{
-		Bitmap bmp = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+		Bitmap bmp = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565);
 		renderToCanvas(new Canvas(bmp), crossword, state, flags);
 
 		OutputStream stream = new FileOutputStream(path);
