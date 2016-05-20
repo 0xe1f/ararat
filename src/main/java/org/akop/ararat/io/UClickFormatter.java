@@ -169,7 +169,7 @@ public class UClickFormatter
 				.setHint(hint);
 
 		for (char ch: answer.toCharArray()) {
-			wb.addCell(ch);
+			wb.addCell(ch, 0);
 		}
 
 		return wb.build();

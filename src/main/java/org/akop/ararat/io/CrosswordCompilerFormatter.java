@@ -143,8 +143,7 @@ public class CrosswordCompilerFormatter
 
 						// Build the individual characters from the char map
 						for (int column = startColumn; column <= endColumn; column++) {
-							wb.addCell(new char[] { mChars[row][column] },
-									mAttrs[row][column]);
+							wb.addCell(mChars[row][column], mAttrs[row][column]);
 						}
 					} else {
 						int yDashIndex = ySpan.indexOf("-");
@@ -159,8 +158,7 @@ public class CrosswordCompilerFormatter
 
 						// Build the individual characters from the char map
 						for (int row = startRow; row <= endRow; row++) {
-							wb.addCell(new char[] { mChars[row][column] },
-									mAttrs[row][column]);
+							wb.addCell(mChars[row][column], mAttrs[row][column]);
 						}
 					}
 

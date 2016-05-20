@@ -577,14 +577,14 @@ public class Crossword
 			int row = word.mStartRow;
 			for (int i = 0, col = word.mStartColumn; i < word.mCells.length; i++, col++) {
 				totalCount++;
-				char stateChar = state.mCharMatrix[row][col];
-				if (word.mCells[i].contains(stateChar)) {
+				String stateChar = state.mCharMatrix[row][col];
+				if (word.mCells[i].containsah(stateChar)) {
 					if (state.cheatedAt(row, col)) {
 						cheatedCount++;
 					} else {
 						solvedCount++;
 					}
-				} else if (stateChar != State.EMPTY_CELL) {
+				} else if (stateChar != null) {
 					wrongCount++;
 				}
 
@@ -596,14 +596,14 @@ public class Crossword
 			for (int i = 0, row = word.mStartRow; i < word.mCells.length; i++, row++) {
 				if (!done[row][col]) {
 					totalCount++;
-					char stateChar = state.mCharMatrix[row][col];
-					if (word.mCells[i].contains(stateChar)) {
+					String stateChar = state.mCharMatrix[row][col];
+					if (word.mCells[i].containsah(stateChar)) {
 						if (state.cheatedAt(row, col)) {
 							cheatedCount++;
 						} else {
 							solvedCount++;
 						}
-					} else if (stateChar != State.EMPTY_CELL) {
+					} else if (stateChar != null) {
 						wrongCount++;
 					}
 				}
@@ -672,8 +672,6 @@ public class Crossword
 	public static class State
 			implements Parcelable
 	{
-		public static final char EMPTY_CELL = '\0';
-
 		public static final int FLAG_CHEATED = 1;
 		public static final int FLAG_MARKED  = 1 << 1;
 
@@ -712,7 +710,7 @@ public class Crossword
 		long mPlayTimeMillis;
 		long mLastPlayed;
 		int mSelection;
-		char[][] mCharMatrix;
+		String[][] mCharMatrix;
 		int[][] mAttrMatrix;
 
 		State()
@@ -740,7 +738,7 @@ public class Crossword
 		{
 			mWidth = width;
 			mHeight = height;
-			mCharMatrix = new char[height][width];
+			mCharMatrix = new String[height][width];
 			mAttrMatrix = new int[height][width];
 		}
 
@@ -749,10 +747,10 @@ public class Crossword
 			mWidth = in.readInt();
 			mHeight = in.readInt();
 
-			mCharMatrix = new char[mHeight][mWidth];
-			char[] charArray = in.createCharArray();
+			mCharMatrix = new String[mHeight][mWidth];
+			String[] charArray = in.createStringArray();
 
-			for (int i = 0, k = 0; i < mHeight; i++, k+= mWidth) {
+			for (int i = 0, k = 0; i < mHeight; i++, k += mWidth) {
 				System.arraycopy(charArray, k, mCharMatrix[i], 0, mWidth);
 			}
 
@@ -864,12 +862,12 @@ public class Crossword
 			return mSelection != 0;
 		}
 
-		public char charAt(int row, int column)
+		public String charAt(int row, int column)
 		{
 			return mCharMatrix[row][column];
 		}
 
-		public void setCharAt(int row, int column, char ch)
+		public void setCharAt(int row, int column, String ch)
 		{
 			mCharMatrix[row][column] = ch;
 		}
@@ -917,7 +915,7 @@ public class Crossword
 		@Override
 		public void writeToParcel(Parcel dest, int flags)
 		{
-			char[] charArray = new char[mHeight * mWidth];
+			String[] charArray = new String[mHeight * mWidth];
 			for (int i = 0, k = 0; i < mHeight; i++, k += mWidth) {
 				System.arraycopy(mCharMatrix[i], 0, charArray, k, mWidth);
 			}
@@ -929,7 +927,7 @@ public class Crossword
 
 			dest.writeInt(mWidth);
 			dest.writeInt(mHeight);
-			dest.writeCharArray(charArray);
+			dest.writeStringArray(charArray);
 			dest.writeIntArray(attrArray);
 			dest.writeLong(mSquareCounts);
 			dest.writeLong(mPlayTimeMillis);
@@ -941,8 +939,6 @@ public class Crossword
 	public static class Cell
 			implements Parcelable
 	{
-		private static final char[] EMPTY_CHAR = new char[] { '\0' };
-
 		public static final int ATTR_CIRCLED = 1;
 
 		public static final Creator<Cell> CREATOR = new Creator<Cell>()
@@ -958,29 +954,27 @@ public class Crossword
 			}
 		};
 
-		char[] mChars;
+		String mChars;
 		byte mAttrFlags;
 
 		Cell()
 		{
-			mChars = EMPTY_CHAR;
-			mAttrFlags = 0;
 		}
 
 		private Cell(Parcel in)
 		{
-			mChars = in.createCharArray();
+			mChars = in.readString();
 			mAttrFlags = in.readByte();
 		}
 
 		public char charAt(int pos)
 		{
-			return mChars[pos];
+			return mChars.charAt(pos);
 		}
 
 		public boolean isEmpty()
 		{
-			return mChars == EMPTY_CHAR;
+			return mChars == null;
 		}
 
 		public boolean isCircled()
@@ -988,15 +982,13 @@ public class Crossword
 			return (mAttrFlags & ATTR_CIRCLED) == ATTR_CIRCLED;
 		}
 
-		public boolean contains(char charSought)
+		public boolean containsah(String charSought)
 		{
-			for (char ch: mChars) {
-				if (charSought == ch) {
-					return true;
-				}
+			if (charSought == null || mChars == null) {
+				return charSought == mChars;
 			}
 
-			return false;
+			return mChars.equals(charSought);
 		}
 
 		@Override
@@ -1008,15 +1000,15 @@ public class Crossword
 		@Override
 		public void writeToParcel(Parcel dest, int flags)
 		{
-			dest.writeCharArray(mChars);
+			dest.writeString(mChars);
 			dest.writeByte(mAttrFlags);
 		}
 
 		@Override
 		public String toString()
 		{
-			if (mChars.length == 1) {
-				return String.valueOf(mChars[0]);
+			if (mChars.length() == 1) {
+				return String.valueOf(mChars.charAt(0));
 			}
 
 			return "[" + String.valueOf(mChars) + "]";
@@ -1084,18 +1076,16 @@ public class Crossword
 				return this;
 			}
 
-			public Builder addCell(char ch)
+			public Builder addCell(char ch, int attrFlags)
 			{
-				return addCell(new char[] { ch }, 0);
+				return addCell(String.valueOf(ch), attrFlags);
 			}
 
-			public Builder addCell(char[] chars, int attrFlags)
+			public Builder addCell(String chars, int attrFlags)
 			{
 				Cell cell = new Cell();
 				cell.mAttrFlags = (byte) attrFlags;
-
-				cell.mChars = new char[chars.length];
-				System.arraycopy(chars, 0, cell.mChars, 0, chars.length);
+				cell.mChars = chars;
 
 				mCells.add(cell);
 				return this;

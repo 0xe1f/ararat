@@ -29,7 +29,7 @@ import java.io.OutputStream;
 public class CrosswordStateWriter
 		implements Closeable
 {
-	static final int VERSION_CURRENT = 1;
+	static final int VERSION_CURRENT = 2;
 	static final int MAGIC_NUMBER = 0xbaaddeed;
 
 	private ObjectOutputStream mOutStream;
@@ -60,7 +60,7 @@ public class CrosswordStateWriter
 		mOutStream.writeInt(state.mSelection);
 
 		// Flatten the matrices
-		char[] flatChars = new char[state.mWidth * state.mHeight];
+		String[] flatChars = new String[state.mWidth * state.mHeight];
 		int[] flatAttrs = new int[state.mWidth * state.mHeight];
 
 		for (int i = 0, j = 0; i < state.mHeight; i++, j += state.mWidth) {

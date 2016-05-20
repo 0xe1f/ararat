@@ -29,7 +29,7 @@ import java.io.OutputStream;
 public class CrosswordWriter
 		implements Closeable
 {
-	static final int VERSION_CURRENT = 2;
+	static final int VERSION_CURRENT = 3;
 	static final int MAGIC_NUMBER = 0xdeadbea7;
 
 	private ObjectOutputStream mOutStream;

@@ -243,7 +243,7 @@ public class DatFormatter
 					.setStartColumn(hint.mStartCol);
 
 			for (int j = hint.mStartCol; j < width && map[hint.mStartRow][j] != '\0'; j++) {
-				wb.addCell(map[hint.mStartRow][j]);
+				wb.addCell(map[hint.mStartRow][j], 0);
 			}
 
 			cb.addWord(wb.build());
@@ -259,7 +259,7 @@ public class DatFormatter
 					.setStartColumn(hint.mStartCol);
 
 			for (int i = hint.mStartRow; i < height && map[i][hint.mStartCol] != '\0'; i++) {
-				wb.addCell(map[i][hint.mStartCol]);
+				wb.addCell(map[i][hint.mStartCol], 0);
 			}
 
 			cb.addWord(wb.build());

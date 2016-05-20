@@ -70,13 +70,13 @@ public class CrosswordReader
 		readMetadata(crossword, version);
 
 		for (int i = mInStream.readInt(); i > 0; i--) {
-			Crossword.Word word = readWord();
+			Crossword.Word word = readWord(version);
 			word.mDirection = Crossword.Word.DIR_ACROSS;
 
 			crossword.mWordsAcross.add(word);
 		}
 		for (int i = mInStream.readInt(); i > 0; i--) {
-			Crossword.Word word = readWord();
+			Crossword.Word word = readWord(version);
 			word.mDirection = Crossword.Word.DIR_DOWN;
 
 			crossword.mWordsDown.add(word);
@@ -95,14 +95,14 @@ public class CrosswordReader
 		crossword.mDescription = (String) mInStream.readObject();
 		crossword.mAuthor = (String) mInStream.readObject();
 		crossword.mCopyright = (String) mInStream.readObject();
-		if (version == 2) {
+		if (version > 1) {
 			crossword.mComment = (String) mInStream.readObject();
 		}
 		crossword.mAlphabet = (char[]) mInStream.readObject();
 		crossword.mDate = mInStream.readLong();
 	}
 
-	private Crossword.Word readWord()
+	private Crossword.Word readWord(int version)
 			throws IOException, ClassNotFoundException
 	{
 		Crossword.Word word = new Crossword.Word();
@@ -116,19 +116,23 @@ public class CrosswordReader
 
 		word.mCells = new Crossword.Cell[mInStream.readInt()];
 		for (int i = 0; i < word.mCells.length; i++) {
-			word.mCells[i] = readCell();
+			word.mCells[i] = readCell(version);
 		}
 
 		return word;
 	}
 
-	private Crossword.Cell readCell()
+	private Crossword.Cell readCell(int version)
 			throws IOException, ClassNotFoundException
 	{
 		Crossword.Cell cell = new Crossword.Cell();
 
 		cell.mAttrFlags = mInStream.readByte();
-		cell.mChars = (char[]) mInStream.readObject();
+		if (version < 3) {
+			cell.mChars = new String((char[]) mInStream.readObject());
+		} else {
+			cell.mChars = (String) mInStream.readObject();
+		}
 
 		return cell;
 	}

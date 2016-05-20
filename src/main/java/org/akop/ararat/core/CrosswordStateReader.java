@@ -73,15 +73,29 @@ public class CrosswordStateReader
 		state.mSelection = mInStream.readInt();
 
 		// Un-flatten the matrices
-		char[] flatChars = (char[]) mInStream.readObject();
 		int[] flatAttrs = (int[]) mInStream.readObject();
-
-		state.mCharMatrix = new char[state.mHeight][state.mWidth];
 		state.mAttrMatrix = new int[state.mHeight][state.mWidth];
-
 		for (int i = 0, j = 0; i < state.mHeight; i++, j += state.mWidth) {
-			System.arraycopy(flatChars, j, state.mCharMatrix[i], 0, state.mWidth);
 			System.arraycopy(flatAttrs, j, state.mAttrMatrix[i], 0, state.mWidth);
+		}
+
+		if (version < 2) {
+			char[] flatChars = (char[]) mInStream.readObject();
+			state.mCharMatrix = new String[state.mHeight][state.mWidth];
+			for (int i = 0, j = 0; i < state.mHeight; i++) {
+				for (int c = 0; c < state.mWidth; c++) {
+					char ch = flatChars[j++];
+					if (ch != '\0') {
+						state.mCharMatrix[i][c] = String.valueOf(ch);
+					}
+				}
+			}
+		} else {
+			String[] flatChars = (String[]) mInStream.readObject();
+			state.mCharMatrix = new String[state.mHeight][state.mWidth];
+			for (int i = 0, j = 0; i < state.mHeight; i++, j += state.mWidth) {
+				System.arraycopy(flatChars, j, state.mCharMatrix[i], 0, state.mWidth);
+			}
 		}
 
 		return state;
