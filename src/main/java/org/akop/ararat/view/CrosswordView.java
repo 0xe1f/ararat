@@ -39,6 +39,7 @@ import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.v4.view.ViewCompat;
 import android.text.InputType;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -60,6 +61,7 @@ import org.akop.ararat.widget.Zoomer;
 import java.util.Stack;
 
 
+@SuppressWarnings("unused")
 public class CrosswordView
 		extends View
 		implements View.OnKeyListener
@@ -204,11 +206,11 @@ public class CrosswordView
 				char[] chars = text.toString().toCharArray();
 
 				// Copy all acceptable chars to a separate array
-				char[] filtered = new char[chars.length];
+				String[] filtered = new String[chars.length];
 				int k = 0;
 				for (char ch: chars) {
 					if (isAcceptableChar(ch)) {
-						filtered[k++] = ch;
+						filtered[k++] = String.valueOf(ch);
 					}
 				}
 
@@ -216,12 +218,12 @@ public class CrosswordView
 					return; // No valid chars
 				}
 
-				char[][] matrix;
+				String[][] matrix;
 				if (mSelection.getDirection() == Crossword.Word.DIR_ACROSS) {
-					matrix = new char[1][k];
+					matrix = new String[1][k];
 					System.arraycopy(filtered, 0, matrix[0], 0, k);
 				} else {
-					matrix = new char[k][1];
+					matrix = new String[k][1];
 					for (int i = 0; i < k; i++) {
 						matrix[i][0] = filtered[i];
 					}
@@ -563,17 +565,17 @@ public class CrosswordView
 
 	public void solveWord(Crossword.Word word)
 	{
-		char matrix[][];
+		String matrix[][];
 		int wordLen = word.getLength();
 		if (word.getDirection() == Crossword.Word.DIR_ACROSS) {
-			matrix = new char[1][wordLen];
+			matrix = new String[1][wordLen];
 			for (int i = 0; i < wordLen; i++) {
-				matrix[0][i] = word.cellAt(i).charAt(0); // FIXME: multicells
+				matrix[0][i] = word.cellAt(i).chars();
 			}
 		} else if (word.getDirection() == Crossword.Word.DIR_DOWN) {
-			matrix = new char[wordLen][1];
+			matrix = new String[wordLen][1];
 			for (int i = 0; i < wordLen; i++) {
-				matrix[i][0] = word.cellAt(i).charAt(0); // FIXME: multicells
+				matrix[i][0] = word.cellAt(i).chars();
 			}
 		} else {
 			throw new IllegalArgumentException("Word direction not valid");
@@ -614,27 +616,25 @@ public class CrosswordView
 			row += charIndex;
 		}
 
-		// FIXME: multicells
-		char ch = word.cellAt(charIndex).charAt(0);
-		setChars(row, column, new char[][]{{ch,},}, true);
+		String ch = word.cellAt(charIndex).chars();
+		setChars(row, column, new String[][]{{ch}}, true);
 	}
 
 	public void solveCrossword()
 	{
-		// FIXME: multicells
-		char[][] matrix = new char[mPuzzleHeight][mPuzzleWidth];
+		String[][] matrix = new String[mPuzzleHeight][mPuzzleWidth];
 		for (Crossword.Word word: mCrossword.getWordsAcross()) {
 			int row = word.getStartRow();
 			int startCol = word.getStartColumn();
 			for (int i = 0, n = word.getLength(); i < n; i++) {
-				matrix[row][startCol + i] = word.cellAt(i).charAt(0);
+				matrix[row][startCol + i] = word.cellAt(i).chars();
 			}
 		}
 		for (Crossword.Word word: mCrossword.getWordsDown()) {
 			int startRow = word.getStartRow();
 			int col = word.getStartColumn();
 			for (int i = 0, n = word.getLength(); i < n; i++) {
-				matrix[startRow + i][col] = word.cellAt(i).charAt(0);
+				matrix[startRow + i][col] = word.cellAt(i).chars();
 			}
 		}
 
@@ -661,12 +661,13 @@ public class CrosswordView
 		return mSelection != null ? mSelection.mWord : null;
 	}
 
-	private void setChars(int startRow, int startColumn, char charMatrix[][], boolean setCheatFlag)
+	private void setChars(int startRow, int startColumn, String charMatrix[][],
+			boolean setCheatFlag)
 	{
 		setChars(startRow, startColumn, charMatrix, setCheatFlag, false);
 	}
 
-	private void setChars(int startRow, int startColumn, char charMatrix[][],
+	private void setChars(int startRow, int startColumn, String charMatrix[][],
 			boolean setCheatFlag, boolean bypassUndoBuffer)
 	{
 		// Check startRow/startColumn
@@ -690,9 +691,9 @@ public class CrosswordView
 		}
 
 		// Set up undo buffer
-		char[][] undoBuf = null;
+		String[][] undoBuf = null;
 		if (!bypassUndoBuffer && mUndoMode != UNDO_NONE) {
-			undoBuf = new char[charHeight][charWidth];
+			undoBuf = new String[charHeight][charWidth];
 		}
 
 		// Fill in the char array
@@ -705,9 +706,9 @@ public class CrosswordView
 					if (undoBuf != null) {
 						undoBuf[k][l] = vwCell.mChar;
 					}
-					char ch = Cell.canonicalize(charMatrix[k][l]);
-					if (ch != vwCell.mChar && isAcceptableChar(ch)) {
-						boolean cellChanged = (vwCell.mChar != ch);
+					String ch = Cell.canonicalize(charMatrix[k][l]);
+					if (!TextUtils.equals(ch, vwCell.mChar) && isAcceptableChar(ch)) {
+						boolean cellChanged = !TextUtils.equals(vwCell.mChar, ch);
 						if (cellChanged) {
 							vwCell.setChar(ch);
 							cwChanged = true;
@@ -877,6 +878,20 @@ public class CrosswordView
 		return getCellRect(new Selectable(word, cell));
 	}
 
+	public void setCellContents(Crossword.Word word, int charIndex, String sol)
+	{
+		int row = word.getStartRow();
+		int column = word.getStartColumn();
+
+		if (word.getDirection() == Crossword.Word.DIR_ACROSS) {
+			column += charIndex;
+		} else if (word.getDirection() == Crossword.Word.DIR_DOWN) {
+			row += charIndex;
+		}
+
+		setChars(row, column, new String[][]{{sol}}, true);
+	}
+
 	public Typeface getAnswerTypeface()
 	{
 		return mAnswerTextPaint.getTypeface();
@@ -1001,6 +1016,7 @@ public class CrosswordView
 			return;
 		}
 
+		String sch = String.valueOf(ch);
 		if (mSelection != null && isAcceptableChar(ch)) {
 			clearUndoBufferIfNeeded(mSelection);
 
@@ -1008,11 +1024,11 @@ public class CrosswordView
 			int col = mSelection.getColumn();
 
 			Cell cell = mPuzzleCells[row][col];
-			boolean changed = (cell.mChar != ch);
+			boolean changed = !TextUtils.equals(cell.mChar, sch);
 			if (changed) {
 				mUndoBuffer.push(new UndoItem(cell.mChar, row, col)
 						.setSelectable(mSelection));
-				cell.setChar(ch);
+				cell.setChar(sch);
 			}
 
 			if ((mMarkerDisplayMode & MARKER_ERROR) != 0) {
@@ -1501,7 +1517,7 @@ public class CrosswordView
 		}
 
 		if (!cell.isEmpty()) {
-			canvas.drawText(cell.mCharStr, cellRect.left + mCellSize / 2,
+			canvas.drawText(cell.mChar, cellRect.left + mCellSize / 2,
 					cellRect.top + mCellSize - mAnswerTextPadding, mAnswerTextPaint);
 		}
 	}
@@ -1591,12 +1607,24 @@ public class CrosswordView
 		canvas.restore();
 	}
 
-	private boolean isAcceptableChar(char ch)
+	private boolean isAcceptableChar(String ch)
 	{
-		if (ch == Crossword.State.EMPTY_CELL) {
-			return true;
+		if (ch == null) {
+			return false;
 		}
 
+		String upper = ch.toUpperCase();
+		for (int i = 0, n = ch.length(); i < n; i++) {
+			if (!isAcceptableChar(upper.charAt(i))) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	private boolean isAcceptableChar(char ch)
+	{
 		char upper = Character.toUpperCase(ch);
 		for (char allowedChar: mAllowedChars) {
 			if (upper == allowedChar) {
@@ -1835,15 +1863,15 @@ public class CrosswordView
 	{
 		short mStartRow;
 		short mStartCol;
-		char[][] mChars;
+		String[][] mChars;
 		Selectable mSelectable;
 
-		UndoItem(char ch, int row, int col)
+		UndoItem(String ch, int row, int col)
 		{
-			this(new char[][] { { ch } }, row, col);
+			this(new String[][] { { ch } }, row, col);
 		}
 
-		UndoItem(char[][] chars, int row, int col)
+		UndoItem(String[][] chars, int row, int col)
 		{
 			mChars = chars;
 			mStartRow = (short) row;
@@ -1855,26 +1883,6 @@ public class CrosswordView
 		{
 			mSelectable = selectable;
 			return this;
-		}
-
-		@Override
-		public String toString()
-		{
-			String text;
-			if (mChars.length == 1) {
-				if (mChars[0].length == 1 && mChars[0][0] == '\0') {
-					text = "[null]";
-				} else {
-					text = new String(mChars[0]);
-				}
-			} else {
-				text = "[" + mChars.length + " lines]";
-			}
-
-			return String.format("(%d,%d)-(%d,%d) %s",
-					mStartRow, mStartCol,
-					mStartRow + mChars.length - 1, mStartCol + mChars[0].length - 1,
-					text);
 		}
 	}
 
@@ -1976,12 +1984,6 @@ public class CrosswordView
 			return super.equals(o);
 		}
 
-		@Override
-		public String toString()
-		{
-			return String.format("%s (%d)", mWord, mCell);
-		}
-
 		public static final Creator<Selectable> CREATOR = new Creator<Selectable>()
 		{
 			public Selectable createFromParcel(Parcel in)
@@ -2055,8 +2057,7 @@ public class CrosswordView
 		static final int FLAG_MARKED  = 1 << 3;
 
 		String mNumber;
-		char mChar;
-		String mCharStr;
+		String mChar;
 		int mWordAcrossNumber;
 		int mWordDownNumber;
 		int mFlag;
@@ -2064,23 +2065,22 @@ public class CrosswordView
 		public Cell()
 		{
 			mFlag = 0;
-			mChar = Crossword.State.EMPTY_CELL;
 			mWordAcrossNumber = mWordDownNumber = WORD_NUMBER_NONE;
 		}
 
-		public static char canonicalize(char ch)
+		public static String canonicalize(String ch)
 		{
-			return Character.toUpperCase(ch);
+			return ch != null ? ch.toUpperCase() : null;
 		}
 
 		public boolean isEmpty()
 		{
-			return mChar == Crossword.State.EMPTY_CELL;
+			return mChar == null;
 		}
 
 		public boolean clearChar()
 		{
-			return setChar(Crossword.State.EMPTY_CELL);
+			return setChar(null);
 		}
 
 		public void reset()
@@ -2089,19 +2089,13 @@ public class CrosswordView
 			setFlag(FLAG_CHEATED | FLAG_ERROR, false);
 		}
 
-		public boolean setChar(char ch)
+		public boolean setChar(String ch)
 		{
 			boolean changed = false;
 			ch = canonicalize(ch);
 
-			if (ch != mChar) {
-				if (ch == Crossword.State.EMPTY_CELL) {
-					mChar = ch;
-					mCharStr = null;
-				} else {
-					mChar = ch;
-					mCharStr = String.valueOf(mChar);
-				}
+			if (!TextUtils.equals(ch, mChar)) {
+				mChar = ch;
 				changed = true;
 			}
 
@@ -2110,7 +2104,7 @@ public class CrosswordView
 
 		public boolean isSolved(Crossword.Cell cwCell)
 		{
-			return !isEmpty() && cwCell.contains(mChar);
+			return mChar != null && cwCell.contains(mChar);
 		}
 
 		public void markError(Crossword.Cell cwCell, boolean setCheatFlag)
@@ -2146,7 +2140,7 @@ public class CrosswordView
 		private Cell(Parcel in)
 		{
 			mNumber = in.readString();
-			setChar(in.createCharArray()[0]);
+			setChar(in.readString());
 			mWordAcrossNumber = in.readInt();
 			mWordDownNumber = in.readInt();
 			mFlag = in.readInt();
@@ -2162,7 +2156,7 @@ public class CrosswordView
 		public void writeToParcel(Parcel dest, int flags)
 		{
 			dest.writeString(mNumber);
-			dest.writeCharArray(new char[]{mChar,});
+			dest.writeString(mChar);
 			dest.writeInt(mWordAcrossNumber);
 			dest.writeInt(mWordDownNumber);
 			dest.writeInt(mFlag);

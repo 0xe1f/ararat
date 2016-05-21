@@ -126,11 +126,12 @@ public class PzzlFormatter
 							}
 
 							// Copy the chars
+							// FIXME: check rebus support
 							char[] chars = new char[charCount];
 							for (int j = i, k = 0; k < charCount; j += 2, k++) {
 								chars[k] = lineChars[j];
 							}
-							cell.mChars = chars;
+							cell.mChars = new String(chars);
 
 							// Advance the index
 							i += (charCount - 1) * 2;
@@ -236,7 +237,7 @@ public class PzzlFormatter
 
 	private static class Cell
 	{
-		char[] mChars;
+		String mChars;
 		int mAttrs;
 	}
 }

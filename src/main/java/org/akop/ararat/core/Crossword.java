@@ -578,7 +578,7 @@ public class Crossword
 			for (int i = 0, col = word.mStartColumn; i < word.mCells.length; i++, col++) {
 				totalCount++;
 				String stateChar = state.mCharMatrix[row][col];
-				if (word.mCells[i].containsah(stateChar)) {
+				if (word.mCells[i].contains(stateChar)) {
 					if (state.cheatedAt(row, col)) {
 						cheatedCount++;
 					} else {
@@ -597,7 +597,7 @@ public class Crossword
 				if (!done[row][col]) {
 					totalCount++;
 					String stateChar = state.mCharMatrix[row][col];
-					if (word.mCells[i].containsah(stateChar)) {
+					if (word.mCells[i].contains(stateChar)) {
 						if (state.cheatedAt(row, col)) {
 							cheatedCount++;
 						} else {
@@ -967,9 +967,9 @@ public class Crossword
 			mAttrFlags = in.readByte();
 		}
 
-		public char charAt(int pos)
+		public String chars()
 		{
-			return mChars.charAt(pos);
+			return mChars;
 		}
 
 		public boolean isEmpty()
@@ -982,10 +982,10 @@ public class Crossword
 			return (mAttrFlags & ATTR_CIRCLED) == ATTR_CIRCLED;
 		}
 
-		public boolean containsah(String charSought)
+		public boolean contains(String charSought)
 		{
-			if (charSought == null || mChars == null) {
-				return charSought == mChars;
+			if (charSought == mChars) {
+				return true;
 			}
 
 			return mChars.equals(charSought);

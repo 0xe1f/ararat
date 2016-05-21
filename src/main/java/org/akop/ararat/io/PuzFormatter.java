@@ -232,7 +232,7 @@ public class PuzFormatter
 		builder.setCopyright(copyright);
 		builder.setComment(notes);
 
-		buildWords(builder, clues, charMap, attrMap);
+		buildWords(builder, clues, charMap, attrMap, rebusMap, rebusSols);
 	}
 
 	@Override
@@ -255,7 +255,8 @@ public class PuzFormatter
 	}
 
 	private static void buildWords(Crossword.Builder cb, List<String> clues,
-			char[][] charMap, byte[][] attrMap)
+			char[][] charMap, byte[][] attrMap,
+			int[][] rebusMap, SparseArray<String> rebusSols)
 	{
 		for (int i = 0, clue = 0, number = 0; i < charMap.length; i++) {
 			for (int j = 0; j < charMap[i].length; j++) {
@@ -279,7 +280,16 @@ public class PuzFormatter
 							if ((attrMap[i][k] & GEXT_CIRCLED) != 0) {
 								attrs |= Crossword.Cell.ATTR_CIRCLED;
 							}
-							wb.addCell(new char[] { charMap[i][k] }, attrs);
+							String rebus = null;
+							if (rebusMap != null && rebusSols != null) {
+								rebus = rebusSols.get(rebusMap[i][k]);
+							}
+
+							if (rebus != null) {
+								wb.addCell(rebus, attrs);
+							} else {
+								wb.addCell(String.valueOf(charMap[i][k]), attrs);
+							}
 						}
 
 						cb.addWord(wb.build());
@@ -303,7 +313,16 @@ public class PuzFormatter
 							if ((attrMap[k][j] & GEXT_CIRCLED) != 0) {
 								attrs |= Crossword.Cell.ATTR_CIRCLED;
 							}
-							wb.addCell(new char[] { charMap[k][j] }, attrs);
+							String rebus = null;
+							if (rebusMap != null && rebusSols != null) {
+								rebus = rebusSols.get(rebusMap[k][j]);
+							}
+
+							if (rebus != null) {
+								wb.addCell(rebus, attrs);
+							} else {
+								wb.addCell(String.valueOf(charMap[k][j]), attrs);
+							}
 						}
 
 						cb.addWord(wb.build());

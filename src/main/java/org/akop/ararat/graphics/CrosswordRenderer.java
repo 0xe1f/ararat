@@ -109,13 +109,14 @@ public class CrosswordRenderer
 
 		if ((rp.mFlags & FLAG_RENDER_ANSWER) == FLAG_RENDER_ANSWER) {
 			if (!cell.isEmpty()) {
-				rp.mCanvas.drawText(cell.charAt(0) + "", cellRect.left + rp.mCellDim / 2,
+				rp.mCanvas.drawText(cell.chars(), cellRect.left + rp.mCellDim / 2,
 						cellRect.bottom - rp.mAnswerMetrics.descent, rp.mAnswerTextPaint);
 			}
 		} else if ((rp.mFlags & FLAG_RENDER_ATTEMPT) == FLAG_RENDER_ATTEMPT) {
-			char attempt = rp.mState.charAt(row, col);
-			if (attempt != Crossword.State.EMPTY_CELL) {
-				rp.mCanvas.drawText(attempt + "", cellRect.left + rp.mCellDim / 2,
+			// FIXME: rebus
+			String attempt = rp.mState.charAt(row, col);
+			if (attempt != null) {
+				rp.mCanvas.drawText(attempt, cellRect.left + rp.mCellDim / 2,
 						cellRect.bottom - rp.mAnswerMetrics.descent, rp.mAnswerTextPaint);
 			}
 		}
