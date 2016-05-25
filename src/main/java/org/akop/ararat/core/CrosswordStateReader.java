@@ -47,7 +47,7 @@ public class CrosswordStateReader
 		}
 
 		int version = mInStream.readByte();
-		if (version != CrosswordStateWriter.VERSION_CURRENT) {
+		if (version > CrosswordStateWriter.VERSION_CURRENT) {
 			throw new IllegalArgumentException("State version " + version + " not supported");
 		}
 
