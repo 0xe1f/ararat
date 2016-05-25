@@ -57,9 +57,11 @@ import org.akop.ararat.core.Crossword;
 import org.akop.ararat.view.inputmethod.CrosswordInputConnection;
 import org.akop.ararat.widget.Zoomer;
 
+import java.util.Locale;
 import java.util.Stack;
 
 
+@SuppressWarnings("unused")
 public class CrosswordView
 		extends View
 		implements View.OnKeyListener
@@ -173,6 +175,7 @@ public class CrosswordView
 	private Scroller mScroller;
 	private boolean mIsSolved;
 
+	private boolean mSoftInputEnabled;
 	private boolean mIsEditable;
 	private boolean mSkipOccupiedOnType;
 	private boolean mSelectFirstUnoccupiedOnNav;
@@ -482,18 +485,21 @@ public class CrosswordView
 	@Override
 	public InputConnection onCreateInputConnection(EditorInfo outAttrs)
 	{
-		outAttrs.actionLabel = null;
-		outAttrs.inputType = InputType.TYPE_NULL;
-//		outAttrs.inputType = InputType.TYPE_CLASS_TEXT; // FIXME
-		outAttrs.imeOptions &= ~EditorInfo.IME_FLAG_NO_FULLSCREEN;
-		outAttrs.imeOptions |= EditorInfo.IME_FLAG_NO_EXTRACT_UI;
-		outAttrs.imeOptions &= ~EditorInfo.IME_MASK_ACTION;
-		outAttrs.imeOptions |= EditorInfo.IME_ACTION_NEXT;
-		outAttrs.packageName = getContext().getPackageName();
+		Log.v(LOG_TAG, "onCreateInputConnection()");
 
-		CrosswordInputConnection inputConnection
-				= new CrosswordInputConnection(this);
-		inputConnection.setOnInputEventListener(mInputEventListener);
+		CrosswordInputConnection inputConnection = null;
+		if (mSoftInputEnabled) {
+			outAttrs.actionLabel = null;
+			outAttrs.inputType = InputType.TYPE_NULL;
+			outAttrs.imeOptions &= ~EditorInfo.IME_FLAG_NO_FULLSCREEN;
+			outAttrs.imeOptions |= EditorInfo.IME_FLAG_NO_EXTRACT_UI;
+			outAttrs.imeOptions &= ~EditorInfo.IME_MASK_ACTION;
+			outAttrs.imeOptions |= EditorInfo.IME_ACTION_NEXT;
+			outAttrs.packageName = getContext().getPackageName();
+
+			inputConnection = new CrosswordInputConnection(this);
+			inputConnection.setOnInputEventListener(mInputEventListener);
+		}
 
 		return inputConnection;
 	}
@@ -501,7 +507,7 @@ public class CrosswordView
 	@Override
 	public boolean onCheckIsTextEditor()
 	{
-		return mIsEditable;
+		return mIsEditable && mSoftInputEnabled;
 	}
 
 	@Override
@@ -661,7 +667,8 @@ public class CrosswordView
 		return mSelection != null ? mSelection.mWord : null;
 	}
 
-	private void setChars(int startRow, int startColumn, char charMatrix[][], boolean setCheatFlag)
+	private void setChars(int startRow, int startColumn, char charMatrix[][],
+			boolean setCheatFlag)
 	{
 		setChars(startRow, startColumn, charMatrix, setCheatFlag, false);
 	}
@@ -917,7 +924,18 @@ public class CrosswordView
 	public void setEditable(boolean editable)
 	{
 		mIsEditable = editable;
-		setFocusableInTouchMode(mIsEditable);
+		resetInputMode();
+	}
+
+	public boolean isSoftInputEnabled()
+	{
+		return mSoftInputEnabled;
+	}
+
+	public void setSoftInputEnabled(boolean enabled)
+	{
+		mSoftInputEnabled = enabled;
+		resetInputMode();
 	}
 
 	public boolean skipOccupiedOnType()
@@ -992,6 +1010,20 @@ public class CrosswordView
 		if (top.mSelectable != null
 			&& !Crossword.Word.equals(selectable.mWord, top.mSelectable.mWord)) {
 			mUndoBuffer.clear();
+		}
+	}
+
+	private void resetInputMode()
+	{
+		setFocusableInTouchMode(mIsEditable && mSoftInputEnabled);
+
+		InputMethodManager imm = (InputMethodManager)
+				getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+		if (imm != null) {
+			if (imm.isActive(this)) {
+				imm.hideSoftInputFromWindow(getWindowToken(), 0);
+			}
+			imm.restartInput(this);
 		}
 	}
 
@@ -1164,9 +1196,11 @@ public class CrosswordView
 
 	protected void showKeyboard()
 	{
-		InputMethodManager imm = (InputMethodManager)
-				getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-		imm.showSoftInput(CrosswordView.this, InputMethodManager.SHOW_IMPLICIT);
+		if (mSoftInputEnabled) {
+			InputMethodManager imm = (InputMethodManager)
+					getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+			imm.showSoftInput(CrosswordView.this, InputMethodManager.SHOW_IMPLICIT);
+		}
 	}
 
 	private void resetErrorMarkers()
@@ -1871,10 +1905,9 @@ public class CrosswordView
 				text = "[" + mChars.length + " lines]";
 			}
 
-			return String.format("(%d,%d)-(%d,%d) %s",
-					mStartRow, mStartCol,
-					mStartRow + mChars.length - 1, mStartCol + mChars[0].length - 1,
-					text);
+			return String.format(Locale.getDefault(), "(%d,%d)-(%d,%d) %s",
+					mStartRow, mStartCol, mStartRow + mChars.length - 1,
+					mStartCol + mChars[0].length - 1, text);
 		}
 	}
 
@@ -1979,7 +2012,8 @@ public class CrosswordView
 		@Override
 		public String toString()
 		{
-			return String.format("%s (%d)", mWord, mCell);
+			return String.format(Locale.getDefault(),
+					"%s (%d)", mWord, mCell);
 		}
 
 		public static final Creator<Selectable> CREATOR = new Creator<Selectable>()

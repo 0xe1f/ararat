@@ -49,7 +49,7 @@ public class CrosswordReader
 
 		// Check version number
 		int version = mInStream.readByte();
-		if (version != 1 && version != 2) {
+		if (version > CrosswordWriter.VERSION_CURRENT) {
 			throw new IllegalArgumentException("Version " + version + " not supported");
 		}
 
