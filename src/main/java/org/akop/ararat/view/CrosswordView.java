@@ -292,6 +292,7 @@ public class CrosswordView
 		mNumberTextPadding = NUMBER_TEXT_PADDING * dm.density;
 		mAnswerTextPadding = ANSWER_TEXT_PADDING * dm.density;
 		mIsEditable = true;
+		mSoftInputEnabled = true;
 		mSkipOccupiedOnType = false;
 		mSelectFirstUnoccupiedOnNav = true;
 		mMaxBitmapSize = DEFAULT_MAX_BITMAP_DIMENSION;
@@ -409,7 +410,7 @@ public class CrosswordView
 		mZoomer = new Zoomer(context);
 		mUndoBuffer = new Stack<>();
 
-		setFocusableInTouchMode(mIsEditable);
+		setFocusableInTouchMode(mIsEditable && mSoftInputEnabled);
 		setOnKeyListener(this);
 	}
 
@@ -491,7 +492,7 @@ public class CrosswordView
 		if (mSoftInputEnabled) {
 			outAttrs.actionLabel = null;
 			outAttrs.inputType = InputType.TYPE_NULL;
-			outAttrs.imeOptions &= ~EditorInfo.IME_FLAG_NO_FULLSCREEN;
+			outAttrs.imeOptions |= EditorInfo.IME_FLAG_NO_FULLSCREEN;
 			outAttrs.imeOptions |= EditorInfo.IME_FLAG_NO_EXTRACT_UI;
 			outAttrs.imeOptions &= ~EditorInfo.IME_MASK_ACTION;
 			outAttrs.imeOptions |= EditorInfo.IME_ACTION_NEXT;
