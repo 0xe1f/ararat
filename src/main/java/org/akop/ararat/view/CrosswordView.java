@@ -58,6 +58,7 @@ import org.akop.ararat.core.Crossword;
 import org.akop.ararat.view.inputmethod.CrosswordInputConnection;
 import org.akop.ararat.widget.Zoomer;
 
+import java.util.Locale;
 import java.util.Stack;
 
 
@@ -136,6 +137,7 @@ public class CrosswordView
 	private Paint mNumberTextPaint;
 	private Paint mNumberStrokePaint;
 	private Paint mAnswerTextPaint;
+	private Paint mRebusTextPaint;
 	private float mCellSize;
 	private float mMarkerSideLength;
 	private float mCircleRadius;
@@ -143,6 +145,7 @@ public class CrosswordView
 	private float mAnswerTextPadding;
 	private float mAnswerTextHeight;
 	private float mNumberTextHeight;
+	private float mScaledDensity;
 	private Stack<UndoItem> mUndoBuffer;
 
 	private int mPuzzleWidth; // Total number of cells across
@@ -175,6 +178,7 @@ public class CrosswordView
 	private Scroller mScroller;
 	private boolean mIsSolved;
 
+	private boolean mSoftInputEnabled;
 	private boolean mIsEditable;
 	private boolean mSkipOccupiedOnType;
 	private boolean mSelectFirstUnoccupiedOnNav;
@@ -284,13 +288,15 @@ public class CrosswordView
 		int cellStrokeColor = CELL_STROKE_COLOR;
 		int circleStrokeColor = CIRCLE_STROKE_COLOR;
 
-		float numberTextSize = NUMBER_TEXT_SIZE * dm.scaledDensity;
-		float answerTextSize = ANSWER_TEXT_SIZE * dm.scaledDensity;
+		mScaledDensity = dm.scaledDensity;
+		float numberTextSize = NUMBER_TEXT_SIZE * mScaledDensity;
+		float answerTextSize = ANSWER_TEXT_SIZE * mScaledDensity;
 
 		mCellSize = CELL_SIZE * dm.density;
 		mNumberTextPadding = NUMBER_TEXT_PADDING * dm.density;
 		mAnswerTextPadding = ANSWER_TEXT_PADDING * dm.density;
 		mIsEditable = true;
+		mSoftInputEnabled = true;
 		mSkipOccupiedOnType = false;
 		mSelectFirstUnoccupiedOnNav = true;
 		mMaxBitmapSize = DEFAULT_MAX_BITMAP_DIMENSION;
@@ -374,7 +380,7 @@ public class CrosswordView
 		mNumberStrokePaint.setTextAlign(Paint.Align.CENTER);
 		mNumberStrokePaint.setTextSize(numberTextSize);
 		mNumberStrokePaint.setStyle(Paint.Style.STROKE);
-		mNumberStrokePaint.setStrokeWidth(NUMBER_TEXT_STROKE_WIDTH * dm.scaledDensity);
+		mNumberStrokePaint.setStrokeWidth(NUMBER_TEXT_STROKE_WIDTH * mScaledDensity);
 
  		mAnswerTextPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 		mAnswerTextPaint.setColor(textColor);
@@ -383,6 +389,8 @@ public class CrosswordView
 
 		mAnswerTextPaint.getTextBounds("A", 0, "A".length(), mTempRect);
 		mAnswerTextHeight = mTempRect.height();
+
+		mRebusTextPaint = new Paint(mAnswerTextPaint);
 
 		// Init rest of the values
 		mCircleRadius = (mCellSize / 2) - mCircleStrokePaint.getStrokeWidth();
@@ -408,7 +416,7 @@ public class CrosswordView
 		mZoomer = new Zoomer(context);
 		mUndoBuffer = new Stack<>();
 
-		setFocusableInTouchMode(mIsEditable);
+		setFocusableInTouchMode(mIsEditable && mSoftInputEnabled);
 		setOnKeyListener(this);
 	}
 
@@ -484,18 +492,21 @@ public class CrosswordView
 	@Override
 	public InputConnection onCreateInputConnection(EditorInfo outAttrs)
 	{
-		outAttrs.actionLabel = null;
-		outAttrs.inputType = InputType.TYPE_NULL;
-//		outAttrs.inputType = InputType.TYPE_CLASS_TEXT; // FIXME
-		outAttrs.imeOptions &= ~EditorInfo.IME_FLAG_NO_FULLSCREEN;
-		outAttrs.imeOptions |= EditorInfo.IME_FLAG_NO_EXTRACT_UI;
-		outAttrs.imeOptions &= ~EditorInfo.IME_MASK_ACTION;
-		outAttrs.imeOptions |= EditorInfo.IME_ACTION_NEXT;
-		outAttrs.packageName = getContext().getPackageName();
+		Log.v(LOG_TAG, "onCreateInputConnection()");
 
-		CrosswordInputConnection inputConnection
-				= new CrosswordInputConnection(this);
-		inputConnection.setOnInputEventListener(mInputEventListener);
+		CrosswordInputConnection inputConnection = null;
+		if (mSoftInputEnabled) {
+			outAttrs.actionLabel = null;
+			outAttrs.inputType = InputType.TYPE_NULL;
+			outAttrs.imeOptions |= EditorInfo.IME_FLAG_NO_FULLSCREEN;
+			outAttrs.imeOptions |= EditorInfo.IME_FLAG_NO_EXTRACT_UI;
+			outAttrs.imeOptions &= ~EditorInfo.IME_MASK_ACTION;
+			outAttrs.imeOptions |= EditorInfo.IME_ACTION_NEXT;
+			outAttrs.packageName = getContext().getPackageName();
+
+			inputConnection = new CrosswordInputConnection(this);
+			inputConnection.setOnInputEventListener(mInputEventListener);
+		}
 
 		return inputConnection;
 	}
@@ -503,7 +514,7 @@ public class CrosswordView
 	@Override
 	public boolean onCheckIsTextEditor()
 	{
-		return mIsEditable;
+		return mIsEditable && mSoftInputEnabled;
 	}
 
 	@Override
@@ -903,6 +914,8 @@ public class CrosswordView
 		mAnswerTextPaint.getTextBounds("A", 0, "A".length(), mTempRect);
 		mAnswerTextHeight = mTempRect.height();
 
+		mRebusTextPaint = new Paint(mAnswerTextPaint);
+
 		redrawInPlace();
 	}
 
@@ -932,7 +945,18 @@ public class CrosswordView
 	public void setEditable(boolean editable)
 	{
 		mIsEditable = editable;
-		setFocusableInTouchMode(mIsEditable);
+		resetInputMode();
+	}
+
+	public boolean isSoftInputEnabled()
+	{
+		return mSoftInputEnabled;
+	}
+
+	public void setSoftInputEnabled(boolean enabled)
+	{
+		mSoftInputEnabled = enabled;
+		resetInputMode();
 	}
 
 	public boolean skipOccupiedOnType()
@@ -1007,6 +1031,20 @@ public class CrosswordView
 		if (top.mSelectable != null
 			&& !Crossword.Word.equals(selectable.mWord, top.mSelectable.mWord)) {
 			mUndoBuffer.clear();
+		}
+	}
+
+	private void resetInputMode()
+	{
+		setFocusableInTouchMode(mIsEditable && mSoftInputEnabled);
+
+		InputMethodManager imm = (InputMethodManager)
+				getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+		if (imm != null) {
+			if (imm.isActive(this)) {
+				imm.hideSoftInputFromWindow(getWindowToken(), 0);
+			}
+			imm.restartInput(this);
 		}
 	}
 
@@ -1180,9 +1218,11 @@ public class CrosswordView
 
 	protected void showKeyboard()
 	{
-		InputMethodManager imm = (InputMethodManager)
-				getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-		imm.showSoftInput(CrosswordView.this, InputMethodManager.SHOW_IMPLICIT);
+		if (mSoftInputEnabled) {
+			InputMethodManager imm = (InputMethodManager)
+					getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+			imm.showSoftInput(CrosswordView.this, InputMethodManager.SHOW_IMPLICIT);
+		}
 	}
 
 	private void resetErrorMarkers()
@@ -1517,8 +1557,35 @@ public class CrosswordView
 		}
 
 		if (!cell.isEmpty()) {
-			canvas.drawText(cell.mChar, cellRect.left + mCellSize / 2,
-					cellRect.top + mCellSize - mAnswerTextPadding, mAnswerTextPaint);
+			Paint paint;
+			float xOffset;
+			float yOffset; // measured from the bottom
+
+			int length = cell.mChar.length();
+			if (length < 2) {
+				paint = mAnswerTextPaint;
+				xOffset = mCellSize / 2f;
+				yOffset = mAnswerTextPadding;
+			} else {
+				paint = mRebusTextPaint;
+
+				float textSize = mAnswerTextPaint.getTextSize();
+				float textWidth;
+				do {
+					// FIXME: padding
+					mRebusTextPaint.setTextSize(textSize);
+					mRebusTextPaint.getTextBounds(cell.mChar, 0, length, mTempRect);
+					textWidth = mRebusTextPaint.measureText(cell.mChar);
+
+					xOffset = textWidth / 2f;
+					yOffset = (mCellSize - mTempRect.height()) / 2;
+					textSize -= mScaledDensity;
+Log.v(LOG_TAG, String.format("** textWidth: %.02f - mCellSize: %.02f", textWidth, mCellSize));
+				} while (textWidth >= mCellSize);
+			}
+
+			canvas.drawText(cell.mChar, cellRect.centerX() - xOffset,
+					cellRect.bottom - yOffset, paint);
 		}
 	}
 
