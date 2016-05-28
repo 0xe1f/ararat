@@ -36,6 +36,7 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.support.v4.view.ViewCompat;
 import android.text.InputType;
@@ -142,8 +143,6 @@ public class CrosswordView
 	private float mMarkerSideLength;
 	private float mCircleRadius;
 	private float mNumberTextPadding;
-	private float mAnswerTextPadding;
-	private float mAnswerTextHeight;
 	private float mNumberTextHeight;
 	private float mScaledDensity;
 	private Stack<UndoItem> mUndoBuffer;
@@ -294,7 +293,6 @@ public class CrosswordView
 
 		mCellSize = CELL_SIZE * dm.density;
 		mNumberTextPadding = NUMBER_TEXT_PADDING * dm.density;
-		mAnswerTextPadding = ANSWER_TEXT_PADDING * dm.density;
 		mIsEditable = true;
 		mSoftInputEnabled = true;
 		mSkipOccupiedOnType = false;
@@ -309,7 +307,6 @@ public class CrosswordView
 			mCellSize = a.getDimension(R.styleable.CrosswordView_cellSize, mCellSize);
 			mNumberTextPadding = a.getDimension(R.styleable.CrosswordView_numberTextPadding, mNumberTextPadding);
 			numberTextSize = a.getDimension(R.styleable.CrosswordView_numberTextSize, numberTextSize);
-			mAnswerTextPadding = a.getDimension(R.styleable.CrosswordView_answerTextPadding, mAnswerTextPadding);
 			answerTextSize = a.getDimension(R.styleable.CrosswordView_answerTextSize, answerTextSize);
 			cellFillColor = a.getColor(R.styleable.CrosswordView_defaultCellFillColor, cellFillColor);
 			cheatedCellFillColor = a.getColor(R.styleable.CrosswordView_cheatedCellFillColor, cheatedCellFillColor);
@@ -385,10 +382,8 @@ public class CrosswordView
  		mAnswerTextPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 		mAnswerTextPaint.setColor(textColor);
 		mAnswerTextPaint.setTextSize(answerTextSize);
-		mAnswerTextPaint.setTextAlign(Paint.Align.CENTER);
 
 		mAnswerTextPaint.getTextBounds("A", 0, "A".length(), mTempRect);
-		mAnswerTextHeight = mTempRect.height();
 
 		mRebusTextPaint = new Paint(mAnswerTextPaint);
 
@@ -911,9 +906,6 @@ public class CrosswordView
 	public void setAnswerTypeface(Typeface typeface)
 	{
 		mAnswerTextPaint.setTypeface(typeface);
-		mAnswerTextPaint.getTextBounds("A", 0, "A".length(), mTempRect);
-		mAnswerTextHeight = mTempRect.height();
-
 		mRebusTextPaint = new Paint(mAnswerTextPaint);
 
 		redrawInPlace();
@@ -1511,10 +1503,11 @@ public class CrosswordView
 					mCircleRadius, mCircleStrokePaint);
 		}
 
+		float numberY = cellRect.top + mNumberTextPadding + mNumberTextHeight;
+
 		if (cell.mNumber != null) {
 			float textWidth = mNumberTextPaint.measureText(cell.mNumber);
 			float numberX = cellRect.left + mNumberTextPadding + (textWidth / 2);
-			float numberY = cellRect.top + mNumberTextPadding + mNumberTextHeight;
 
 			if (cell.isFlagSet(Cell.FLAG_CIRCLED)) {
 				canvas.drawText(cell.mNumber, numberX, numberY, mNumberStrokePaint);
@@ -1557,35 +1550,36 @@ public class CrosswordView
 		}
 
 		if (!cell.isEmpty()) {
-			Paint paint;
-			float xOffset;
-			float yOffset; // measured from the bottom
+			String text = cell.mChar;
+			RectF textRect = new RectF(cellRect);
+			textRect.top = numberY;
 
-			int length = cell.mChar.length();
-			if (length < 2) {
-				paint = mAnswerTextPaint;
-				xOffset = mCellSize / 2f;
-				yOffset = mAnswerTextPadding;
-			} else {
-				paint = mRebusTextPaint;
+			// FIXME: cache text widths and heights
 
-				float textSize = mAnswerTextPaint.getTextSize();
-				float textWidth;
-				do {
-					// FIXME: padding
-					mRebusTextPaint.setTextSize(textSize);
-					mRebusTextPaint.getTextBounds(cell.mChar, 0, length, mTempRect);
-					textWidth = mRebusTextPaint.measureText(cell.mChar);
-
-					xOffset = textWidth / 2f;
-					yOffset = (mCellSize - mTempRect.height()) / 2;
-					textSize -= mScaledDensity;
-Log.v(LOG_TAG, String.format("** textWidth: %.02f - mCellSize: %.02f", textWidth, mCellSize));
-				} while (textWidth >= mCellSize);
+			if (text.length() > 8) {
+				// FIXME: allow customization of max length and replacement pattern
+				text = text.substring(0, 8) + "…";
 			}
 
-			canvas.drawText(cell.mChar, cellRect.centerX() - xOffset,
-					cellRect.bottom - yOffset, paint);
+			float textSize = mAnswerTextPaint.getTextSize();
+			float textWidth;
+			float xOffset;
+
+			int i = 0;
+			do {
+				mRebusTextPaint.setTextSize(textSize);
+				textWidth = mRebusTextPaint.measureText(text);
+
+				xOffset = textWidth / 2f;
+				textSize -= mScaledDensity;
+				i++;
+			} while (textWidth >= mCellSize);
+
+			mRebusTextPaint.getTextBounds("A", 0, 1, mTempRect);
+			float yOffset = mTempRect.height() / 2;
+
+			canvas.drawText(text, textRect.centerX() - xOffset,
+					textRect.centerY() + yOffset, mRebusTextPaint);
 		}
 	}
 
@@ -2306,9 +2300,8 @@ Log.v(LOG_TAG, String.format("** textWidth: %.02f - mCellSize: %.02f", textWidth
 
 		public void renderPuzzle(Canvas canvas)
 		{
+			long startedMillis = SystemClock.uptimeMillis();
 			RectF cellRect = new RectF();
-
-			Log.d(LOG_TAG, "Rendering puzzle...");
 
 			canvas.save();
 			canvas.scale(mScale, mScale);
@@ -2330,8 +2323,10 @@ Log.v(LOG_TAG, String.format("** textWidth: %.02f - mCellSize: %.02f", textWidth
 			}
 
 			canvas.restore();
-
 			renderSelection(canvas, false);
+
+			Log.d(LOG_TAG, String.format("Rendered puzzle (%.02fs)",
+					(SystemClock.uptimeMillis() - startedMillis) / 1000f));
 		}
 	}
 
