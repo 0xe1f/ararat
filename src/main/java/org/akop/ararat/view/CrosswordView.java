@@ -884,6 +884,25 @@ public class CrosswordView
 		return getCellRect(new Selectable(word, cell));
 	}
 
+	public String getCellContents(Crossword.Word word, int charIndex)
+	{
+		int row = word.getStartRow();
+		int column = word.getStartColumn();
+
+		if (word.getDirection() == Crossword.Word.DIR_ACROSS) {
+			column += charIndex;
+		} else if (word.getDirection() == Crossword.Word.DIR_DOWN) {
+			row += charIndex;
+		}
+
+		Cell cell = mPuzzleCells[row][column];
+		if (cell == null) {
+			return null;
+		}
+
+		return cell.mChar;
+	}
+
 	public void setCellContents(Crossword.Word word, int charIndex, String sol)
 	{
 		int row = word.getStartRow();
@@ -1565,14 +1584,12 @@ public class CrosswordView
 			float textWidth;
 			float xOffset;
 
-			int i = 0;
 			do {
 				mRebusTextPaint.setTextSize(textSize);
 				textWidth = mRebusTextPaint.measureText(text);
 
 				xOffset = textWidth / 2f;
 				textSize -= mScaledDensity;
-				i++;
 			} while (textWidth >= mCellSize);
 
 			mRebusTextPaint.getTextBounds("A", 0, 1, mTempRect);
