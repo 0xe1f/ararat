@@ -59,7 +59,6 @@ import org.akop.ararat.core.Crossword;
 import org.akop.ararat.view.inputmethod.CrosswordInputConnection;
 import org.akop.ararat.widget.Zoomer;
 
-import java.util.Locale;
 import java.util.Stack;
 
 
@@ -138,13 +137,13 @@ public class CrosswordView
 	private Paint mNumberTextPaint;
 	private Paint mNumberStrokePaint;
 	private Paint mAnswerTextPaint;
-	private Paint mRebusTextPaint;
 	private float mCellSize;
 	private float mMarkerSideLength;
 	private float mCircleRadius;
 	private float mNumberTextPadding;
 	private float mNumberTextHeight;
 	private float mScaledDensity;
+	private float mAnswerTextSize;
 	private Stack<UndoItem> mUndoBuffer;
 
 	private int mPuzzleWidth; // Total number of cells across
@@ -187,6 +186,7 @@ public class CrosswordView
 	private int mMaxBitmapSize;
 
 	private Rect mTempRect = new Rect();
+	private RectF mAnswerTextRect = new RectF();
 
 	private final Object mRendererLock = new Object();
 
@@ -289,7 +289,7 @@ public class CrosswordView
 
 		mScaledDensity = dm.scaledDensity;
 		float numberTextSize = NUMBER_TEXT_SIZE * mScaledDensity;
-		float answerTextSize = ANSWER_TEXT_SIZE * mScaledDensity;
+		mAnswerTextSize = ANSWER_TEXT_SIZE * mScaledDensity;
 
 		mCellSize = CELL_SIZE * dm.density;
 		mNumberTextPadding = NUMBER_TEXT_PADDING * dm.density;
@@ -307,7 +307,7 @@ public class CrosswordView
 			mCellSize = a.getDimension(R.styleable.CrosswordView_cellSize, mCellSize);
 			mNumberTextPadding = a.getDimension(R.styleable.CrosswordView_numberTextPadding, mNumberTextPadding);
 			numberTextSize = a.getDimension(R.styleable.CrosswordView_numberTextSize, numberTextSize);
-			answerTextSize = a.getDimension(R.styleable.CrosswordView_answerTextSize, answerTextSize);
+			mAnswerTextSize = a.getDimension(R.styleable.CrosswordView_answerTextSize, mAnswerTextSize);
 			cellFillColor = a.getColor(R.styleable.CrosswordView_defaultCellFillColor, cellFillColor);
 			cheatedCellFillColor = a.getColor(R.styleable.CrosswordView_cheatedCellFillColor, cheatedCellFillColor);
 			mistakeCellFillColor = a.getColor(R.styleable.CrosswordView_mistakeCellFillColor, mistakeCellFillColor);
@@ -381,11 +381,7 @@ public class CrosswordView
 
  		mAnswerTextPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 		mAnswerTextPaint.setColor(textColor);
-		mAnswerTextPaint.setTextSize(answerTextSize);
-
-		mAnswerTextPaint.getTextBounds("A", 0, "A".length(), mTempRect);
-
-		mRebusTextPaint = new Paint(mAnswerTextPaint);
+		mAnswerTextPaint.setTextSize(mAnswerTextSize);
 
 		// Init rest of the values
 		mCircleRadius = (mCellSize / 2) - mCircleStrokePaint.getStrokeWidth();
@@ -925,7 +921,6 @@ public class CrosswordView
 	public void setAnswerTypeface(Typeface typeface)
 	{
 		mAnswerTextPaint.setTypeface(typeface);
-		mRebusTextPaint = new Paint(mAnswerTextPaint);
 
 		redrawInPlace();
 	}
@@ -1570,33 +1565,29 @@ public class CrosswordView
 
 		if (!cell.isEmpty()) {
 			String text = cell.mChar;
-			RectF textRect = new RectF(cellRect);
-			textRect.top = numberY;
-
-			// FIXME: cache text widths and heights
-
 			if (text.length() > 8) {
-				// FIXME: allow customization of max length and replacement pattern
+				// FIXME: customize max length and replacement pattern
 				text = text.substring(0, 8) + "…";
 			}
 
-			float textSize = mAnswerTextPaint.getTextSize();
+			mAnswerTextRect.set(cellRect.left, numberY,
+					cellRect.right, cellRect.bottom);
+
+			float textSize = mAnswerTextSize;
 			float textWidth;
-			float xOffset;
 
 			do {
-				mRebusTextPaint.setTextSize(textSize);
-				textWidth = mRebusTextPaint.measureText(text);
-
-				xOffset = textWidth / 2f;
+				mAnswerTextPaint.setTextSize(textSize);
+				textWidth = mAnswerTextPaint.measureText(text);
 				textSize -= mScaledDensity;
 			} while (textWidth >= mCellSize);
 
-			mRebusTextPaint.getTextBounds("A", 0, 1, mTempRect);
+			mAnswerTextPaint.getTextBounds("A", 0, 1, mTempRect);
+			float xOffset = textWidth / 2f;
 			float yOffset = mTempRect.height() / 2;
 
-			canvas.drawText(text, textRect.centerX() - xOffset,
-					textRect.centerY() + yOffset, mRebusTextPaint);
+			canvas.drawText(text, mAnswerTextRect.centerX() - xOffset,
+					mAnswerTextRect.centerY() + yOffset, mAnswerTextPaint);
 		}
 	}
 
