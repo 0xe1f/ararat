@@ -210,7 +210,7 @@ public class CrosswordUnitTest
 				} else if (map[r][c] == null) {
 					assertNull(word.cellAt(j));
 				} else {
-					assertEquals(word.cellAt(j).charAt(0), map[r][c].charAt(0));
+					assertEquals(word.cellAt(j).chars(), map[r][c].chars());
 				}
 			}
 		}
@@ -222,7 +222,7 @@ public class CrosswordUnitTest
 				} else if (map[r][c] == null) {
 					assertNull(word.cellAt(i));
 				} else {
-					assertEquals(word.cellAt(i).charAt(0), map[r][c].charAt(0));
+					assertEquals(word.cellAt(i).chars(), map[r][c].chars());
 				}
 			}
 		}
@@ -246,11 +246,11 @@ public class CrosswordUnitTest
 			assertEquals(word.getStartColumn(), w.mStartCol);
 
 			// Check the answer
-			char[] answer = new char[word.getLength()];
+			String answer = "";
 			for (int i = 0, n = word.getLength(); i < n; i++) {
-				answer[i] = word.cellAt(i).charAt(0);
+				answer += word.cellAt(i).chars();
 			}
-			assertEquals(new String(answer), w.mChars);
+			assertEquals(answer, w.mChars);
 		}
 	}
 
@@ -268,7 +268,7 @@ public class CrosswordUnitTest
 					.setNumber(w.mNumber);
 
 			for (int i = 0, n = w.mChars.length(); i < n; i++) {
-				wb.addCell(w.mChars.charAt(i));
+				wb.addCell(w.mChars.charAt(i), 0);
 			}
 
 			crosswordBuilder.addWord(wb.build());

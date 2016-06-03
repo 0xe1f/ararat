@@ -1679,7 +1679,7 @@ public class CrosswordView
 	private boolean isAcceptableChar(String ch)
 	{
 		if (ch == null) {
-			return false;
+			return true;
 		}
 
 		String upper = ch.toUpperCase();
