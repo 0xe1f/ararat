@@ -26,6 +26,7 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Rect;
 import android.graphics.RectF;
 import android.util.DisplayMetrics;
 
@@ -54,8 +55,8 @@ public class CrosswordRenderer
 	private Paint mCellFillPaint;
 	private Paint mPuzzleBackgroundPaint;
 	private Paint mCircleStrokePaint;
-	private Paint mAnswerTextPaintBase;
 	private float mScaledCellStrokeWidth;
+	private float mScaledDensity;
 
 	public CrosswordRenderer(Context context)
 	{
@@ -67,6 +68,7 @@ public class CrosswordRenderer
 		DisplayMetrics dm = res.getDisplayMetrics();
 
 		mScaledCellStrokeWidth = CELL_STROKE_WIDTH * dm.density;
+		mScaledDensity = dm.scaledDensity;
 
 		mCellStrokePaint = new Paint();
 		mCellStrokePaint.setColor(CELL_STROKE_COLOR);
@@ -86,10 +88,6 @@ public class CrosswordRenderer
 		mCircleStrokePaint.setColor(CIRCLE_STROKE_COLOR);
 		mCircleStrokePaint.setStyle(Paint.Style.STROKE);
 		mCircleStrokePaint.setStrokeWidth(1);
-
-		mAnswerTextPaintBase = new Paint(Paint.ANTI_ALIAS_FLAG);
-		mAnswerTextPaintBase.setColor(TEXT_COLOR);
-		mAnswerTextPaintBase.setTextAlign(Paint.Align.CENTER);
 	}
 
 	private void renderCell(RenderParams rp, int row, int col, RectF cellRect)
@@ -113,11 +111,28 @@ public class CrosswordRenderer
 						cellRect.bottom - rp.mAnswerMetrics.descent, rp.mAnswerTextPaint);
 			}
 		} else if ((rp.mFlags & FLAG_RENDER_ATTEMPT) == FLAG_RENDER_ATTEMPT) {
-			// FIXME: rebus
-			String attempt = rp.mState.charAt(row, col);
-			if (attempt != null) {
-				rp.mCanvas.drawText(attempt, cellRect.left + rp.mCellDim / 2,
-						cellRect.bottom - rp.mAnswerMetrics.descent, rp.mAnswerTextPaint);
+			String text = rp.mState.charAt(row, col);
+			if (text != null) {
+				if (text.length() > 8) {
+					// FIXME: customize max length and replacement pattern
+					text = text.substring(0, 8) + "…";
+				}
+
+				float textSize = rp.mAnswerTextSize;
+				float textWidth;
+
+				do {
+					rp.mAnswerTextPaint.setTextSize(textSize);
+					textWidth = rp.mAnswerTextPaint.measureText(text);
+					textSize -= mScaledDensity;
+				} while (textWidth >= rp.mAnswerTextSize);
+
+				rp.mAnswerTextPaint.getTextBounds("A", 0, 1, rp.mTempRect);
+				float xOffset = textWidth / 2f;
+				float yOffset = rp.mTempRect.height() / 2;
+
+				rp.mCanvas.drawText(text, cellRect.centerX() - xOffset,
+						cellRect.centerY() + yOffset, rp.mAnswerTextPaint);
 			}
 		}
 	}
@@ -165,6 +180,7 @@ public class CrosswordRenderer
 		final Canvas mCanvas;
 		final float mCellDim;
 		final float mRadius;
+		final float mAnswerTextSize;
 		final Paint mAnswerTextPaint;
 		final int mBmpW;
 		final int mBmpH;
@@ -174,6 +190,7 @@ public class CrosswordRenderer
 		final Crossword.State mState;
 		final Paint.FontMetrics mAnswerMetrics;
 		final int mFlags;
+		final Rect mTempRect;
 
 		RenderParams(Canvas canvas,
 				Crossword crossword, Crossword.State state, int flags)
@@ -184,15 +201,17 @@ public class CrosswordRenderer
 			mBmpW = canvas.getWidth();
 			mBmpH = canvas.getHeight();
 			mFlags = flags;
+			mTempRect = new Rect();
 
 			int longestCwDim = Math.max(mCwW, mCwH);
 			float shortestWantedDim = Math.min(mBmpW, mBmpH);
 			mCellDim = (shortestWantedDim / longestCwDim)
 					- (mScaledCellStrokeWidth / longestCwDim);
 			mRadius = (mCellDim / 2) - mCircleStrokePaint.getStrokeWidth();
+			mAnswerTextSize = mCellDim * 0.75f;
 
-			mAnswerTextPaint = new Paint(mAnswerTextPaintBase);
-			mAnswerTextPaint.setTextSize(mCellDim * 0.75f);
+			mAnswerTextPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+			mAnswerTextPaint.setColor(TEXT_COLOR);
 
 			mAnswerMetrics = mAnswerTextPaint.getFontMetrics();
 
