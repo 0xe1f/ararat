@@ -165,7 +165,7 @@ public class CrosswordView
 	private ScaleGestureDetector mScaleDetector;
 	private GestureDetector mGestureDetector;
 
-	private BitmapRenderer mAsyncRenderer;
+	private RenderTask mAsyncRenderer;
 	private Canvas mPuzzleCanvas;
 	private Bitmap mPuzzleBitmap;
 	private Paint mBitmapPaint;
@@ -189,6 +189,7 @@ public class CrosswordView
 	private RectF mAnswerTextRect = new RectF();
 
 	private final Object mRendererLock = new Object();
+	private final Renderer mInPlaceRenderer = new Renderer();
 
 	private OnSelectionChangeListener mSelectionChangeListener;
 	private OnStateChangeListener mStateChangeListener;
@@ -663,6 +664,11 @@ public class CrosswordView
 		return mSelection != null ? mSelection.mWord : null;
 	}
 
+	public int getSelectedCell()
+	{
+		return mSelection != null ? mSelection.mCell : -1;
+	}
+
 	private void setChars(int startRow, int startColumn, String charMatrix[][],
 			boolean setCheatFlag)
 	{
@@ -869,7 +875,7 @@ public class CrosswordView
 		if (mCrossword != null) {
 			int cell = 0;
 			if (mSelectFirstUnoccupiedOnNav && word != null) {
-				cell = Math.max(firstFreeCell(word), 0);
+				cell = Math.max(firstFreeCell(word, 0), 0);
 			}
 			resetSelection(word != null ? new Selectable(word, cell) : null);
 		}
@@ -1109,7 +1115,7 @@ public class CrosswordView
 		if (nextCell == -1) {
 			word = mCrossword.nextWord(word);
 			if (mSelectFirstUnoccupiedOnNav) {
-				nextCell = Math.max(firstFreeCell(word), 0);
+				nextCell = Math.max(firstFreeCell(word, 0), 0);
 			} else {
 				nextCell = 0;
 			}
@@ -1355,7 +1361,7 @@ public class CrosswordView
 			// A 1px size line is always present, so it's not enough to just
 			// check for zero
 			if (mPuzzleRect.width() > 1 && mPuzzleRect.height() > 1) {
-				mAsyncRenderer = new BitmapRenderer(mRenderScale);
+				mAsyncRenderer = new RenderTask(mRenderScale);
 				mAsyncRenderer.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 			}
 		}
@@ -1500,94 +1506,14 @@ public class CrosswordView
 	private void redrawInPlace()
 	{
 		if (mPuzzleCanvas != null) {
-			mAsyncRenderer = new BitmapRenderer(mRenderScale);
-			mAsyncRenderer.renderPuzzle(mPuzzleCanvas);
+			synchronized (mRendererLock) {
+				if (mAsyncRenderer != null) {
+					mAsyncRenderer.cancel(false);
+				}
+			}
 
+			mInPlaceRenderer.renderPuzzle(mPuzzleCanvas, mRenderScale);
 			ViewCompat.postInvalidateOnAnimation(this);
-		}
-	}
-
-	private void renderCell(Canvas canvas, Cell cell, RectF cellRect, Paint fillPaint)
-	{
-		canvas.drawRect(cellRect, fillPaint);
-		canvas.drawRect(cellRect, mCellStrokePaint);
-
-		if (cell.isFlagSet(Cell.FLAG_CIRCLED)) {
-			canvas.drawCircle(cellRect.centerX(), cellRect.centerY(),
-					mCircleRadius, mCircleStrokePaint);
-		}
-
-		float numberY = cellRect.top + mNumberTextPadding + mNumberTextHeight;
-
-		if (cell.mNumber != null) {
-			float textWidth = mNumberTextPaint.measureText(cell.mNumber);
-			float numberX = cellRect.left + mNumberTextPadding + (textWidth / 2);
-
-			if (cell.isFlagSet(Cell.FLAG_CIRCLED)) {
-				canvas.drawText(cell.mNumber, numberX, numberY, mNumberStrokePaint);
-			}
-
-			canvas.drawText(cell.mNumber, numberX, numberY, mNumberTextPaint);
-		}
-
-		if (cell.isFlagSet(Cell.FLAG_MARKED) && (mMarkerDisplayMode & MARKER_CUSTOM) != 0) {
-			Path path = new Path();
-			path.moveTo(cellRect.right - mMarkerSideLength, cellRect.top);
-			path.lineTo(cellRect.right, cellRect.top);
-			path.lineTo(cellRect.right, cellRect.top + mMarkerSideLength);
-			path.close();
-
-			canvas.drawPath(path, mMarkedCellFillPaint);
-			canvas.drawPath(path, mCellStrokePaint);
-		}
-
-		if (cell.isFlagSet(Cell.FLAG_CHEATED) && (mMarkerDisplayMode & MARKER_CHEAT) != 0) {
-			Path path = new Path();
-			path.moveTo(cellRect.right, cellRect.bottom);
-			path.lineTo(cellRect.right - mMarkerSideLength, cellRect.bottom);
-			path.lineTo(cellRect.right, cellRect.bottom - mMarkerSideLength);
-			path.close();
-
-			canvas.drawPath(path, mCheatedCellFillPaint);
-			canvas.drawPath(path, mCellStrokePaint);
-		}
-
-		if (cell.isFlagSet(Cell.FLAG_ERROR) && (mMarkerDisplayMode & MARKER_ERROR) != 0) {
-			Path path = new Path();
-			path.moveTo(cellRect.left, cellRect.bottom);
-			path.lineTo(cellRect.left + mMarkerSideLength, cellRect.bottom);
-			path.lineTo(cellRect.left, cellRect.bottom - mMarkerSideLength);
-			path.close();
-
-			canvas.drawPath(path, mMistakeCellFillPaint);
-			canvas.drawPath(path, mCellStrokePaint);
-		}
-
-		if (!cell.isEmpty()) {
-			String text = cell.mChar;
-			if (text.length() > 8) {
-				// FIXME: customize max length and replacement pattern
-				text = text.substring(0, 8) + "…";
-			}
-
-			mAnswerTextRect.set(cellRect.left, numberY,
-					cellRect.right, cellRect.bottom);
-
-			float textSize = mAnswerTextSize;
-			float textWidth;
-
-			do {
-				mAnswerTextPaint.setTextSize(textSize);
-				textWidth = mAnswerTextPaint.measureText(text);
-				textSize -= mScaledDensity;
-			} while (textWidth >= mCellSize);
-
-			mAnswerTextPaint.getTextBounds("A", 0, 1, mTempRect);
-			float xOffset = textWidth / 2f;
-			float yOffset = mTempRect.height() / 2;
-
-			canvas.drawText(text, mAnswerTextRect.centerX() - xOffset,
-					mAnswerTextRect.centerY() + yOffset, mAnswerTextPaint);
 		}
 	}
 
@@ -1604,7 +1530,7 @@ public class CrosswordView
 			// Create a canvas on top of the existing bitmap
 			if (mSelection != null && selectionChanged) {
 				// Clear the selection from the deselected word
-				renderSelection(mPuzzleCanvas, true);
+				mInPlaceRenderer.renderSelection(mPuzzleCanvas, true);
 			}
 		}
 
@@ -1618,7 +1544,7 @@ public class CrosswordView
 			}
 
 			// Render the new selection
-			renderSelection(mPuzzleCanvas, false);
+			mInPlaceRenderer.renderSelection(mPuzzleCanvas, false);
 		}
 
 		// Notify the listener of the change in selection
@@ -1630,50 +1556,6 @@ public class CrosswordView
 
 		// Invalidate the view
 		invalidate();
-	}
-
-	private void renderSelection(Canvas canvas, boolean clearSelection)
-	{
-		if (mSelection == null) {
-			return;
-		}
-
-		int startRow = mSelection.getStartRow();
-		int endRow = mSelection.getEndRow();
-		int startColumn = mSelection.getStartColumn();
-		int endColumn = mSelection.getEndColumn();
-		RectF cellRect = new RectF();
-
-		canvas.save();
-		canvas.scale(mRenderScale, mRenderScale);
-
-		float top = mSelection.getStartRow() * mCellSize;
-		for (int row = startRow, index = 0; row <= endRow; row++, top += mCellSize) {
-			float left = mSelection.getStartColumn() * mCellSize;
-			for (int column = startColumn; column <= endColumn; column++, left += mCellSize) {
-				Cell cell = mPuzzleCells[row][column];
-				if (cell != null) {
-					// Draw the unselected cell
-					Paint paint;
-					if (clearSelection) {
-						paint = mCellFillPaint;
-					} else {
-						if (index == mSelection.mCell) {
-							paint = mSelectedCellFillPaint;
-						} else {
-							paint = mSelectedWordFillPaint;
-						}
-					}
-
-					cellRect.set(left, top, left + mCellSize, top + mCellSize);
-					renderCell(canvas, cell, cellRect, paint);
-				}
-
-				index++;
-			}
-		}
-
-		canvas.restore();
 	}
 
 	private boolean isAcceptableChar(String ch)
@@ -1780,11 +1662,6 @@ public class CrosswordView
 						mSelection.mWord, sel.mCell);
 			}
 		}
-	}
-
-	private int firstFreeCell(Crossword.Word word)
-	{
-		return firstFreeCell(word, 0);
 	}
 
 	private int firstFreeCell(Crossword.Word word, int start)
@@ -2232,47 +2109,215 @@ public class CrosswordView
 		}
 	}
 
-	private class BitmapRenderer
+	private class Renderer
+	{
+		boolean mCancel;
+
+		void renderCell(Canvas canvas, Cell cell, RectF cellRect, Paint fillPaint)
+		{
+			canvas.drawRect(cellRect, fillPaint);
+			canvas.drawRect(cellRect, mCellStrokePaint);
+
+			if (cell.isFlagSet(Cell.FLAG_CIRCLED)) {
+				canvas.drawCircle(cellRect.centerX(), cellRect.centerY(),
+						mCircleRadius, mCircleStrokePaint);
+			}
+
+			float numberY = cellRect.top + mNumberTextPadding + mNumberTextHeight;
+
+			if (cell.mNumber != null) {
+				float textWidth = mNumberTextPaint.measureText(cell.mNumber);
+				float numberX = cellRect.left + mNumberTextPadding + (textWidth / 2);
+
+				if (cell.isFlagSet(Cell.FLAG_CIRCLED)) {
+					canvas.drawText(cell.mNumber, numberX, numberY, mNumberStrokePaint);
+				}
+
+				canvas.drawText(cell.mNumber, numberX, numberY, mNumberTextPaint);
+			}
+
+			if (cell.isFlagSet(Cell.FLAG_MARKED) && (mMarkerDisplayMode & MARKER_CUSTOM) != 0) {
+				Path path = new Path();
+				path.moveTo(cellRect.right - mMarkerSideLength, cellRect.top);
+				path.lineTo(cellRect.right, cellRect.top);
+				path.lineTo(cellRect.right, cellRect.top + mMarkerSideLength);
+				path.close();
+
+				canvas.drawPath(path, mMarkedCellFillPaint);
+				canvas.drawPath(path, mCellStrokePaint);
+			}
+
+			if (cell.isFlagSet(Cell.FLAG_CHEATED) && (mMarkerDisplayMode & MARKER_CHEAT) != 0) {
+				Path path = new Path();
+				path.moveTo(cellRect.right, cellRect.bottom);
+				path.lineTo(cellRect.right - mMarkerSideLength, cellRect.bottom);
+				path.lineTo(cellRect.right, cellRect.bottom - mMarkerSideLength);
+				path.close();
+
+				canvas.drawPath(path, mCheatedCellFillPaint);
+				canvas.drawPath(path, mCellStrokePaint);
+			}
+
+			if (cell.isFlagSet(Cell.FLAG_ERROR) && (mMarkerDisplayMode & MARKER_ERROR) != 0) {
+				Path path = new Path();
+				path.moveTo(cellRect.left, cellRect.bottom);
+				path.lineTo(cellRect.left + mMarkerSideLength, cellRect.bottom);
+				path.lineTo(cellRect.left, cellRect.bottom - mMarkerSideLength);
+				path.close();
+
+				canvas.drawPath(path, mMistakeCellFillPaint);
+				canvas.drawPath(path, mCellStrokePaint);
+			}
+
+			if (!cell.isEmpty()) {
+				String text = cell.mChar;
+				if (text.length() > 8) {
+					// FIXME: customize max length and replacement pattern
+					text = text.substring(0, 8) + "…";
+				}
+
+				mAnswerTextRect.set(cellRect.left, numberY,
+						cellRect.right, cellRect.bottom);
+
+				float textSize = mAnswerTextSize;
+				float textWidth;
+
+				do {
+					mAnswerTextPaint.setTextSize(textSize);
+					textWidth = mAnswerTextPaint.measureText(text);
+					textSize -= mScaledDensity;
+				} while (textWidth >= mCellSize);
+
+				mAnswerTextPaint.getTextBounds("A", 0, 1, mTempRect);
+				float xOffset = textWidth / 2f;
+				float yOffset = mTempRect.height() / 2;
+
+				canvas.drawText(text, mAnswerTextRect.centerX() - xOffset,
+						mAnswerTextRect.centerY() + yOffset, mAnswerTextPaint);
+			}
+		}
+
+		public void renderSelection(Canvas canvas, boolean clearSelection)
+		{
+			if (mSelection == null) {
+				return;
+			}
+
+			mCancel = false;
+			int startRow = mSelection.getStartRow();
+			int endRow = mSelection.getEndRow();
+			int startColumn = mSelection.getStartColumn();
+			int endColumn = mSelection.getEndColumn();
+			RectF cellRect = new RectF();
+
+			canvas.save();
+			canvas.scale(mRenderScale, mRenderScale);
+
+			float top = mSelection.getStartRow() * mCellSize;
+			for (int row = startRow, index = 0; row <= endRow; row++, top += mCellSize) {
+				float left = mSelection.getStartColumn() * mCellSize;
+				for (int column = startColumn; column <= endColumn; column++, left += mCellSize) {
+					Cell cell = mPuzzleCells[row][column];
+					if (cell != null) {
+						if (mCancel) {
+							canvas.restore();
+							return;
+						}
+
+						// Draw the unselected cell
+						Paint paint;
+						if (clearSelection) {
+							paint = mCellFillPaint;
+						} else {
+							if (index == mSelection.mCell) {
+								paint = mSelectedCellFillPaint;
+							} else {
+								paint = mSelectedWordFillPaint;
+							}
+						}
+
+						cellRect.set(left, top, left + mCellSize, top + mCellSize);
+						renderCell(canvas, cell, cellRect, paint);
+					}
+
+					index++;
+				}
+			}
+
+			canvas.restore();
+		}
+
+		public void renderPuzzle(Canvas canvas, float scale)
+		{
+			mCancel = false;
+			long startedMillis = SystemClock.uptimeMillis();
+			RectF cellRect = new RectF();
+
+			canvas.save();
+			canvas.scale(scale, scale);
+
+			float top = 0;
+			for (int i = 0; i < mPuzzleHeight; i++, top += mCellSize) {
+				float left = 0;
+				for (int j = 0; j < mPuzzleWidth; j++, left += mCellSize) {
+					if (mCancel) {
+						canvas.restore();
+						return;
+					}
+
+					Cell cell = mPuzzleCells[i][j];
+					if (cell != null) {
+						cellRect.set(left, top, left + mCellSize, top + mCellSize);
+						renderCell(canvas, cell, cellRect, mCellFillPaint);
+					}
+				}
+			}
+
+			canvas.restore();
+			renderSelection(canvas, false);
+
+			Log.d(LOG_TAG, String.format("Rendered puzzle (%.02fs)",
+					(SystemClock.uptimeMillis() - startedMillis) / 1000f));
+		}
+	}
+
+	private class RenderTask
 			extends AsyncTask<Void, Void, Void>
 	{
-		private float mScale;
-		private Canvas mRenderingCanvas;
-		private Bitmap mRenderedPuzzle;
+		Canvas mRenderingCanvas;
+		Bitmap mRenderedPuzzle;
+		Renderer mRenderer = new Renderer();
+		float mScale;
 
-		public BitmapRenderer(float scaleFactor)
+		public RenderTask(float scale)
 		{
-			mScale = scaleFactor;
+			mScale = scale;
 		}
 
 		@Override
 		protected Void doInBackground(Void... params)
 		{
-			Canvas canvas = null;
-			Bitmap puzzleBitmap = null;
-
 			if (mPuzzleWidth > 0 && mPuzzleHeight > 0) {
 				int width = (int) mPuzzleRect.width();
 				int height = (int) mPuzzleRect.height();
 
-				puzzleBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565);
-				canvas = new Canvas(puzzleBitmap);
+				mRenderedPuzzle = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565);
+				mRenderingCanvas = new Canvas(mRenderedPuzzle);
 
 				int sizeBytes;
 				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-					sizeBytes = puzzleBitmap.getAllocationByteCount();
+					sizeBytes = mRenderedPuzzle.getAllocationByteCount();
 				} else {
-					sizeBytes = puzzleBitmap.getByteCount();
+					sizeBytes = mRenderedPuzzle.getByteCount();
 				}
+
 				Log.d(LOG_TAG, String.format("Created a new %dx%d puzzle bitmap (%,dkB)...",
 						width, height, sizeBytes / 1024));
 
-				renderPuzzle(canvas);
+				mRenderer.renderPuzzle(mRenderingCanvas, mScale);
 			} else {
 				Log.d(LOG_TAG, "Not creating an empty puzzle bitmap");
 			}
-
-			mRenderedPuzzle = puzzleBitmap;
-			mRenderingCanvas = canvas;
 
 			return null;
 		}
@@ -2281,6 +2326,10 @@ public class CrosswordView
 		protected void onPostExecute(Void param)
 		{
 			super.onPostExecute(param);
+
+			if (isCancelled()) {
+				return;
+			}
 
 			mPuzzleCanvas = mRenderingCanvas;
 			mPuzzleBitmap = mRenderedPuzzle;
@@ -2299,42 +2348,12 @@ public class CrosswordView
 		{
 			super.onCancelled(aVoid);
 
+			mRenderer.mCancel = true;
 			Log.d(LOG_TAG, "Task cancelled");
 
 			synchronized (mRendererLock) {
 				mAsyncRenderer = null;
 			}
-		}
-
-		public void renderPuzzle(Canvas canvas)
-		{
-			long startedMillis = SystemClock.uptimeMillis();
-			RectF cellRect = new RectF();
-
-			canvas.save();
-			canvas.scale(mScale, mScale);
-
-			float top = 0;
-			for (int i = 0; i < mPuzzleHeight; i++, top += mCellSize) {
-				float left = 0;
-				for (int j = 0; j < mPuzzleWidth; j++, left += mCellSize) {
-					if (isCancelled()) {
-						return;
-					}
-
-					Cell cell = mPuzzleCells[i][j];
-					if (cell != null) {
-						cellRect.set(left, top, left + mCellSize, top + mCellSize);
-						renderCell(canvas, cell, cellRect, mCellFillPaint);
-					}
-				}
-			}
-
-			canvas.restore();
-			renderSelection(canvas, false);
-
-			Log.d(LOG_TAG, String.format("Rendered puzzle (%.02fs)",
-					(SystemClock.uptimeMillis() - startedMillis) / 1000f));
 		}
 	}
 
