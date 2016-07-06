@@ -12,6 +12,8 @@ object
 * [CrosswordView](src/main/java/org/akop/ararat/view/CrosswordView.java), the
 `View` subclass that handles gameplay
 
+For a demonstration, see [CrosswordDemo](https://github.com/pokebyte/CrosswordDemo).
+
 License
 =======
 
