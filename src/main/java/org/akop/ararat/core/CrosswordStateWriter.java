@@ -40,7 +40,7 @@ public class CrosswordStateWriter
 		mOutStream = new ObjectOutputStream(out);
 	}
 
-	public void write(Crossword.State state)
+	public void write(CrosswordState state)
 			throws IOException
 	{
 		mOutStream.writeInt(MAGIC_NUMBER);
@@ -49,7 +49,7 @@ public class CrosswordStateWriter
 		writeState(state);
 	}
 
-	private void writeState(Crossword.State state)
+	private void writeState(CrosswordState state)
 			throws IOException
 	{
 		mOutStream.writeInt(state.mWidth);

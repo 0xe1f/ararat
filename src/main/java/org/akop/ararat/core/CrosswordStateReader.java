@@ -37,10 +37,10 @@ public class CrosswordStateReader
 		mInStream = new ObjectInputStream(in);
 	}
 
-	public Crossword.State read()
+	public CrosswordState read()
 			throws IOException
 	{
-		Crossword.State state;
+		CrosswordState state;
 
 		if (mInStream.readInt() != CrosswordStateWriter.MAGIC_NUMBER) {
 			throw new IllegalArgumentException("Magic number mismatch");
@@ -60,10 +60,10 @@ public class CrosswordStateReader
 		return state;
 	}
 
-	private Crossword.State readState(int version)
+	private CrosswordState readState(int version)
 			throws IOException, ClassNotFoundException
 	{
-		Crossword.State state = new Crossword.State();
+		CrosswordState state = new CrosswordState();
 
 		state.mWidth = mInStream.readInt();
 		state.mHeight = mInStream.readInt();

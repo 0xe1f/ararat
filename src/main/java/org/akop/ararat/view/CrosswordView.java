@@ -56,6 +56,7 @@ import android.widget.Scroller;
 
 import org.akop.ararat.R;
 import org.akop.ararat.core.Crossword;
+import org.akop.ararat.core.CrosswordState;
 import org.akop.ararat.view.inputmethod.CrosswordInputConnection;
 import org.akop.ararat.widget.Zoomer;
 
@@ -769,13 +770,13 @@ public class CrosswordView
 		resetConstraintsAndRedraw(true);
 	}
 
-	public Crossword.State getState()
+	public CrosswordState getState()
 	{
 		if (mCrossword == null) {
 			return null;
 		}
 
-		Crossword.State state = mCrossword.newState();
+		CrosswordState state = mCrossword.newState();
 
 		if (mSelection != null) {
 			state.setSelection(mSelection.getDirection(),
@@ -799,7 +800,7 @@ public class CrosswordView
 		return state;
 	}
 
-	public void restoreState(Crossword.State state)
+	public void restoreState(CrosswordState state)
 	{
 		if (state.getHeight() != mPuzzleHeight || state.getWidth() != mPuzzleWidth) {
 			throw new RuntimeException("Dimensions for puzzle and state don't match");

@@ -31,6 +31,7 @@ import android.graphics.RectF;
 import android.util.DisplayMetrics;
 
 import org.akop.ararat.core.Crossword;
+import org.akop.ararat.core.CrosswordState;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -138,7 +139,7 @@ public class CrosswordRenderer
 	}
 
 	public void renderToCanvas(Canvas canvas, Crossword crossword,
-			Crossword.State state, int flags)
+			CrosswordState state, int flags)
 	{
 		RenderParams rp = new RenderParams(canvas, crossword, state, flags);
 		RectF puzzleRect = new RectF(0, 0, rp.mBmpW, rp.mBmpH);
@@ -163,7 +164,7 @@ public class CrosswordRenderer
 	}
 
 	public void renderToFile(String path,
-			Crossword crossword, Crossword.State state,
+			Crossword crossword, CrosswordState state,
 			int width, int height, int flags)
 			throws IOException
 	{
@@ -187,13 +188,13 @@ public class CrosswordRenderer
 		final int mCwW;
 		final int mCwH;
 		final Crossword.Cell[][] mCellMap;
-		final Crossword.State mState;
+		final CrosswordState mState;
 		final Paint.FontMetrics mAnswerMetrics;
 		final int mFlags;
 		final Rect mTempRect;
 
 		RenderParams(Canvas canvas,
-				Crossword crossword, Crossword.State state, int flags)
+				Crossword crossword, CrosswordState state, int flags)
 		{
 			mCanvas = canvas;
 			mCwW = crossword.getWidth();
