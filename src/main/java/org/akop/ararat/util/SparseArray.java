@@ -115,7 +115,7 @@ public class SparseArray<E>
 
 	public int keyAt(int index)
 	{
-		if (index < 0 || index > mSize) {
+		if (index < 0 || index >= mSize) {
 			throw new ArrayIndexOutOfBoundsException(index);
 		}
 
@@ -125,7 +125,7 @@ public class SparseArray<E>
 	@SuppressWarnings("unchecked")
 	public E valueAt(int index)
 	{
-		if (index < 0 || index > mSize) {
+		if (index < 0 || index >= mSize) {
 			throw new ArrayIndexOutOfBoundsException(index);
 		}
 
@@ -135,6 +135,16 @@ public class SparseArray<E>
 	@Override
 	public String toString()
 	{
-		return Arrays.asList(mValues).toString();
+		StringBuilder sb = new StringBuilder();
+		sb.append("(");
+		for (int i = 0; i < mSize; i++) {
+			if (i != 0) {
+				sb.append(",");
+			}
+			sb.append(mValues[i]);
+		}
+		sb.append(")");
+
+		return sb.toString();
 	}
 }

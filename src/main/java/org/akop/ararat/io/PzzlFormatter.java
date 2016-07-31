@@ -31,7 +31,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class PzzlFormatter
-		extends SimpleXmlParser
 		implements CrosswordFormatter
 {
 	private static final String DEFAULT_ENCODING = "Windows-1252";
@@ -87,27 +86,48 @@ public class PzzlFormatter
 				builder.setAuthor(line);
 				break;
 			case SECTION_WIDTH:
-				width = Integer.parseInt(line);
-				builder.setWidth(width);
+				// Not actual width
 				break;
 			case SECTION_HEIGHT:
+				// Not actual height
 				height = Integer.parseInt(line);
-				builder.setHeight(height);
 				break;
 			case SECTION_MAP:
-				if (height < 1 || width < 1) {
-					throw new IndexOutOfBoundsException("Width or height have invalid size - assuming missing puzzle");
+				char[] lineChars = line.toCharArray();
+
+				if (height < 1) {
+					throw new IndexOutOfBoundsException("Height is invalid - assuming missing puzzle");
 				}
 
 				if (row == 0) {
+					width = 0;
+					for (int i = 0; i < lineChars.length; i++) {
+						char ch = lineChars[i];
+						if (ch == ',') {
+							for (; i < lineChars.length && lineChars[i] == ','; i += 2) {
+								ch = lineChars[i];
+							}
+						}
+
+						if (ch != '.') {
+							width++;
+						}
+					}
+
+					if (width == 0) {
+						continue;
+					}
+
+					builder.setWidth(width);
 					cellMap = new Cell[height][width];
 				}
 
 				Cell cell = null;
-				char[] lineChars = line.toCharArray();
 				for (int i = 0, p = 0, n = lineChars.length - 1; i <= n; i++) {
 					char ch = line.charAt(i);
-					if (ch != '#') {
+					if (ch == '.') {
+						continue;
+					} else if (ch != '#') {
 						if (ch == '%') {
 							cell = new Cell();
 							cell.mAttrs |= Crossword.Cell.ATTR_CIRCLED;
@@ -126,7 +146,6 @@ public class PzzlFormatter
 							}
 
 							// Copy the chars
-							// FIXME: check rebus support
 							char[] chars = new char[charCount];
 							for (int j = i, k = 0; k < charCount; j += 2, k++) {
 								chars[k] = lineChars[j];
@@ -182,10 +201,13 @@ public class PzzlFormatter
 		int acrossIndex = 0;
 		int downIndex = 0;
 		int number = 0;
+		int actualHeight = 0;
 
 		for (int i = 0; i < cellMap.length; i++) {
+			boolean allEmpty = true;
 			for (int j = 0; j < cellMap[i].length; j++) {
 				if (cellMap[i][j] != null) {
+					allEmpty = false;
 					boolean incremented = false;
 					if (j == 0 || (j > 0 && cellMap[i][j - 1] == null)) {
 						// Start of a new Across word
@@ -232,7 +254,13 @@ public class PzzlFormatter
 					}
 				}
 			}
+
+			if (!allEmpty) {
+				actualHeight++;
+			}
 		}
+
+		cb.setHeight(actualHeight);
 	}
 
 	private static class Cell

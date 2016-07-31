@@ -31,11 +31,7 @@ import org.junit.Test;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.net.URLConnection;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.List;
@@ -47,6 +43,7 @@ import static junit.framework.Assert.assertNull;
 
 
 public class CrosswordUnitTest
+		extends UnitTestBase
 {
 	@Test
 	public void crossword_testReadWrite()
@@ -58,8 +55,10 @@ public class CrosswordUnitTest
 		long millis = System.currentTimeMillis();
 		Crossword crossword = null;
 
+		CrosswordFormatter formatter = new PuzFormatter();
 		for (int i = 0; i < 30 && crossword == null; i++, millis -= DateUtils.DAY_IN_MILLIS) {
-			crossword = tryDownload(String.format(urlFormat, dateFormat.format(millis)));
+			crossword = tryDownload(String.format(urlFormat, dateFormat.format(millis)),
+					formatter);
 		}
 
 		assertNotNull("No crosswords to test", crossword);
@@ -291,38 +290,6 @@ public class CrosswordUnitTest
 		reader.close();
 
 		return clone;
-	}
-
-	private static InputStream tryGetInputStreamConnect(String urlString)
-			throws IOException
-	{
-		URL url = new URL(urlString);
-		URLConnection connection = url.openConnection();
-
-		return connection.getInputStream();
-	}
-
-	private static Crossword tryDownload(String urlString)
-			throws IOException
-	{
-		InputStream inputStream;
-		try {
-			inputStream = tryGetInputStreamConnect(urlString);
-		} catch (FileNotFoundException e) {
-			return null;
-		}
-
-		Crossword.Builder cb = new Crossword.Builder();
-		CrosswordFormatter formatter = new PuzFormatter();
-
-		try {
-			formatter.read(cb, inputStream);
-		} finally {
-			try { inputStream.close(); }
-			catch (IOException e) { e.printStackTrace(); }
-		}
-
-		return cb.build();
 	}
 
 	private static class W

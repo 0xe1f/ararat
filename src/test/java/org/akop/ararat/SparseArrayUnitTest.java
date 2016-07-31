@@ -68,6 +68,22 @@ public class SparseArrayUnitTest
 	}
 
 	@Test
+	public void indices_bounded() throws Exception
+	{
+		SparseArray<Integer> array = new SparseArray<>();
+
+		final int count = SparseArray.DEFAULT_CAPACITY / 2;
+		for (int i = 0; i < count; i++) {
+			array.put(i, i);
+		}
+
+		assertOobKey(array, -1);
+		assertOobKey(array, count);
+		assertOobValue(array, -1);
+		assertOobValue(array, count);
+	}
+
+	@Test
 	public void keys_ordered() throws Exception
 	{
 		SparseArray<Integer> array = new SparseArray<>();
@@ -138,6 +154,34 @@ public class SparseArrayUnitTest
 		}
 	}
 
+	@Test
+	public void toString_isCorrect() throws Exception
+	{
+		SparseArray<Integer> array = new SparseArray<>(12);
+
+		final int count = 5;
+		for (int i = 0; i < count; i++) {
+			array.put(i, i);
+		}
+
+		String s = array.toString();
+		int elements = 0;
+		int commas = 0;
+		for (int i = 0, n = s.length(); i < n; i++) {
+			char ch = s.charAt(i);
+			if (ch >= '0' && ch <= '9') {
+				elements++;
+			} else if (ch == ',') {
+				commas++;
+			}
+		}
+
+		assertEquals("Mismatched number of elements in string",
+				count, elements);
+		assertEquals("Mismatched number of commas in string",
+				count - 1, commas);
+	}
+
 	private static int[] generateRandom(int count)
 	{
 		int[] items = new int[count];
@@ -155,5 +199,25 @@ public class SparseArrayUnitTest
 		}
 
 		return items;
+	}
+
+	private static void assertOobKey(SparseArray array, int index)
+	{
+		try {
+			array.keyAt(index);
+			fail("Accessed key out of bounds (" + index + "/" + array.size() + ")");
+		} catch (ArrayIndexOutOfBoundsException e) {
+			// All OK
+		}
+	}
+
+	private static void assertOobValue(SparseArray array, int index)
+	{
+		try {
+			array.valueAt(index);
+			fail("Accessed value out of bounds (" + index + "/" + array.size() + ")");
+		} catch (ArrayIndexOutOfBoundsException e) {
+			// All OK
+		}
 	}
 }
