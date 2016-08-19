@@ -166,7 +166,7 @@ public class CrosswordView
 	private ScaleGestureDetector mScaleDetector;
 	private GestureDetector mGestureDetector;
 
-	private RenderTask mAsyncRenderer;
+	private RenderTask mAsyncTask;
 	private Canvas mPuzzleCanvas;
 	private Bitmap mPuzzleBitmap;
 	private Paint mBitmapPaint;
@@ -454,17 +454,23 @@ public class CrosswordView
 	{
 		super.onDraw(canvas);
 
+		constrainTranslation();
+
+		canvas.save();
+		canvas.clipRect(mContentRect);
+		canvas.translate(mBitmapOffset.x, mBitmapOffset.y);
+		canvas.scale(mBitmapScale, mBitmapScale);
+
 		if (mPuzzleBitmap != null) {
-			constrainTranslation();
-
-			canvas.save();
-			canvas.clipRect(mContentRect);
-			canvas.translate(mBitmapOffset.x, mBitmapOffset.y);
-			canvas.scale(mBitmapScale, mBitmapScale);
 			canvas.drawBitmap(mPuzzleBitmap, 0, 0, mBitmapPaint);
+		} else {
+			// Perform a fast, barebones render so that the screen doesn't
+			// look completely empty
 
-			canvas.restore();
+			mInPlaceRenderer.renderPuzzle(canvas, mRenderScale, true);
 		}
+
+		canvas.restore();
 	}
 
 	@Override
@@ -1316,7 +1322,8 @@ public class CrosswordView
 
 	private void resetConstraintsAndRedraw(boolean forceBitmapRegen)
 	{
-		boolean regenBitmaps = mPuzzleBitmap == null;
+		boolean regenBitmaps = mPuzzleBitmap == null
+				&& (mAsyncTask == null || mAsyncTask.isCancelled());
 
 		// Determine the scale at which the puzzle takes up the entire width
 		float unscaledWidth = mPuzzleWidth * mCellSize + 1; // +1px for stroke brush
@@ -1355,15 +1362,15 @@ public class CrosswordView
 	private void regenerateBitmaps()
 	{
 		synchronized (mRendererLock) {
-			if (mAsyncRenderer != null) {
-				mAsyncRenderer.cancel(false);
+			if (mAsyncTask != null) {
+				mAsyncTask.cancel(false);
 			}
 
 			// A 1px size line is always present, so it's not enough to just
 			// check for zero
 			if (mPuzzleRect.width() > 1 && mPuzzleRect.height() > 1) {
-				mAsyncRenderer = new RenderTask(mRenderScale);
-				mAsyncRenderer.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+				mAsyncTask = new RenderTask(mRenderScale);
+				mAsyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 			}
 		}
 	}
@@ -1508,12 +1515,12 @@ public class CrosswordView
 	{
 		if (mPuzzleCanvas != null) {
 			synchronized (mRendererLock) {
-				if (mAsyncRenderer != null) {
-					mAsyncRenderer.cancel(false);
+				if (mAsyncTask != null) {
+					mAsyncTask.cancel(false);
 				}
 			}
 
-			mInPlaceRenderer.renderPuzzle(mPuzzleCanvas, mRenderScale);
+			mInPlaceRenderer.renderPuzzle(mPuzzleCanvas, mRenderScale, false);
 			ViewCompat.postInvalidateOnAnimation(this);
 		}
 	}
@@ -2114,10 +2121,15 @@ public class CrosswordView
 	{
 		boolean mCancel;
 
-		void renderCell(Canvas canvas, Cell cell, RectF cellRect, Paint fillPaint)
+		void renderCell(Canvas canvas, Cell cell, RectF cellRect, Paint fillPaint,
+				boolean fastRender)
 		{
 			canvas.drawRect(cellRect, fillPaint);
 			canvas.drawRect(cellRect, mCellStrokePaint);
+
+			if (fastRender) {
+				return;
+			}
 
 			if (cell.isFlagSet(Cell.FLAG_CIRCLED)) {
 				canvas.drawCircle(cellRect.centerX(), cellRect.centerY(),
@@ -2238,7 +2250,7 @@ public class CrosswordView
 						}
 
 						cellRect.set(left, top, left + mCellSize, top + mCellSize);
-						renderCell(canvas, cell, cellRect, paint);
+						renderCell(canvas, cell, cellRect, paint, false);
 					}
 
 					index++;
@@ -2248,7 +2260,7 @@ public class CrosswordView
 			canvas.restore();
 		}
 
-		public void renderPuzzle(Canvas canvas, float scale)
+		public void renderPuzzle(Canvas canvas, float scale, boolean fastRender)
 		{
 			mCancel = false;
 			long startedMillis = SystemClock.uptimeMillis();
@@ -2269,13 +2281,16 @@ public class CrosswordView
 					Cell cell = mPuzzleCells[i][j];
 					if (cell != null) {
 						cellRect.set(left, top, left + mCellSize, top + mCellSize);
-						renderCell(canvas, cell, cellRect, mCellFillPaint);
+						renderCell(canvas, cell, cellRect, mCellFillPaint, fastRender);
 					}
 				}
 			}
 
 			canvas.restore();
-			renderSelection(canvas, false);
+
+			if (!fastRender) {
+				renderSelection(canvas, false);
+			}
 
 			Log.d(LOG_TAG, String.format("Rendered puzzle (%.02fs)",
 					(SystemClock.uptimeMillis() - startedMillis) / 1000f));
@@ -2315,7 +2330,7 @@ public class CrosswordView
 				Log.d(LOG_TAG, String.format("Created a new %dx%d puzzle bitmap (%,dkB)...",
 						width, height, sizeBytes / 1024));
 
-				mRenderer.renderPuzzle(mRenderingCanvas, mScale);
+				mRenderer.renderPuzzle(mRenderingCanvas, mScale, false);
 			} else {
 				Log.d(LOG_TAG, "Not creating an empty puzzle bitmap");
 			}
@@ -2340,7 +2355,7 @@ public class CrosswordView
 			ViewCompat.postInvalidateOnAnimation(CrosswordView.this);
 
 			synchronized (mRendererLock) {
-				mAsyncRenderer = null;
+				mAsyncTask = null;
 			}
 		}
 
@@ -2353,7 +2368,7 @@ public class CrosswordView
 			Log.d(LOG_TAG, "Task cancelled");
 
 			synchronized (mRendererLock) {
-				mAsyncRenderer = null;
+				mAsyncTask = null;
 			}
 		}
 	}

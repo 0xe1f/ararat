@@ -27,11 +27,10 @@ import android.os.Parcelable;
 public class CrosswordState
 		implements Parcelable
 {
-	public static final int FLAG_CHEATED = 1;
-	public static final int FLAG_MARKED  = 1 << 1;
+	public static final int FLAG_CHEATED = 0x01;
+	public static final int FLAG_MARKED  = 0x02;
 
 	private static final int SEL_NUMBER_MASK  = 0x0000fff;
-	private static final int SEL_NUMBER_SHIFT = 0;
 	private static final int SEL_CHAR_MASK    = 0x0fff000;
 	private static final int SEL_CHAR_SHIFT   = 12;
 	private static final int SEL_DIR_MASK     = 0xf000000;
@@ -44,7 +43,6 @@ public class CrosswordState
 	private static final long SCOUNT_WRONG_MASK   = 0x00000000ffff0000L;
 	private static final int SCOUNT_WRONG_SHIFT   = 16;
 	private static final long SCOUNT_TOTAL_MASK   = 0x000000000000ffffL;
-	private static final int SCOUNT_TOTAL_SHIFT   = 0;
 
 	public static final Creator<CrosswordState> CREATOR = new Creator<CrosswordState>()
 	{
@@ -152,8 +150,7 @@ public class CrosswordState
 
 	public int getSquareCount()
 	{
-		return (int) ((mSquareCounts & SCOUNT_TOTAL_MASK)
-				>>> SCOUNT_TOTAL_SHIFT);
+		return (int) (mSquareCounts & SCOUNT_TOTAL_MASK);
 	}
 
 	public boolean isCompleted()
@@ -167,7 +164,7 @@ public class CrosswordState
 		mSquareCounts = (((long) solved << SCOUNT_SOLVED_SHIFT) & SCOUNT_SOLVED_MASK)
 				| (((long) cheated << SCOUNT_CHEATED_SHIFT) & SCOUNT_CHEATED_MASK)
 				| (((long) wrong << SCOUNT_WRONG_SHIFT) & SCOUNT_WRONG_MASK)
-				| (((long) count << SCOUNT_TOTAL_SHIFT) & SCOUNT_TOTAL_MASK);
+				| ((long) count & SCOUNT_TOTAL_MASK);
 	}
 
 	public long getPlayTimeMillis()
@@ -197,7 +194,7 @@ public class CrosswordState
 
 	public int getSelectedNumber()
 	{
-		return (mSelection & SEL_NUMBER_MASK) >> SEL_NUMBER_SHIFT;
+		return mSelection & SEL_NUMBER_MASK;
 	}
 
 	public int getSelectedCell()
@@ -208,7 +205,7 @@ public class CrosswordState
 	public void setSelection(int direction, int number, int cell)
 	{
 		mSelection = ((direction << SEL_DIR_SHIFT) & SEL_DIR_MASK)
-				| ((number << SEL_NUMBER_SHIFT) & SEL_NUMBER_MASK)
+				| (number & SEL_NUMBER_MASK)
 				| ((cell << SEL_CHAR_SHIFT) & SEL_CHAR_MASK);
 	}
 
