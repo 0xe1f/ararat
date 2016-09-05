@@ -2125,6 +2125,40 @@ public class CrosswordView
 				boolean fastRender)
 		{
 			canvas.drawRect(cellRect, fillPaint);
+
+			if (!fastRender) {
+				// Render the markers first, so that the cell stroke paints over
+				if (cell.isFlagSet(Cell.FLAG_MARKED) && (mMarkerDisplayMode & MARKER_CUSTOM) != 0) {
+					Path path = new Path();
+					path.moveTo(cellRect.right - mMarkerSideLength, cellRect.top);
+					path.lineTo(cellRect.right, cellRect.top);
+					path.lineTo(cellRect.right, cellRect.top + mMarkerSideLength);
+					path.close();
+
+					canvas.drawPath(path, mMarkedCellFillPaint);
+				}
+
+				if (cell.isFlagSet(Cell.FLAG_CHEATED) && (mMarkerDisplayMode & MARKER_CHEAT) != 0) {
+					Path path = new Path();
+					path.moveTo(cellRect.right, cellRect.bottom);
+					path.lineTo(cellRect.right - mMarkerSideLength, cellRect.bottom);
+					path.lineTo(cellRect.right, cellRect.bottom - mMarkerSideLength);
+					path.close();
+
+					canvas.drawPath(path, mCheatedCellFillPaint);
+				}
+
+				if (cell.isFlagSet(Cell.FLAG_ERROR) && (mMarkerDisplayMode & MARKER_ERROR) != 0) {
+					Path path = new Path();
+					path.moveTo(cellRect.left, cellRect.bottom);
+					path.lineTo(cellRect.left + mMarkerSideLength, cellRect.bottom);
+					path.lineTo(cellRect.left, cellRect.bottom - mMarkerSideLength);
+					path.close();
+
+					canvas.drawPath(path, mMistakeCellFillPaint);
+				}
+			}
+
 			canvas.drawRect(cellRect, mCellStrokePaint);
 
 			if (fastRender) {
@@ -2147,39 +2181,6 @@ public class CrosswordView
 				}
 
 				canvas.drawText(cell.mNumber, numberX, numberY, mNumberTextPaint);
-			}
-
-			if (cell.isFlagSet(Cell.FLAG_MARKED) && (mMarkerDisplayMode & MARKER_CUSTOM) != 0) {
-				Path path = new Path();
-				path.moveTo(cellRect.right - mMarkerSideLength, cellRect.top);
-				path.lineTo(cellRect.right, cellRect.top);
-				path.lineTo(cellRect.right, cellRect.top + mMarkerSideLength);
-				path.close();
-
-				canvas.drawPath(path, mMarkedCellFillPaint);
-				canvas.drawPath(path, mCellStrokePaint);
-			}
-
-			if (cell.isFlagSet(Cell.FLAG_CHEATED) && (mMarkerDisplayMode & MARKER_CHEAT) != 0) {
-				Path path = new Path();
-				path.moveTo(cellRect.right, cellRect.bottom);
-				path.lineTo(cellRect.right - mMarkerSideLength, cellRect.bottom);
-				path.lineTo(cellRect.right, cellRect.bottom - mMarkerSideLength);
-				path.close();
-
-				canvas.drawPath(path, mCheatedCellFillPaint);
-				canvas.drawPath(path, mCellStrokePaint);
-			}
-
-			if (cell.isFlagSet(Cell.FLAG_ERROR) && (mMarkerDisplayMode & MARKER_ERROR) != 0) {
-				Path path = new Path();
-				path.moveTo(cellRect.left, cellRect.bottom);
-				path.lineTo(cellRect.left + mMarkerSideLength, cellRect.bottom);
-				path.lineTo(cellRect.left, cellRect.bottom - mMarkerSideLength);
-				path.close();
-
-				canvas.drawPath(path, mMistakeCellFillPaint);
-				canvas.drawPath(path, mCellStrokePaint);
 			}
 
 			if (!cell.isEmpty()) {
