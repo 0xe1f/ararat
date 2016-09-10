@@ -158,7 +158,15 @@ public class PuzFormatter
 
 			// Read the data
 			char[] data = new char[dataLength];
-			reader.read(data, 0, dataLength);
+			int dataRead = 0;
+			while (dataRead < dataLength) {
+				int read = reader.read(data, dataRead, dataLength - dataRead);
+				if (read < 0) {
+					throw new FormatException("Unexpected end while reading extra data");
+				}
+
+				dataRead += read;
+			}
 
 			// Handle sections
 			String sectionName = new String(sect);
