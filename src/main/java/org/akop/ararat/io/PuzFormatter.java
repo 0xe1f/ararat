@@ -41,6 +41,7 @@ public class PuzFormatter
 	private static final String LOG_TAG = CrosswordFormatter.class.getSimpleName();
 
 	private static final char GEXT_CIRCLED = 0x80;
+	private static final String MAGIC_STRING = "ACROSS&DOWN\0";
 
 	private static final char EMPTY = '.';
 	private static final String DEFAULT_ENCODING = "ISO-8859-1";
@@ -66,12 +67,13 @@ public class PuzFormatter
 
 		// Magic string
 		char[] temp = new char[128];
-		if (reader.read(temp, 0, 12) != 12) {
+		if (reader.read(temp, 0, MAGIC_STRING.length()) != MAGIC_STRING.length()) {
 			throw new FormatException("Magic string incomplete");
 		}
 
-		if ("ACROSS&DOWN".equals(new String(temp, 0, 12))) {
-			throw new FormatException("Magic string mismatch");
+		String magic = new String(temp, 0, MAGIC_STRING.length());
+		if (!MAGIC_STRING.equals(magic)) {
+			throw new FormatException("Magic string mismatch (got '" + magic + "')");
 		}
 
 		// Checksums
@@ -119,10 +121,14 @@ public class PuzFormatter
 		// The layout
 		char[][] charMap = new char[height][width];
 		for (int i = 0; i < height; i++) {
+			int totalRead = 0;
 			int read;
-			if ((read = reader.read(charMap[i], 0, width)) != width) {
-				throw new FormatException("Line " + i + " incomplete (read "
-						+ read + " expected " + width + ")");
+			while ((read = reader.read(charMap[i], totalRead, width - totalRead)) < width) {
+				if (read < 0) {
+					throw new FormatException("Line " + i + " incomplete (read "
+							+ totalRead + " expected " + width + ")");
+				}
+				totalRead += read;
 			}
 		}
 
