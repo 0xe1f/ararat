@@ -60,7 +60,7 @@ public class PzzlFormatter
 		BufferedReader reader = new BufferedReader(inputReader);
 
 		Cell[][] cellMap = null;
-		int width = -1;
+		int width;
 		int height = -1;
 		int row = 0;
 		List<String> hintsAcross = new ArrayList<>();
@@ -109,7 +109,7 @@ public class PzzlFormatter
 							}
 						}
 
-						if (ch != '.') {
+						if (ch != '.' && ch != '%') {
 							width++;
 						}
 					}
@@ -203,13 +203,14 @@ public class PzzlFormatter
 		int number = 0;
 		int actualHeight = 0;
 
-		for (int i = 0; i < cellMap.length; i++) {
+		for (int i = 0, m = cellMap.length - 1; i <= m; i++) {
 			boolean allEmpty = true;
-			for (int j = 0; j < cellMap[i].length; j++) {
+			for (int j = 0, n = cellMap[i].length - 1; j <= n; j++) {
 				if (cellMap[i][j] != null) {
 					allEmpty = false;
 					boolean incremented = false;
-					if (j == 0 || (j > 0 && cellMap[i][j - 1] == null)) {
+					if ((j == 0 || (j > 0 && cellMap[i][j - 1] == null))
+							&& (j < n && cellMap[i][j + 1] != null)) {
 						// Start of a new Across word
 						number++;
 						incremented = true;
@@ -231,7 +232,8 @@ public class PzzlFormatter
 						cb.addWord(wb.build());
 					}
 
-					if (i == 0 || (i > 0 && cellMap[i - 1][j] == null)) {
+					if (i == 0 || (i > 0 && cellMap[i - 1][j] == null)
+							&& (i < m && cellMap[i + 1][j] != null)) {
 						// Start of a new Down word
 						if (!incremented) {
 							number++;
@@ -261,6 +263,22 @@ public class PzzlFormatter
 		}
 
 		cb.setHeight(actualHeight);
+	}
+
+	@SuppressWarnings("unused")
+	private static void dumpMap(Cell[][] cellMap)
+	{
+		for (Cell[] row: cellMap) {
+			String rowDump = "";
+			for (Cell cell: row) {
+				if (cell != null) {
+					rowDump += "[" + cell.mChars + "]";
+				} else {
+					rowDump += "   ";
+				}
+			}
+			System.out.println(rowDump);
+		}
 	}
 
 	private static class Cell
