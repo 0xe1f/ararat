@@ -96,6 +96,34 @@ public class CrosswordWriter
 		mOutStream.writeObject(cell.mChars);
 	}
 
+	void writeForHash(Crossword crossword)
+			throws IOException
+	{
+		mOutStream.writeInt(crossword.mWidth);
+		mOutStream.writeInt(crossword.mHeight);
+
+		for (Crossword.Word word: crossword.mWordsAcross) {
+			writeWordForHash(word);
+		}
+		for (Crossword.Word word: crossword.mWordsDown) {
+			writeWordForHash(word);
+		}
+	}
+
+	private void writeWordForHash(Crossword.Word word)
+			throws IOException
+	{
+		mOutStream.writeShort(word.mNumber);
+		mOutStream.writeObject(word.mHint);
+		mOutStream.writeShort(word.mStartRow);
+		mOutStream.writeShort(word.mStartColumn);
+
+		for (Crossword.Cell cell: word.mCells) {
+			mOutStream.writeByte(cell.mAttrFlags);
+			mOutStream.writeObject(cell.mChars);
+		}
+	}
+
 	@Override
 	public void close()
 			throws IOException

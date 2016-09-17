@@ -531,7 +531,7 @@ public class Crossword
 
 		try {
 			CrosswordWriter writer = new CrosswordWriter(byteStream);
-			writer.write(this);
+			writer.writeForHash(this);
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		} finally {
