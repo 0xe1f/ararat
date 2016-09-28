@@ -912,7 +912,8 @@ public class CrosswordView
 		return cell.mChar;
 	}
 
-	public void setCellContents(Crossword.Word word, int charIndex, String sol)
+	public void setCellContents(Crossword.Word word, int charIndex,
+			String sol, boolean markAsCheated)
 	{
 		int row = word.getStartRow();
 		int column = word.getStartColumn();
@@ -923,7 +924,7 @@ public class CrosswordView
 			row += charIndex;
 		}
 
-		setChars(row, column, new String[][]{{sol}}, true);
+		setChars(row, column, new String[][]{{sol}}, markAsCheated);
 	}
 
 	public Typeface getAnswerTypeface()
