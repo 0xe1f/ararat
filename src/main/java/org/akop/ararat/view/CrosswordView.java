@@ -1977,11 +1977,11 @@ public class CrosswordView
 		private int mRow;
 		private int mColumn;
 
-		public CellOffset()
+		CellOffset()
 		{
 		}
 
-		public CellOffset(CellOffset offset)
+		CellOffset(CellOffset offset)
 		{
 			mRow = offset.mRow;
 			mColumn = offset.mColumn;
@@ -2023,28 +2023,28 @@ public class CrosswordView
 			mWordAcrossNumber = mWordDownNumber = WORD_NUMBER_NONE;
 		}
 
-		public static String canonicalize(String ch)
+		static String canonicalize(String ch)
 		{
 			return ch != null ? ch.toUpperCase() : null;
 		}
 
-		public boolean isEmpty()
+		boolean isEmpty()
 		{
 			return mChar == null;
 		}
 
-		public boolean clearChar()
+		boolean clearChar()
 		{
 			return setChar(null);
 		}
 
-		public void reset()
+		void reset()
 		{
 			clearChar();
 			setFlag(FLAG_CHEATED | FLAG_ERROR, false);
 		}
 
-		public boolean setChar(String ch)
+		boolean setChar(String ch)
 		{
 			boolean changed = false;
 			ch = canonicalize(ch);
@@ -2057,12 +2057,12 @@ public class CrosswordView
 			return changed;
 		}
 
-		public boolean isSolved(Crossword.Cell cwCell)
+		boolean isSolved(Crossword.Cell cwCell)
 		{
 			return mChar != null && cwCell.contains(mChar);
 		}
 
-		public void markError(Crossword.Cell cwCell, boolean setCheatFlag)
+		void markError(Crossword.Cell cwCell, boolean setCheatFlag)
 		{
 			boolean error = !isEmpty() && !cwCell.contains(mChar);
 			if (error) {
@@ -2075,12 +2075,12 @@ public class CrosswordView
 			}
 		}
 
-		public boolean isFlagSet(int flag)
+		boolean isFlagSet(int flag)
 		{
 			return (mFlag & flag) == flag;
 		}
 
-		public boolean setFlag(int flag, boolean set)
+		boolean setFlag(int flag, boolean set)
 		{
 			int old = mFlag;
 			if (set) {
@@ -2212,7 +2212,7 @@ public class CrosswordView
 			}
 		}
 
-		public void renderSelection(Canvas canvas, boolean clearSelection)
+		void renderSelection(Canvas canvas, boolean clearSelection)
 		{
 			if (mSelection == null) {
 				return;
@@ -2262,7 +2262,7 @@ public class CrosswordView
 			canvas.restore();
 		}
 
-		public void renderPuzzle(Canvas canvas, float scale, boolean fastRender)
+		void renderPuzzle(Canvas canvas, float scale, boolean fastRender)
 		{
 			mCancel = false;
 			long startedMillis = SystemClock.uptimeMillis();
@@ -2307,7 +2307,7 @@ public class CrosswordView
 		Renderer mRenderer = new Renderer();
 		float mScale;
 
-		public RenderTask(float scale)
+		RenderTask(float scale)
 		{
 			mScale = scale;
 		}
@@ -2431,7 +2431,7 @@ public class CrosswordView
 	{
 		private CellOffset mTapLocation;
 
-		public GestureListener()
+		GestureListener()
 		{
 			mTapLocation = new CellOffset();
 		}
