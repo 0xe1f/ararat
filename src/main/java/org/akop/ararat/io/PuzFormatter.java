@@ -272,11 +272,12 @@ public class PuzFormatter
 			char[][] charMap, byte[][] attrMap,
 			int[][] rebusMap, SparseArray<String> rebusSols)
 	{
-		for (int i = 0, clue = 0, number = 0; i < charMap.length; i++) {
-			for (int j = 0; j < charMap[i].length; j++) {
+		for (int i = 0, clue = 0, number = 0, im = charMap.length - 1; i <= im; i++) {
+			for (int j = 0, jm = charMap[i].length - 1; j <= jm; j++) {
 				if (charMap[i][j] != EMPTY) {
 					boolean incremented = false;
-					if (j == 0 || (j > 0 && charMap[i][j - 1] == EMPTY)) {
+					if ((j == 0 || (j > 0 && charMap[i][j - 1] == EMPTY))
+							&& (j + 1 < jm && charMap[i][j + 1] != EMPTY)) {
 						// Start of a new Across word
 						number++;
 						incremented = true;
@@ -289,7 +290,7 @@ public class PuzFormatter
 								.setStartColumn(j);
 
 						// Copy contents to a temp buffer
-						for (int k = j; k < charMap[i].length && charMap[i][k] != EMPTY; k++) {
+						for (int k = j; k <= jm && charMap[i][k] != EMPTY; k++) {
 							int attrs = 0;
 							if ((attrMap[i][k] & GEXT_CIRCLED) != 0) {
 								attrs |= Crossword.Cell.ATTR_CIRCLED;
@@ -309,7 +310,8 @@ public class PuzFormatter
 						cb.addWord(wb.build());
 					}
 
-					if (i == 0 || (i > 0 && charMap[i - 1][j] == EMPTY)) {
+					if ((i == 0 || (i > 0 && charMap[i - 1][j] == EMPTY))
+							&& (i + 1 < im && charMap[i + 1][j] != EMPTY)) {
 						// Start of a new Down word
 						if (!incremented) {
 							number++;
@@ -322,7 +324,7 @@ public class PuzFormatter
 								.setStartRow(i)
 								.setStartColumn(j);
 
-						for (int k = i; k < charMap.length && charMap[k][j] != EMPTY; k++) {
+						for (int k = i; k <= im && charMap[k][j] != EMPTY; k++) {
 							int attrs = 0;
 							if ((attrMap[k][j] & GEXT_CIRCLED) != 0) {
 								attrs |= Crossword.Cell.ATTR_CIRCLED;
