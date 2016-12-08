@@ -77,6 +77,9 @@ public class CrosswordView
 	public static final int UNDO_NONE  = 0;
 	public static final int UNDO_SMART = 1;
 
+	public static final int INPUT_MODE_NONE   = 0;
+	public static final int INPUT_MODE_KEYBOARD = 1;
+
 	public interface OnStateChangeListener
 	{
 		void onCrosswordChanged(CrosswordView view);
@@ -177,7 +180,7 @@ public class CrosswordView
 	private Scroller mScroller;
 	private boolean mIsSolved;
 
-	private boolean mSoftInputEnabled;
+	private int mInputMode;
 	private boolean mIsEditable;
 	private boolean mSkipOccupiedOnType;
 	private boolean mSelectFirstUnoccupiedOnNav;
@@ -296,7 +299,7 @@ public class CrosswordView
 		mCellSize = CELL_SIZE * dm.density;
 		mNumberTextPadding = NUMBER_TEXT_PADDING * dm.density;
 		mIsEditable = true;
-		mSoftInputEnabled = true;
+		mInputMode = INPUT_MODE_KEYBOARD;
 		mSkipOccupiedOnType = false;
 		mSelectFirstUnoccupiedOnNav = true;
 		mMaxBitmapSize = DEFAULT_MAX_BITMAP_DIMENSION;
@@ -409,7 +412,7 @@ public class CrosswordView
 		mZoomer = new Zoomer(context);
 		mUndoBuffer = new Stack<>();
 
-		setFocusableInTouchMode(mIsEditable && mSoftInputEnabled);
+		setFocusableInTouchMode(mIsEditable && mInputMode != INPUT_MODE_NONE);
 		setOnKeyListener(this);
 	}
 
@@ -494,7 +497,7 @@ public class CrosswordView
 		Log.v(LOG_TAG, "onCreateInputConnection()");
 
 		CrosswordInputConnection inputConnection = null;
-		if (mSoftInputEnabled) {
+		if (mInputMode != INPUT_MODE_NONE) {
 			outAttrs.actionLabel = null;
 			outAttrs.inputType = InputType.TYPE_NULL;
 			outAttrs.imeOptions |= EditorInfo.IME_FLAG_NO_FULLSCREEN;
@@ -513,7 +516,7 @@ public class CrosswordView
 	@Override
 	public boolean onCheckIsTextEditor()
 	{
-		return mIsEditable && mSoftInputEnabled;
+		return mIsEditable && mInputMode != INPUT_MODE_NONE;
 	}
 
 	@Override
@@ -968,14 +971,14 @@ public class CrosswordView
 		resetInputMode();
 	}
 
-	public boolean isSoftInputEnabled()
+	public int getInputMode()
 	{
-		return mSoftInputEnabled;
+		return mInputMode;
 	}
 
-	public void setSoftInputEnabled(boolean enabled)
+	public void setInputMode(int mode)
 	{
-		mSoftInputEnabled = enabled;
+		mInputMode = mode;
 		resetInputMode();
 	}
 
@@ -1056,7 +1059,7 @@ public class CrosswordView
 
 	private void resetInputMode()
 	{
-		setFocusableInTouchMode(mIsEditable && mSoftInputEnabled);
+		setFocusableInTouchMode(mIsEditable && mInputMode != INPUT_MODE_NONE);
 
 		InputMethodManager imm = (InputMethodManager)
 				getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
@@ -1238,7 +1241,7 @@ public class CrosswordView
 
 	protected void showKeyboard()
 	{
-		if (mSoftInputEnabled) {
+		if (mInputMode != INPUT_MODE_NONE) {
 			InputMethodManager imm = (InputMethodManager)
 					getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
 			imm.showSoftInput(CrosswordView.this, InputMethodManager.SHOW_IMPLICIT);
