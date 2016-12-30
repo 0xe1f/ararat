@@ -326,18 +326,22 @@ public class WordReferenceMovementMethod
 		}
 	}
 
-	public static String linkify(Crossword.Word word, Crossword crossword)
+	public static String linkify(Crossword.Word word, String hint,
+			Crossword crossword)
 	{
 		StringBuilder sb = new StringBuilder();
+		if (hint == null) {
+			hint = word.getHint();
+		}
 
 		if (word.getHintUrl() != null) {
 			sb.append("<a href=\"")
 					.append(word.getHintUrl())
 					.append("\">")
-					.append(TextUtils.htmlEncode(word.getHint()))
+					.append(TextUtils.htmlEncode(hint))
 					.append("</a>");
 		} else if (word.getCitation() != null) {
-			sb.append(TextUtils.htmlEncode(word.getHint()))
+			sb.append(TextUtils.htmlEncode(hint))
 					.append(" <a href=\"")
 					.append(PROTOCOL_CITATION)
 					.append("://")
@@ -347,9 +351,8 @@ public class WordReferenceMovementMethod
 					.append("\">&#8224;</a>");
 		} else {
 			List<ReferenceScanner.WordReference> refs =
-					ReferenceScanner.findReferences(word, crossword);
+					ReferenceScanner.findReferences(hint, crossword);
 
-			String hint = word.getHint();
 			int start = 0;
 			for (ReferenceScanner.WordReference ref: refs) {
 				int refStart = ref.getStart();

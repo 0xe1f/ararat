@@ -85,12 +85,11 @@ public class ReferenceScanner
 		}
 	}
 
-	public static List<WordReference> findReferences(Crossword.Word word,
+	public static List<WordReference> findReferences(String hint,
 			Crossword crossword)
 	{
 		List<WordReference> refs = new ArrayList<>();
 
-		String hint = word.getHint();
 		Matcher m = NUMBER_FINDER.matcher(hint);
 		while (m.find()) {
 			// Find any numbers
