@@ -34,8 +34,9 @@
         <attr name="numberTextPadding" format="dimension" />
         <attr name="numberTextSize" format="dimension" />
         <attr name="answerTextPadding" format="dimension" />
-        <attr name="answerTextSize" format="dimension" />
-        <attr name="textColor" format="color" />
+		<attr name="answerTextSize" format="dimension" />
+		<attr name="answerTextColor" format="color" />
+		<attr name="numberTextColor" format="color" />
         <attr name="editable" format="boolean" />
         <attr name="skipOccupiedOnType" format="boolean" />
         <attr name="selectFirstUnoccupiedOnNav" format="boolean" />

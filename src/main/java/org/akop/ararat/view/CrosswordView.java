@@ -37,6 +37,7 @@ import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.SystemClock;
+import android.support.annotation.ColorInt;
 import android.support.annotation.NonNull;
 import android.support.v4.view.ViewCompat;
 import android.text.InputType;
@@ -121,7 +122,8 @@ public class CrosswordView
 	private static final int SELECTED_WORD_FILL_COLOR = Color.parseColor("#faeace");
 	private static final int SELECTED_CELL_FILL_COLOR = Color.parseColor("#ecae44");
 	private static final int MARKED_CELL_FILL_COLOR = Color.parseColor("#cedefa");
-	private static final int TEXT_COLOR = Color.parseColor("#000000");
+	private static final int NUMBER_TEXT_COLOR = Color.parseColor("#000000");
+	private static final int ANSWER_TEXT_COLOR = Color.parseColor("#0041b7");
 	private static final int CELL_STROKE_COLOR = Color.parseColor("#000000");
 	private static final int CIRCLE_STROKE_COLOR = Color.parseColor("#555555");
 
@@ -288,9 +290,10 @@ public class CrosswordView
 		int selectedWordFillColor = SELECTED_WORD_FILL_COLOR;
 		int selectedCellFillColor = SELECTED_CELL_FILL_COLOR;
 		int markedCellFillColor = MARKED_CELL_FILL_COLOR;
-		int textColor = TEXT_COLOR;
+		int numberTextColor = NUMBER_TEXT_COLOR;
 		int cellStrokeColor = CELL_STROKE_COLOR;
 		int circleStrokeColor = CIRCLE_STROKE_COLOR;
+		int answerTextColor = ANSWER_TEXT_COLOR;
 
 		mScaledDensity = dm.scaledDensity;
 		float numberTextSize = NUMBER_TEXT_SIZE * mScaledDensity;
@@ -313,6 +316,7 @@ public class CrosswordView
 			mNumberTextPadding = a.getDimension(R.styleable.CrosswordView_numberTextPadding, mNumberTextPadding);
 			numberTextSize = a.getDimension(R.styleable.CrosswordView_numberTextSize, numberTextSize);
 			mAnswerTextSize = a.getDimension(R.styleable.CrosswordView_answerTextSize, mAnswerTextSize);
+			answerTextColor = a.getColor(R.styleable.CrosswordView_answerTextColor, answerTextColor);
 			cellFillColor = a.getColor(R.styleable.CrosswordView_defaultCellFillColor, cellFillColor);
 			cheatedCellFillColor = a.getColor(R.styleable.CrosswordView_cheatedCellFillColor, cheatedCellFillColor);
 			mistakeCellFillColor = a.getColor(R.styleable.CrosswordView_mistakeCellFillColor, mistakeCellFillColor);
@@ -321,7 +325,7 @@ public class CrosswordView
 			markedCellFillColor = a.getColor(R.styleable.CrosswordView_markedCellFillColor, markedCellFillColor);
 			cellStrokeColor = a.getColor(R.styleable.CrosswordView_cellStrokeColor, cellStrokeColor);
 			circleStrokeColor = a.getColor(R.styleable.CrosswordView_circleStrokeColor, circleStrokeColor);
-			textColor = a.getColor(R.styleable.CrosswordView_textColor, textColor);
+			numberTextColor = a.getColor(R.styleable.CrosswordView_numberTextColor, numberTextColor);
 			mIsEditable = a.getBoolean(R.styleable.CrosswordView_editable, mIsEditable);
 			mSkipOccupiedOnType = a.getBoolean(R.styleable.CrosswordView_skipOccupiedOnType, mSkipOccupiedOnType);
 			mSelectFirstUnoccupiedOnNav = a.getBoolean(R.styleable.CrosswordView_selectFirstUnoccupiedOnNav,
@@ -369,7 +373,7 @@ public class CrosswordView
 		mCircleStrokePaint.setStrokeWidth(1);
 
 		mNumberTextPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-		mNumberTextPaint.setColor(textColor);
+		mNumberTextPaint.setColor(numberTextColor);
 		mNumberTextPaint.setTextAlign(Paint.Align.CENTER);
 		mNumberTextPaint.setTextSize(numberTextSize);
 
@@ -385,7 +389,7 @@ public class CrosswordView
 		mNumberStrokePaint.setStrokeWidth(NUMBER_TEXT_STROKE_WIDTH * mScaledDensity);
 
  		mAnswerTextPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-		mAnswerTextPaint.setColor(textColor);
+		mAnswerTextPaint.setColor(answerTextColor);
 		mAnswerTextPaint.setTextSize(mAnswerTextSize);
 
 		// Init rest of the values
@@ -938,6 +942,13 @@ public class CrosswordView
 	public void setAnswerTypeface(Typeface typeface)
 	{
 		mAnswerTextPaint.setTypeface(typeface);
+
+		redrawInPlace();
+	}
+
+	public void setAnswerColor(@ColorInt int color)
+	{
+		mAnswerTextPaint.setColor(color);
 
 		redrawInPlace();
 	}
