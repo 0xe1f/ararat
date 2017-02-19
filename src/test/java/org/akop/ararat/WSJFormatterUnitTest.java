@@ -38,7 +38,7 @@ public class WSJFormatterUnitTest
 			throws Exception
 	{
 		CrosswordFormatter formatter = new WSJFormatter();
-		String url = "http://blogs.wsj.com/puzzle/crossword/20170217/22334/data.json";
+		String url = "http://blogs.wsj.com/puzzle/crossword/20170216/22333/data.json";
 
 		Crossword crossword = null;
 		try {

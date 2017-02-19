@@ -42,7 +42,7 @@ public class WSJFormatter
 	private static final String LOG_TAG = WSJFormatter.class.getSimpleName();
 
 	private static final String DEFAULT_ENCODING = "UTF-8";
-	private static DateFormat RELEASE_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss",
+	private static DateFormat PUBLISH_DATE_FORMAT = new SimpleDateFormat("EEEE, d MMMM yyyy",
 			Locale.US);
 
 	private String mEncoding = DEFAULT_ENCODING;
@@ -93,11 +93,11 @@ public class WSJFormatter
 		builder.setCopyright(copyObj.optString("publisher"));
 		builder.setAuthor(copyObj.optString("byline"));
 
-		String relString = copyObj.optString("date-release");
+		String pubString = copyObj.optString("date-publish");
 		try {
-			builder.setDate(RELEASE_DATE_FORMAT.parse(relString).getTime());
+			builder.setDate(PUBLISH_DATE_FORMAT.parse(pubString).getTime());
 		} catch (ParseException e) {
-			throw new FormatException("Can't parse '" + relString + "' as release date");
+			throw new FormatException("Can't parse '" + pubString + "' as publish date");
 		}
 
 		builder.setWidth(gridObj.optInt("cols"));
