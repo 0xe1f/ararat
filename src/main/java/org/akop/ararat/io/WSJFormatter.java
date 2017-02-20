@@ -100,10 +100,14 @@ public class WSJFormatter
 			throw new FormatException("Can't parse '" + pubString + "' as publish date");
 		}
 
-		builder.setWidth(gridObj.optInt("cols"));
-		builder.setHeight(gridObj.optInt("rows"));
+		int width = gridObj.optInt("cols");
+		int height = gridObj.optInt("rows");
 
-		readClues(builder, copyObj);
+		builder.setWidth(width);
+		builder.setHeight(height);
+
+		readClues(builder, copyObj,
+				Grid.parseJSON(dataObj.optJSONArray("grid"), width, height));
 	}
 
 	@Override
@@ -125,7 +129,8 @@ public class WSJFormatter
 		return false;
 	}
 
-	private static void readClues(Crossword.Builder builder, JSONObject copyObj)
+	private static void readClues(Crossword.Builder builder, JSONObject copyObj,
+			Grid grid)
 	{
 		JSONArray cluesArray = copyObj.optJSONArray("clues");
 		if (cluesArray == null) {
@@ -188,17 +193,87 @@ public class WSJFormatter
 						.setStartColumn(word.mCol)
 						.setStartRow(word.mRow);
 
-				String answer = subclue.optString("answer");
-				if (answer == null) {
-					throw new FormatException("Missing 'data.copy.clues[" + i + "].clues[" + j + "].answer'");
-				}
-
-				for (char ch : answer.toCharArray()) {
-					wb.addCell(String.valueOf(ch), 0);
+				if (dir == Crossword.Word.DIR_ACROSS) {
+					for (int k = word.mCol, l = 0; l < word.mLen; k++, l++) {
+						Square square = grid.mSquares[word.mRow][k];
+						if (square == null) {
+							throw new FormatException("grid["
+									+ word.mRow + "][" + k + "] is null (it shouldn't be)");
+						}
+						wb.addCell(square.mChar, 0);
+					}
+				} else {
+					for (int k = word.mRow, l = 0; l < word.mLen; k++, l++) {
+						Square square = grid.mSquares[k][word.mCol];
+						if (square == null) {
+							throw new FormatException("grid["
+									+ k + "][" + word.mCol + "] is null (it shouldn't be)");
+						}
+						wb.addCell(square.mChar, 0);
+					}
 				}
 
 				builder.addWord(wb.build());
 			}
+		}
+	}
+
+	private static class Grid
+	{
+		int mWidth;
+		int mHeight;
+		final Square[][] mSquares;
+
+		Grid(int width, int height)
+		{
+			mWidth = width;
+			mHeight = height;
+			mSquares = new Square[height][width];
+		}
+
+		static Grid parseJSON(JSONArray gridArray, int width, int height)
+		{
+			if (gridArray == null) {
+				throw new FormatException("Missing 'data.grid[]'");
+			} else if (gridArray.length() != height) {
+				throw new FormatException("Unexpected clues length of "
+						+ gridArray.length() + " (expected " + height + ")");
+			}
+
+			Grid grid = new Grid(width, height);
+			for (int i = 0; i < height; i++) {
+				JSONArray rowArray = gridArray.optJSONArray(i);
+				if (rowArray == null) {
+					throw new FormatException("Missing 'data.grid[" + i + "]'");
+				} else if (rowArray.length() != width) {
+					throw new FormatException("Unexpected clues length of "
+							+ rowArray.length() + " (expected " + width + ")");
+				}
+
+				for (int j = 0; j < width; j++) {
+					grid.mSquares[i][j] = Square.parseJSON(rowArray.optJSONObject(j));
+				}
+			}
+
+			return grid;
+		}
+	}
+
+	private static class Square
+	{
+		String mChar;
+
+		static Square parseJSON(JSONObject squareObj)
+		{
+			Square square = null;
+
+			String letter = squareObj.optString("Letter");
+			if (letter != null && !letter.isEmpty()) {
+				square = new Square();
+				square.mChar = letter;
+			}
+
+			return square;
 		}
 	}
 
@@ -207,34 +282,37 @@ public class WSJFormatter
 		int mId;
 		int mRow;
 		int mCol;
+		int mLen;
 
 		static Word parseJSON(JSONObject wordObj)
 		{
-			String xStr = wordObj.optString("x");
-			if (xStr == null) {
-				throw new FormatException("Word missing 'x'");
-			}
-			String yStr = wordObj.optString("y");
-			if (yStr == null) {
-				throw new FormatException("Word missing 'y'");
-			}
-
 			Word word = new Word();
 			word.mId = wordObj.optInt("id", -1);
 			if (word.mId == -1) {
 				throw new FormatException("Word missing identifier");
 			}
 
+			String posStr;
 			int dashIdx;
-			if ((dashIdx = xStr.indexOf('-')) != -1) {
-				word.mCol = Integer.parseInt(xStr.substring(0, dashIdx)) - 1;
-			} else {
-				word.mCol = Integer.parseInt(xStr) - 1;
+
+			if ((posStr = wordObj.optString("x")) == null) {
+				throw new FormatException("Word missing 'x'");
 			}
-			if ((dashIdx = yStr.indexOf('-')) != -1) {
-				word.mRow = Integer.parseInt(yStr.substring(0, dashIdx)) - 1;
+			if ((dashIdx = posStr.indexOf('-')) != -1) {
+				word.mCol = Integer.parseInt(posStr.substring(0, dashIdx)) - 1;
+				word.mLen = Integer.parseInt(posStr.substring(dashIdx + 1)) - word.mCol;
 			} else {
-				word.mRow = Integer.parseInt(yStr) - 1;
+				word.mCol = Integer.parseInt(posStr) - 1;
+			}
+
+			if ((posStr = wordObj.optString("y")) == null) {
+				throw new FormatException("Word missing 'y'");
+			}
+			if ((dashIdx = posStr.indexOf('-')) != -1) {
+				word.mRow = Integer.parseInt(posStr.substring(0, dashIdx)) - 1;
+				word.mLen = Integer.parseInt(posStr.substring(dashIdx + 1)) - word.mRow;
+			} else {
+				word.mRow = Integer.parseInt(posStr) - 1;
 			}
 
 			return word;
