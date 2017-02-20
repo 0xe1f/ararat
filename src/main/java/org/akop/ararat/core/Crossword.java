@@ -1,4 +1,4 @@
-// Copyright (c) 2014-2016 Akop Karapetyan
+// Copyright (c) 2014-2017 Akop Karapetyan
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -42,6 +42,8 @@ public class Crossword
 			'N','O','P','Q','R','S','T','U','V','W','X','Y','Z',
 	};
 
+	public static final int FLAG_NO_SOLUTION = 1;
+
 	public static class Builder
 	{
 		private int mWidth;
@@ -54,6 +56,7 @@ public class Crossword
 		private long mDate;
 		private List<Word> mWords;
 		private char[] mAlphabet;
+		private int mFlags;
 
 		public Builder()
 		{
@@ -125,6 +128,11 @@ public class Crossword
 			}
 
 			return this;
+		}
+
+		public void setFlags(int flags)
+		{
+			mFlags = flags;
 		}
 
 		private int countSquares()
@@ -211,6 +219,7 @@ public class Crossword
 			crossword.mCopyright = mCopyright;
 			crossword.mDate = mDate;
 			crossword.mAlphabet = mAlphabet;
+			crossword.mFlags = mFlags;
 			crossword.mSquareCount = countSquares();
 
 			for (Word word: mWords) {
@@ -241,6 +250,7 @@ public class Crossword
 	int mWidth;
 	int mHeight;
 	int mSquareCount;
+	int mFlags;
 	String mTitle;
 	String mDescription;
 	String mAuthor;
@@ -281,6 +291,7 @@ public class Crossword
 		in.readTypedList(mWordsDown, Word.CREATOR);
 
 		mAlphabet = in.createCharArray();
+		mFlags = in.readInt();
 	}
 
 	public int getWidth()
@@ -341,6 +352,11 @@ public class Crossword
 	public List<Word> getWordsDown()
 	{
 		return mWordsDown;
+	}
+
+	public int getFlags()
+	{
+		return mFlags;
 	}
 
 	public Cell[][] getCellMap()
@@ -637,6 +653,7 @@ public class Crossword
 		dest.writeTypedList(mWordsDown);
 
 		dest.writeCharArray(mAlphabet);
+		dest.writeInt(mFlags);
 	}
 
 	public String getHash()
@@ -672,7 +689,8 @@ public class Crossword
 	public static class Cell
 			implements Parcelable
 	{
-		public static final int ATTR_CIRCLED = 1;
+		public static final int ATTR_CIRCLED     = 1;
+		public static final int ATTR_NO_SOLUTION = 2;
 
 		public static final Creator<Cell> CREATOR = new Creator<Cell>()
 		{

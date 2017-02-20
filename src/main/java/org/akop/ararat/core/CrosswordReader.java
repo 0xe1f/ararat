@@ -1,4 +1,4 @@
-// Copyright (c) 2014-2016 Akop Karapetyan
+// Copyright (c) 2014-2017 Akop Karapetyan
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -95,11 +95,14 @@ public class CrosswordReader
 		crossword.mDescription = (String) mInStream.readObject();
 		crossword.mAuthor = (String) mInStream.readObject();
 		crossword.mCopyright = (String) mInStream.readObject();
-		if (version > 1) {
+		if (version >= 2) {
 			crossword.mComment = (String) mInStream.readObject();
 		}
 		crossword.mAlphabet = (char[]) mInStream.readObject();
 		crossword.mDate = mInStream.readLong();
+		if (version >= 4) {
+			crossword.mFlags = mInStream.readInt();
+		}
 	}
 
 	private Crossword.Word readWord(int version)
@@ -128,10 +131,10 @@ public class CrosswordReader
 		Crossword.Cell cell = new Crossword.Cell();
 
 		cell.mAttrFlags = mInStream.readByte();
-		if (version < 3) {
-			cell.mChars = new String((char[]) mInStream.readObject());
-		} else {
+		if (version >= 3) {
 			cell.mChars = (String) mInStream.readObject();
+		} else {
+			cell.mChars = new String((char[]) mInStream.readObject());
 		}
 
 		return cell;

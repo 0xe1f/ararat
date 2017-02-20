@@ -1,4 +1,4 @@
-// Copyright (c) 2014-2016 Akop Karapetyan
+// Copyright (c) 2014-2017 Akop Karapetyan
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -20,9 +20,6 @@
 
 package org.akop.ararat.io;
 
-import android.os.SystemClock;
-import android.util.Log;
-
 import org.akop.ararat.core.Crossword;
 import org.akop.ararat.util.SparseArray;
 
@@ -38,7 +35,8 @@ import java.util.List;
 public class PuzFormatter
 		implements CrosswordFormatter
 {
-	private static final String LOG_TAG = CrosswordFormatter.class.getSimpleName();
+	private static final char PUZZLE_TYPE_SCRAMBLED   = 4;
+	private static final char PUZZLE_TYPE_NO_SOLUTION = 2;
 
 	private static final char GEXT_CIRCLED = 0x80;
 	private static final String MAGIC_STRING = "ACROSS&DOWN\0";
@@ -116,7 +114,7 @@ public class PuzFormatter
 		reader.skip(2);
 
 		// Scrambled/unscrambled
-		boolean scrambled = readShort(reader) != 0;
+		short puzzleType = readShort(reader);
 
 		// The layout
 		char[][] charMap = new char[height][width];
@@ -229,16 +227,17 @@ public class PuzFormatter
 			}
 		}
 
-		// FIXME: complete rebus implementation
+		boolean isScrambled = (puzzleType == PUZZLE_TYPE_SCRAMBLED);
+		boolean hasSolution = (puzzleType != PUZZLE_TYPE_NO_SOLUTION);
 
-		// Unscramble
-		// FIXME: allow passing of key
-		if (scrambled) {
+		if (isScrambled) {
+			// Unscramble by brute-forcing a key (0000-9999)
 			if (!bruteForceKey(charMap, unscrambledChecksum)) {
-				throw new SecurityException("Unable to locate a key (tried to brute-force)");
+				throw new FormatException("Unable to locate a key (brute-force failed)");
 			}
 		}
 
+		builder.setFlags(hasSolution ? 0 : Crossword.FLAG_NO_SOLUTION);
 		builder.setWidth(width);
 		builder.setHeight(height);
 		builder.setTitle(title);
@@ -246,7 +245,7 @@ public class PuzFormatter
 		builder.setCopyright(copyright);
 		builder.setComment(notes);
 
-		buildWords(builder, clues, charMap, attrMap, rebusMap, rebusSols);
+		buildWords(builder, clues, charMap, attrMap, rebusMap, rebusSols, hasSolution);
 	}
 
 	@Override
@@ -270,7 +269,7 @@ public class PuzFormatter
 
 	private static void buildWords(Crossword.Builder cb, List<String> clues,
 			char[][] charMap, byte[][] attrMap,
-			int[][] rebusMap, SparseArray<String> rebusSols)
+			int[][] rebusMap, SparseArray<String> rebusSols, boolean hasSolution)
 	{
 		for (int i = 0, clue = 0, number = 0, im = charMap.length - 1; i <= im; i++) {
 			for (int j = 0, jm = charMap[i].length - 1; j <= jm; j++) {
@@ -294,6 +293,9 @@ public class PuzFormatter
 							int attrs = 0;
 							if ((attrMap[i][k] & GEXT_CIRCLED) != 0) {
 								attrs |= Crossword.Cell.ATTR_CIRCLED;
+							}
+							if (!hasSolution) {
+								attrs |= Crossword.Cell.ATTR_NO_SOLUTION;
 							}
 							String rebus = null;
 							if (rebusMap != null && rebusSols != null) {
@@ -329,6 +331,9 @@ public class PuzFormatter
 							if ((attrMap[k][j] & GEXT_CIRCLED) != 0) {
 								attrs |= Crossword.Cell.ATTR_CIRCLED;
 							}
+							if (!hasSolution) {
+								attrs |= Crossword.Cell.ATTR_NO_SOLUTION;
+							}
 							String rebus = null;
 							if (rebusMap != null && rebusSols != null) {
 								rebus = rebusSols.get(rebusMap[k][j]);
@@ -358,7 +363,6 @@ public class PuzFormatter
 
 		int code;
 		boolean found = false;
-		long started = SystemClock.uptimeMillis();
 
 		char[][] copy = new char[height][width];
 		for (code = 0; code < 10000; code++) {
@@ -376,14 +380,6 @@ public class PuzFormatter
 				found = true;
 				break;
 			}
-		}
-
-		if (found) {
-			Log.d(LOG_TAG, String.format("Found a key (%d) in %.02fs",
-					code, (SystemClock.uptimeMillis() - started) / 1000f));
-		} else {
-			Log.d(LOG_TAG, String.format("Key not found after %.02fs",
-					(SystemClock.uptimeMillis() - started) / 1000f));
 		}
 
 		return found;

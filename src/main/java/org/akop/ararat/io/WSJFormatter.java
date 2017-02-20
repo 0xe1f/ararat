@@ -39,8 +39,6 @@ import java.util.Locale;
 public class WSJFormatter
 		implements CrosswordFormatter
 {
-	private static final String LOG_TAG = WSJFormatter.class.getSimpleName();
-
 	private static final String DEFAULT_ENCODING = "UTF-8";
 	private static DateFormat PUBLISH_DATE_FORMAT = new SimpleDateFormat("EEEE, d MMMM yyyy",
 			Locale.US);

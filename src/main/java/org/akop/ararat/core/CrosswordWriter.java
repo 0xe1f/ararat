@@ -1,4 +1,4 @@
-// Copyright (c) 2014-2016 Akop Karapetyan
+// Copyright (c) 2014-2017 Akop Karapetyan
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -29,7 +29,7 @@ import java.io.OutputStream;
 public class CrosswordWriter
 		implements Closeable
 {
-	static final int VERSION_CURRENT = 3;
+	static final int VERSION_CURRENT = 4;
 	static final int MAGIC_NUMBER = 0xdeadbea7;
 
 	private ObjectOutputStream mOutStream;
@@ -62,6 +62,7 @@ public class CrosswordWriter
 		mOutStream.writeObject(crossword.mComment);
 		mOutStream.writeObject(crossword.mAlphabet);
 		mOutStream.writeLong(crossword.mDate);
+		mOutStream.writeInt(crossword.mFlags);
 
 		mOutStream.writeInt(crossword.mWordsAcross.size());
 		for (Crossword.Word word: crossword.mWordsAcross) {
