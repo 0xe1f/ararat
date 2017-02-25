@@ -1,4 +1,4 @@
-// Copyright (c) 2014-2016 Akop Karapetyan
+// Copyright (c) 2014-2017 Akop Karapetyan
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -803,8 +803,10 @@ public class CrosswordView
 					if (!cell.isEmpty()) {
 						state.setCharAt(i, j, cell.mChar);
 					}
-					state.setCheatedAt(i, j, cell.isFlagSet(Cell.FLAG_CHEATED));
-					state.setMarkedAt(i, j, cell.isFlagSet(Cell.FLAG_MARKED));
+					state.setFlagAt(CrosswordState.FLAG_CHEATED,
+							i, j, cell.isFlagSet(Cell.FLAG_CHEATED));
+					state.setFlagAt(CrosswordState.FLAG_MARKED,
+							i, j, cell.isFlagSet(Cell.FLAG_MARKED));
 				}
 			}
 		}
@@ -824,8 +826,10 @@ public class CrosswordView
 			for (int j = 0; j < mPuzzleWidth; j++) {
 				Cell cell = mPuzzleCells[i][j];
 				if (cell != null) {
-					cell.setFlag(Cell.FLAG_CHEATED, state.cheatedAt(i, j));
-					cell.setFlag(Cell.FLAG_MARKED, state.markedAt(i, j));
+					cell.setFlag(Cell.FLAG_CHEATED,
+							state.isFlagSet(CrosswordState.FLAG_CHEATED, i, j));
+					cell.setFlag(Cell.FLAG_MARKED,
+							state.isFlagSet(CrosswordState.FLAG_MARKED, i, j));
 					cell.setChar(state.charAt(i, j));
 					if ((mMarkerDisplayMode & MARKER_ERROR) != 0) {
 						cell.markError(map[i][j], mRevealSetsCheatFlag);
@@ -1203,10 +1207,14 @@ public class CrosswordView
 
 	public void switchWordDirection()
 	{
+		if (mCrossword == null) {
+			return;
+		}
+
 		Selectable ortho = null;
-		if (mSelection == null && mCrossword != null) {
+		if (mSelection == null) {
 			ortho = new Selectable(mCrossword.nextWord(null), 0);
-		} else if (mSelection != null) {
+		} else {
 			Cell cell = mPuzzleCells[mSelection.getRow()][mSelection.getColumn()];
 			if (mSelection.getDirection() == Crossword.Word.DIR_ACROSS) {
 				if (cell.mWordDownNumber != Cell.WORD_NUMBER_NONE) {
@@ -1231,6 +1239,7 @@ public class CrosswordView
 
 		if (ortho != null) {
 			resetSelection(ortho);
+			clearUndoBufferIfNeeded(ortho);
 		}
 	}
 
@@ -1713,6 +1722,10 @@ public class CrosswordView
 
 	public boolean isSolved()
 	{
+		if ((mCrossword.getFlags() & Crossword.FLAG_NO_SOLUTION) != 0) {
+			return false;
+		}
+
 		boolean solved = true;
 		Crossword.Cell[][] map = mCrossword.getCellMap();
 		for (int i = 0; i < map.length; i++) {
@@ -1988,8 +2001,8 @@ public class CrosswordView
 
 	private static class CellOffset
 	{
-		private int mRow;
-		private int mColumn;
+		int mRow;
+		int mColumn;
 
 		CellOffset()
 		{
@@ -2443,7 +2456,7 @@ public class CrosswordView
 	private class GestureListener
 			extends GestureDetector.SimpleOnGestureListener
 	{
-		private CellOffset mTapLocation;
+		CellOffset mTapLocation;
 
 		GestureListener()
 		{

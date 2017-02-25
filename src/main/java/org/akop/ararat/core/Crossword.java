@@ -586,6 +586,7 @@ public class Crossword
 		int totalCount = 0;
 		int solvedCount = 0;
 		int cheatedCount = 0;
+		int unknownCount = 0;
 		int wrongCount = 0;
 
 		boolean[][] done = new boolean[mHeight][mWidth];
@@ -594,8 +595,12 @@ public class Crossword
 			for (int i = 0, col = word.mStartColumn; i < word.mCells.length; i++, col++) {
 				totalCount++;
 				String stateChar = state.mCharMatrix[row][col];
-				if (word.mCells[i].contains(stateChar)) {
-					if (state.cheatedAt(row, col)) {
+				Cell cell = word.mCells[i];
+				if ((cell.mAttrFlags & Cell.ATTR_NO_SOLUTION) != 0
+						&& stateChar != null) {
+					unknownCount++;
+				} else if (cell.contains(stateChar)) {
+					if (state.isFlagSet(CrosswordState.FLAG_CHEATED, row, col)) {
 						cheatedCount++;
 					} else {
 						solvedCount++;
@@ -613,8 +618,12 @@ public class Crossword
 				if (!done[row][col]) {
 					totalCount++;
 					String stateChar = state.mCharMatrix[row][col];
-					if (word.mCells[i].contains(stateChar)) {
-						if (state.cheatedAt(row, col)) {
+					Cell cell = word.mCells[i];
+					if ((cell.mAttrFlags & Cell.ATTR_NO_SOLUTION) != 0
+							&& stateChar != null) {
+						unknownCount++;
+					} else if (cell.contains(stateChar)) {
+						if (state.isFlagSet(CrosswordState.FLAG_CHEATED, row, col)) {
 							cheatedCount++;
 						} else {
 							solvedCount++;
@@ -626,7 +635,8 @@ public class Crossword
 			}
 		}
 
-		state.setSquareStats(solvedCount, cheatedCount, wrongCount, totalCount);
+		state.setSquareStats(solvedCount, cheatedCount, wrongCount,
+				unknownCount, totalCount);
 	}
 
 	@Override

@@ -1,4 +1,4 @@
-// Copyright (c) 2014-2016 Akop Karapetyan
+// Copyright (c) 2014-2017 Akop Karapetyan
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -36,14 +36,6 @@ public class CrosswordState
 	private static final int SEL_DIR_MASK     = 0xf000000;
 	private static final int SEL_DIR_SHIFT    = 24;
 
-	private static final long SCOUNT_SOLVED_MASK  = 0xffff000000000000L;
-	private static final int SCOUNT_SOLVED_SHIFT  = 48;
-	private static final long SCOUNT_CHEATED_MASK = 0x0000ffff00000000L;
-	private static final int SCOUNT_CHEATED_SHIFT = 32;
-	private static final long SCOUNT_WRONG_MASK   = 0x00000000ffff0000L;
-	private static final int SCOUNT_WRONG_SHIFT   = 16;
-	private static final long SCOUNT_TOTAL_MASK   = 0x000000000000ffffL;
-
 	public static final Creator<CrosswordState> CREATOR = new Creator<CrosswordState>()
 	{
 		public CrosswordState createFromParcel(Parcel in)
@@ -59,12 +51,16 @@ public class CrosswordState
 
 	int mHeight;
 	int mWidth;
-	long mSquareCounts;
 	long mPlayTimeMillis;
 	long mLastPlayed;
 	int mSelection;
 	String[][] mCharMatrix;
 	int[][] mAttrMatrix;
+	short mSquaresSolved;
+	short mSquaresCheated;
+	short mSquaresWrong;
+	short mSquaresUnknown;
+	short mSquaresTotal;
 
 	CrosswordState()
 	{
@@ -75,13 +71,15 @@ public class CrosswordState
 		this(other.mWidth, other.mHeight);
 
 		for (int i = 0; i < mHeight; i++) {
-			System.arraycopy(other.mCharMatrix[i], 0,
-					mCharMatrix[i], 0, mWidth);
-			System.arraycopy(other.mAttrMatrix[i], 0,
-					mAttrMatrix[i], 0, mWidth);
+			System.arraycopy(other.mCharMatrix[i], 0, mCharMatrix[i], 0, mWidth);
+			System.arraycopy(other.mAttrMatrix[i], 0, mAttrMatrix[i], 0, mWidth);
 		}
 
-		mSquareCounts = other.mSquareCounts;
+		mSquaresSolved = other.mSquaresSolved;
+		mSquaresCheated = other.mSquaresCheated;
+		mSquaresWrong = other.mSquaresWrong;
+		mSquaresUnknown = other.mSquaresUnknown;
+		mSquaresTotal = other.mSquaresTotal;
 		mPlayTimeMillis = other.mPlayTimeMillis;
 		mLastPlayed = other.mLastPlayed;
 		mSelection = other.mSelection;
@@ -114,7 +112,11 @@ public class CrosswordState
 			System.arraycopy(attrArray, k, mAttrMatrix[i], 0, mWidth);
 		}
 
-		mSquareCounts = in.readLong();
+		mSquaresSolved = (short) in.readInt();
+		mSquaresCheated = (short) in.readInt();
+		mSquaresWrong = (short) in.readInt();
+		mSquaresUnknown = (short) in.readInt();
+		mSquaresTotal = (short) in.readInt();
 		mPlayTimeMillis = in.readLong();
 		mLastPlayed = in.readLong();
 		mSelection = in.readInt();
@@ -132,25 +134,27 @@ public class CrosswordState
 
 	public int getSquaresSolved()
 	{
-		return (int) ((mSquareCounts & SCOUNT_SOLVED_MASK)
-				>>> SCOUNT_SOLVED_SHIFT);
+		return mSquaresSolved;
 	}
 
 	public int getSquaresCheated()
 	{
-		return (int) ((mSquareCounts & SCOUNT_CHEATED_MASK)
-				>>> SCOUNT_CHEATED_SHIFT);
+		return mSquaresCheated;
 	}
 
 	public int getSquaresWrong()
 	{
-		return (int) ((mSquareCounts & SCOUNT_WRONG_MASK)
-				>>> SCOUNT_WRONG_SHIFT);
+		return mSquaresWrong;
+	}
+
+	public int getSquaresUnknown()
+	{
+		return mSquaresUnknown;
 	}
 
 	public int getSquareCount()
 	{
-		return (int) (mSquareCounts & SCOUNT_TOTAL_MASK);
+		return mSquaresTotal;
 	}
 
 	public boolean isCompleted()
@@ -158,13 +162,13 @@ public class CrosswordState
 		return getSquaresSolved() + getSquaresCheated() >= getSquareCount();
 	}
 
-	void setSquareStats(int solved, int cheated, int wrong,
-			int count)
+	void setSquareStats(int solved, int cheated, int wrong, int unknown, int count)
 	{
-		mSquareCounts = (((long) solved << SCOUNT_SOLVED_SHIFT) & SCOUNT_SOLVED_MASK)
-				| (((long) cheated << SCOUNT_CHEATED_SHIFT) & SCOUNT_CHEATED_MASK)
-				| (((long) wrong << SCOUNT_WRONG_SHIFT) & SCOUNT_WRONG_MASK)
-				| ((long) count & SCOUNT_TOTAL_MASK);
+		mSquaresSolved = (short) solved;
+		mSquaresCheated = (short) cheated;
+		mSquaresWrong = (short) wrong;
+		mSquaresUnknown = (short) unknown;
+		mSquaresTotal = (short) count;
 	}
 
 	public long getPlayTimeMillis()
@@ -224,32 +228,12 @@ public class CrosswordState
 		mCharMatrix[row][column] = ch;
 	}
 
-	public boolean cheatedAt(int row, int column)
-	{
-		return isFlagSet(FLAG_CHEATED, row, column);
-	}
-
-	public void setCheatedAt(int row, int column, boolean cheated)
-	{
-		setFlag(FLAG_CHEATED, row, column, cheated);
-	}
-
-	public boolean markedAt(int row, int column)
-	{
-		return isFlagSet(FLAG_MARKED, row, column);
-	}
-
-	public void setMarkedAt(int row, int column, boolean cheated)
-	{
-		setFlag(FLAG_MARKED, row, column, cheated);
-	}
-
-	private boolean isFlagSet(int flag, int row, int column)
+	public boolean isFlagSet(int flag, int row, int column)
 	{
 		return (mAttrMatrix[row][column] & flag) == flag;
 	}
 
-	private void setFlag(int flag, int row, int column, boolean set)
+	public void setFlagAt(int flag, int row, int column, boolean set)
 	{
 		if (set) {
 			mAttrMatrix[row][column] |= flag;
@@ -281,7 +265,11 @@ public class CrosswordState
 		dest.writeInt(mHeight);
 		dest.writeStringArray(charArray);
 		dest.writeIntArray(attrArray);
-		dest.writeLong(mSquareCounts);
+		dest.writeInt(mSquaresSolved);
+		dest.writeInt(mSquaresCheated);
+		dest.writeInt(mSquaresWrong);
+		dest.writeInt(mSquaresUnknown);
+		dest.writeInt(mSquaresTotal);
 		dest.writeLong(mPlayTimeMillis);
 		dest.writeLong(mLastPlayed);
 		dest.writeInt(mSelection);

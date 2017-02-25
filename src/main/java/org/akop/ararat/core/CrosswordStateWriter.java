@@ -1,4 +1,4 @@
-// Copyright (c) 2014-2016 Akop Karapetyan
+// Copyright (c) 2014-2017 Akop Karapetyan
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -29,7 +29,7 @@ import java.io.OutputStream;
 public class CrosswordStateWriter
 		implements Closeable
 {
-	static final int VERSION_CURRENT = 2;
+	static final int VERSION_CURRENT = 3;
 	static final int MAGIC_NUMBER = 0xbaaddeed;
 
 	private ObjectOutputStream mOutStream;
@@ -54,7 +54,11 @@ public class CrosswordStateWriter
 	{
 		mOutStream.writeInt(state.mWidth);
 		mOutStream.writeInt(state.mHeight);
-		mOutStream.writeLong(state.mSquareCounts);
+		mOutStream.writeShort(state.mSquaresSolved);
+		mOutStream.writeShort(state.mSquaresCheated);
+		mOutStream.writeShort(state.mSquaresWrong);
+		mOutStream.writeShort(state.mSquaresUnknown);
+		mOutStream.writeShort(state.mSquaresTotal);
 		mOutStream.writeLong(state.mPlayTimeMillis);
 		mOutStream.writeLong(state.mLastPlayed);
 		mOutStream.writeInt(state.mSelection);

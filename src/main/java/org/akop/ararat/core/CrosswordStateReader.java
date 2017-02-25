@@ -1,4 +1,4 @@
-// Copyright (c) 2014-2016 Akop Karapetyan
+// Copyright (c) 2014-2017 Akop Karapetyan
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -67,12 +67,27 @@ public class CrosswordStateReader
 
 		state.mWidth = mInStream.readInt();
 		state.mHeight = mInStream.readInt();
-		state.mSquareCounts = mInStream.readLong();
+
+		if (version <= 2) {
+			long squareCounts = mInStream.readLong();
+			state.mSquaresSolved = (short) ((squareCounts & 0xffff000000000000L) >>> 48);
+			state.mSquaresCheated = (short) ((squareCounts & 0xffff00000000L) >>> 32);
+			state.mSquaresWrong = (short) ((squareCounts & 0xffff0000L) >>> 16);
+			state.mSquaresUnknown = 0;
+			state.mSquaresTotal = (short) (squareCounts & 0xffffL);
+		} else {
+			state.mSquaresSolved = mInStream.readShort();
+			state.mSquaresCheated = mInStream.readShort();
+			state.mSquaresWrong = mInStream.readShort();
+			state.mSquaresUnknown = mInStream.readShort();
+			state.mSquaresTotal = mInStream.readShort();
+		}
+
 		state.mPlayTimeMillis = mInStream.readLong();
 		state.mLastPlayed = mInStream.readLong();
 		state.mSelection = mInStream.readInt();
 
-		if (version < 2) {
+		if (version <= 1) {
 			char[] flatChars = (char[]) mInStream.readObject();
 			state.mCharMatrix = new String[state.mHeight][state.mWidth];
 			for (int i = 0, j = 0; i < state.mHeight; i++) {
