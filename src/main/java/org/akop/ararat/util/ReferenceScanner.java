@@ -89,6 +89,9 @@ public class ReferenceScanner
 			Crossword crossword)
 	{
 		List<WordReference> refs = new ArrayList<>();
+		if (hint == null) {
+			return refs;
+		}
 
 		Matcher m = NUMBER_FINDER.matcher(hint);
 		while (m.find()) {

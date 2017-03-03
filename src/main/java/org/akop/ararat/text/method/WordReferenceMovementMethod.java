@@ -372,7 +372,9 @@ public class WordReferenceMovementMethod
 				start = refEnd;
 			}
 
-			sb.append(TextUtils.htmlEncode(hint.substring(start)));
+			if (hint != null) {
+				sb.append(TextUtils.htmlEncode(hint.substring(start)));
+			}
 		}
 
 		return sb.toString();
