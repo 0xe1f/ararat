@@ -1,4 +1,4 @@
-// Copyright (c) 2014-2016 Akop Karapetyan
+// Copyright (c) 2014-2017 Akop Karapetyan
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -36,8 +36,7 @@ public class CrosswordCompilerFormatter
 {
 	private Crossword.Builder mBuilder;
 	private SparseArray<Crossword.Word.Builder> mWordBuilders;
-	private char[][] mChars;
-	private int[][] mAttrs;
+	private CCCell[][] mCells;
 	private Crossword.Word.Builder mCurrentWordBuilder;
 
 	public CrosswordCompilerFormatter()
@@ -57,8 +56,7 @@ public class CrosswordCompilerFormatter
 	{
 		// Initialize state
 		mWordBuilders.clear();
-		mChars = null;
-		mAttrs = null;
+		mCells = null;
 		mCurrentWordBuilder = null;
 		mBuilder = builder;
 
@@ -69,7 +67,16 @@ public class CrosswordCompilerFormatter
 		}
 
 		for (int i = 0, n = mWordBuilders.size(); i < n; i++) {
-			mBuilder.addWord(mWordBuilders.valueAt(i).build());
+			Crossword.Word.Builder wb = mWordBuilders.valueAt(i);
+			if (wb.getNumber() == Crossword.Word.Builder.NUMBER_NONE) {
+				// For any words that don't have numbers, check the cells
+				CCCell cell = mCells[wb.getStartRow()][wb.getStartColumn()];
+				if (cell.mNumber != Crossword.Word.Builder.NUMBER_NONE) {
+					wb.setNumber(cell.mNumber);
+				}
+			}
+
+			mBuilder.addWord(wb.build());
 		}
 	}
 
@@ -107,10 +114,12 @@ public class CrosswordCompilerFormatter
 							int row = getIntValue(parser, "y", 0) - 1;
 							int column = getIntValue(parser, "x", 0) - 1;
 
-							mChars[row][column] = sol.charAt(0);
+							mCells[row][column] = new CCCell(sol, getIntValue(parser,
+									"number", Crossword.Word.Builder.NUMBER_NONE));
+
 							String shape = parser.getAttributeValue(null, "background-shape");
 							if (shape != null) {
-								mAttrs[row][column] |= Crossword.Cell.ATTR_CIRCLED;
+								mCells[row][column].mAttr |= Crossword.Cell.ATTR_CIRCLED;
 							}
 						}
 					} else if (path.isDeadEnd()) {
@@ -118,8 +127,7 @@ public class CrosswordCompilerFormatter
 						int width = getIntValue(parser, "width", -1);
 						int height = getIntValue(parser, "height", -1);
 
-						mChars = new char[height][width];
-						mAttrs = new int[height][width];
+						mCells = new CCCell[height][width];
 						mBuilder.setWidth(width)
 								.setHeight(height);
 					}
@@ -143,7 +151,8 @@ public class CrosswordCompilerFormatter
 
 						// Build the individual characters from the char map
 						for (int column = startColumn; column <= endColumn; column++) {
-							wb.addCell(mChars[row][column], mAttrs[row][column]);
+							CCCell cell = mCells[row][column];
+							wb.addCell(cell.mChars, cell.mAttr);
 						}
 					} else {
 						int yDashIndex = ySpan.indexOf("-");
@@ -158,7 +167,8 @@ public class CrosswordCompilerFormatter
 
 						// Build the individual characters from the char map
 						for (int row = startRow; row <= endRow; row++) {
-							wb.addCell(mChars[row][column], mAttrs[row][column]);
+							CCCell cell = mCells[row][column];
+							wb.addCell(cell.mChars, cell.mAttr);
 						}
 					}
 
@@ -212,6 +222,19 @@ public class CrosswordCompilerFormatter
 				// ?/rectangular-puzzle/crossword/clues/clue
 				mCurrentWordBuilder.setHint(text);
 			}
+		}
+	}
+
+	private static class CCCell
+	{
+		final String mChars;
+		final int mNumber;
+		int mAttr;
+
+		CCCell(String chars, int number)
+		{
+			mChars = chars;
+			mNumber = number;
 		}
 	}
 }

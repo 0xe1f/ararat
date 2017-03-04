@@ -781,6 +781,8 @@ public class Crossword
 	{
 		public static class Builder
 		{
+			public static final int NUMBER_NONE = -1;
+
 			private int mNumber;
 			private String mHint;
 			private int mStartRow;
@@ -792,7 +794,13 @@ public class Crossword
 
 			public Builder()
 			{
+				mNumber = NUMBER_NONE;
 				mCells = new ArrayList<>();
+			}
+
+			public int getNumber()
+			{
+				return mNumber;
 			}
 
 			public Builder setNumber(int number)
@@ -807,10 +815,20 @@ public class Crossword
 				return this;
 			}
 
+			public int getStartRow()
+			{
+				return mStartRow;
+			}
+
 			public Builder setStartRow(int startRow)
 			{
 				mStartRow = startRow;
 				return this;
+			}
+
+			public int getStartColumn()
+			{
+				return mStartColumn;
 			}
 
 			public Builder setStartColumn(int startColumn)
