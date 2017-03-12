@@ -54,14 +54,40 @@ public class Crossword
 		private String mCopyright;
 		private String mComment;
 		private long mDate;
-		private List<Word> mWords;
+		private final List<Word> mWords;
 		private char[] mAlphabet;
 		private int mFlags;
 
 		public Builder()
 		{
+			this(null);
+		}
+
+		public Builder(Crossword crossword)
+		{
 			mWords = new ArrayList<>();
 			mAlphabet = ALPHABET_ENGLISH;
+
+			if (crossword != null) {
+				mWidth = crossword.mWidth;
+				mHeight = crossword.mHeight;
+				mTitle = crossword.mTitle;
+				mDescription = crossword.mDescription;
+				mAuthor = crossword.mAuthor;
+				mComment = crossword.mComment;
+				mCopyright = crossword.mCopyright;
+				mDate = crossword.mDate;
+				mAlphabet = new char[crossword.mAlphabet.length];
+				System.arraycopy(crossword.mAlphabet, 0, mAlphabet, 0, mAlphabet.length);
+				mFlags = crossword.mFlags;
+
+				for (Word word: crossword.mWordsAcross) {
+					mWords.add(word);
+				}
+				for (Word word: crossword.mWordsDown) {
+					mWords.add(word);
+				}
+			}
 		}
 
 		public Builder setWidth(int width)
@@ -306,7 +332,10 @@ public class Crossword
 
 	public char[] getAlphabet()
 	{
-		return mAlphabet;
+		char[] alphabet = new char[mAlphabet.length];
+		System.arraycopy(mAlphabet, 0, alphabet, 0, alphabet.length);
+
+		return alphabet;
 	}
 
 	public String getTitle()
