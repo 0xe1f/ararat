@@ -24,6 +24,7 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
+import java.util.HashSet;
 
 
 public class CrosswordReader
@@ -98,7 +99,9 @@ public class CrosswordReader
 		if (version >= 2) {
 			crossword.mComment = (String) mInStream.readObject();
 		}
-		crossword.mAlphabet = (char[]) mInStream.readObject();
+		for (char ch: (char[]) mInStream.readObject()) {
+			crossword.mAlphabet.add(ch);
+		}
 		crossword.mDate = mInStream.readLong();
 		if (version >= 4) {
 			crossword.mFlags = mInStream.readInt();

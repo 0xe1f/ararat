@@ -28,6 +28,8 @@ import org.xmlpull.v1.XmlPullParserException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.HashSet;
+import java.util.Set;
 
 
 public class CrosswordCompilerFormatter
@@ -187,13 +189,14 @@ public class CrosswordCompilerFormatter
 				}
 			} else if (path.isDeadEnd()) {
 				// ?/rectangular-puzzle
-				char[] allowedChars = null;
+				Set<Character> abSet = new HashSet<>();
 				String alphabet = parser.getAttributeValue(null, "alphabet");
 				if (alphabet != null) {
-					allowedChars = alphabet.toCharArray();
+					for (char ch: alphabet.toCharArray()) {
+						abSet.add(ch);
+					}
+					mBuilder.setAlphabet(abSet);
 				}
-
-				mBuilder.setAlphabet(allowedChars);
 			}
 		}
 	}

@@ -28,7 +28,10 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 
 // Based on https://code.google.com/p/puz/wiki/FileFormat
@@ -271,9 +274,13 @@ public class PuzFormatter
 			char[][] charMap, byte[][] attrMap,
 			int[][] rebusMap, SparseArray<String> rebusSols, boolean hasSolution)
 	{
+		Set<Character> alphabet = new HashSet<>(Crossword.ALPHABET_ENGLISH);
+
 		for (int i = 0, clue = 0, number = 0, im = charMap.length - 1; i <= im; i++) {
 			for (int j = 0, jm = charMap[i].length - 1; j <= jm; j++) {
 				if (charMap[i][j] != EMPTY) {
+					alphabet.add(charMap[i][j]);
+
 					boolean incremented = false;
 					if ((j == 0 || (j > 0 && charMap[i][j - 1] == EMPTY))
 							&& (j + 1 < jm && charMap[i][j + 1] != EMPTY)) {
@@ -351,6 +358,8 @@ public class PuzFormatter
 				}
 			}
 		}
+
+		cb.setAlphabet(alphabet);
 	}
 
 	private static boolean bruteForceKey(char[][] map, short unscrambledChecksum)

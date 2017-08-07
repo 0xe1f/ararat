@@ -29,18 +29,25 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 
 public class Crossword
 		implements Parcelable
 {
-	private static char[] EMPTY_ALPHABET = new char[0];
-	public static final char[] ALPHABET_ENGLISH = new char[] {
-			'A','B','C','D','E','F','G','H','I','J','K','L','M',
-			'N','O','P','Q','R','S','T','U','V','W','X','Y','Z',
-	};
+	public static final Set<Character> ALPHABET_ENGLISH;
+
+	static {
+		Set<Character> set = new HashSet<>();
+		for (char ch: "ABCDEFGHIJKLMNOPQRSTUVWXYZ".toCharArray()) {
+			set.add(ch);
+		}
+		ALPHABET_ENGLISH = Collections.unmodifiableSet(set);
+	}
 
 	public static final int FLAG_NO_SOLUTION = 1;
 
@@ -55,7 +62,7 @@ public class Crossword
 		private String mComment;
 		private long mDate;
 		private final List<Word> mWords;
-		private char[] mAlphabet;
+		private Set<Character> mAlphabet;
 		private int mFlags;
 
 		public Builder()
@@ -77,8 +84,7 @@ public class Crossword
 				mComment = crossword.mComment;
 				mCopyright = crossword.mCopyright;
 				mDate = crossword.mDate;
-				mAlphabet = new char[crossword.mAlphabet.length];
-				System.arraycopy(crossword.mAlphabet, 0, mAlphabet, 0, mAlphabet.length);
+				mAlphabet = new HashSet<>(crossword.mAlphabet);
 				mFlags = crossword.mFlags;
 
 				for (Word word: crossword.mWordsAcross) {
@@ -144,13 +150,11 @@ public class Crossword
 			return this;
 		}
 
-		public Builder setAlphabet(char[] alphabet)
+		public Builder setAlphabet(Set<Character> alphabet)
 		{
+			mAlphabet.clear();
 			if (alphabet != null) {
-				mAlphabet = new char[alphabet.length];
-				System.arraycopy(alphabet, 0, mAlphabet, 0, alphabet.length);
-			} else {
-				mAlphabet = EMPTY_ALPHABET;
+				mAlphabet.addAll(alphabet);
 			}
 
 			return this;
@@ -285,7 +289,7 @@ public class Crossword
 	long mDate;
 	List<Word> mWordsAcross;
 	List<Word> mWordsDown;
-	char[] mAlphabet;
+	Set<Character> mAlphabet;
 
 	// Computed and cached on demand
 	private String mHash;
@@ -295,7 +299,7 @@ public class Crossword
 	{
 		mWordsAcross = new ArrayList<>();
 		mWordsDown = new ArrayList<>();
-		mAlphabet = EMPTY_ALPHABET;
+		mAlphabet = new HashSet<>();
 	}
 
 	private Crossword(Parcel in)
@@ -316,7 +320,10 @@ public class Crossword
 		mWordsDown = new ArrayList<>();
 		in.readTypedList(mWordsDown, Word.CREATOR);
 
-		mAlphabet = in.createCharArray();
+		mAlphabet = new HashSet<>();
+		for (char ch: in.createCharArray()) {
+			mAlphabet.add(ch);
+		}
 		mFlags = in.readInt();
 	}
 
@@ -330,12 +337,9 @@ public class Crossword
 		return mHeight;
 	}
 
-	public char[] getAlphabet()
+	public Set<Character> getAlphabet()
 	{
-		char[] alphabet = new char[mAlphabet.length];
-		System.arraycopy(mAlphabet, 0, alphabet, 0, alphabet.length);
-
-		return alphabet;
+		return Collections.unmodifiableSet(mAlphabet);
 	}
 
 	public String getTitle()
@@ -691,7 +695,12 @@ public class Crossword
 		dest.writeTypedList(mWordsAcross);
 		dest.writeTypedList(mWordsDown);
 
-		dest.writeCharArray(mAlphabet);
+		char[] alphabet = new char[mAlphabet.size()];
+		int i = 0;
+		for (char ch: mAlphabet) {
+			alphabet[i++] = ch;
+		}
+		dest.writeCharArray(alphabet);
 		dest.writeInt(mFlags);
 	}
 

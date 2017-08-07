@@ -60,7 +60,12 @@ public class CrosswordWriter
 		mOutStream.writeObject(crossword.mAuthor);
 		mOutStream.writeObject(crossword.mCopyright);
 		mOutStream.writeObject(crossword.mComment);
-		mOutStream.writeObject(crossword.mAlphabet);
+		char[] alphabet = new char[crossword.mAlphabet.size()];
+		int i = 0;
+		for (char ch: crossword.mAlphabet) {
+			alphabet[i] = ch;
+		}
+		mOutStream.writeObject(alphabet);
 		mOutStream.writeLong(crossword.mDate);
 		mOutStream.writeInt(crossword.mFlags);
 

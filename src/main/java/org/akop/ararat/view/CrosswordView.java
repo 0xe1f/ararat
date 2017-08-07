@@ -61,6 +61,8 @@ import org.akop.ararat.core.CrosswordState;
 import org.akop.ararat.view.inputmethod.CrosswordInputConnection;
 import org.akop.ararat.widget.Zoomer;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.Stack;
 
 
@@ -101,7 +103,6 @@ public class CrosswordView
 	}
 
 	private static final Cell[][] EMPTY_CELLS = new Cell[0][0];
-	private static final char[] EMPTY_CHARS = new char[0];
 
 	private static final int NAVIGATION_SCROLL_DURATION_MS = 500;
 	private static final int DEFAULT_MAX_BITMAP_DIMENSION = 2048; // largest allowed bitmap width or height
@@ -156,7 +157,7 @@ public class CrosswordView
 	private int mPuzzleHeight; // Total number of cells down
 	private Cell[][] mPuzzleCells; // Map of the cells
 	private Selectable mSelection;
-	private char[] mAllowedChars;
+	private Set<Character> mAllowedChars;
 
 	private float mMinScaleFactor; // Scale at which the puzzle takes up the entire screen
 	private float mFitWidthScaleFactor; // Scale at which the puzzle fits in horizontally
@@ -397,7 +398,7 @@ public class CrosswordView
 		mPuzzleCells = EMPTY_CELLS;
 		mPuzzleWidth = 0;
 		mPuzzleHeight = 0;
-		mAllowedChars = EMPTY_CHARS;
+		mAllowedChars = new HashSet<>();
 
 		mRenderScale = 0;
 		mBitmapOffset = new PointF();
@@ -571,9 +572,15 @@ public class CrosswordView
 			} else {
 				int uniChar = event.getUnicodeChar();
 				if (uniChar != 0) {
-					handleInput((char) event.getUnicodeChar());
+					handleInput((char) uniChar);
 					handled = true;
 				}
+			}
+		} else if (event.getAction() == KeyEvent.ACTION_MULTIPLE) {
+			String uniChars = event.getCharacters();
+			if (!TextUtils.isEmpty(uniChars)) {
+				handleInput(uniChars.charAt(0));
+				handled = true;
 			}
 		}
 
@@ -771,7 +778,7 @@ public class CrosswordView
 		mPuzzleHeight = 0;
 		mPuzzleWidth = 0;
 		mPuzzleCells = EMPTY_CELLS;
-		mAllowedChars = EMPTY_CHARS;
+		mAllowedChars.clear();
 		mCrossword = crossword;
 
 		if (crossword != null) {
@@ -1292,10 +1299,9 @@ public class CrosswordView
 		mPuzzleCells = new Cell[mPuzzleHeight][mPuzzleWidth];
 
 		// Copy allowed characters
-		char allowedChars[] = crossword.getAlphabet();
-		mAllowedChars = new char[allowedChars.length];
-		for (int i = 0, n = allowedChars.length; i < n; i++) {
-			mAllowedChars[i] = Character.toUpperCase(allowedChars[i]);
+		mAllowedChars.clear();
+		for (char ch: crossword.getAlphabet()) {
+			mAllowedChars.add(Character.toUpperCase(ch));
 		}
 
 		// Copy across
@@ -1608,14 +1614,7 @@ public class CrosswordView
 
 	private boolean isAcceptableChar(char ch)
 	{
-		char upper = Character.toUpperCase(ch);
-		for (char allowedChar: mAllowedChars) {
-			if (upper == allowedChar) {
-				return true;
-			}
-		}
-
-		return false;
+		return mAllowedChars.contains(Character.toUpperCase(ch));
 	}
 
 	private boolean getCellOffset(float viewX, float viewY, CellOffset offset)
