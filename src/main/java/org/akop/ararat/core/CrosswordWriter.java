@@ -63,7 +63,7 @@ public class CrosswordWriter
 		char[] alphabet = new char[crossword.mAlphabet.size()];
 		int i = 0;
 		for (char ch: crossword.mAlphabet) {
-			alphabet[i] = ch;
+			alphabet[i++] = ch;
 		}
 		mOutStream.writeObject(alphabet);
 		mOutStream.writeLong(crossword.mDate);

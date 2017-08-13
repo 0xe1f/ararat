@@ -1299,7 +1299,6 @@ public class CrosswordView
 		mPuzzleCells = new Cell[mPuzzleHeight][mPuzzleWidth];
 
 		// Copy allowed characters
-		mAllowedChars.clear();
 		for (char ch: crossword.getAlphabet()) {
 			mAllowedChars.add(Character.toUpperCase(ch));
 		}

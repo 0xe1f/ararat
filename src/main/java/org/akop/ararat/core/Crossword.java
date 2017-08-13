@@ -73,7 +73,7 @@ public class Crossword
 		public Builder(Crossword crossword)
 		{
 			mWords = new ArrayList<>();
-			mAlphabet = ALPHABET_ENGLISH;
+			mAlphabet = new HashSet<>(ALPHABET_ENGLISH);
 
 			if (crossword != null) {
 				mWidth = crossword.mWidth;
