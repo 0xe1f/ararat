@@ -27,6 +27,7 @@ import org.akop.ararat.io.CrosswordFormatter;
 import org.akop.ararat.io.PzzlFormatter;
 import org.junit.Test;
 
+import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
@@ -58,6 +59,9 @@ public class PzzlFormatterUnitTest
 					System.out.println("MISSING");
 					continue;
 				}
+			} catch (IOException e) {
+				System.out.println("IO ERROR: " + e.getMessage());
+				continue;
 			} catch (Exception e) {
 				e.printStackTrace(System.out);
 			}

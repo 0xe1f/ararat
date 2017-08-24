@@ -30,7 +30,7 @@ import java.net.URL;
 import java.net.URLConnection;
 
 
-public abstract class UnitTestBase
+abstract class UnitTestBase
 {
 	private static InputStream tryGetInputStreamConnect(String urlString)
 			throws IOException
@@ -41,7 +41,7 @@ public abstract class UnitTestBase
 		return connection.getInputStream();
 	}
 
-	protected static Crossword tryDownload(String urlString, CrosswordFormatter formatter)
+	static Crossword tryDownload(String urlString, CrosswordFormatter formatter)
 			throws IOException
 	{
 		InputStream inputStream;

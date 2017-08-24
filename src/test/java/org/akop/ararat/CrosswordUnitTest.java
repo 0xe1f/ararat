@@ -34,8 +34,11 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
@@ -162,6 +165,11 @@ public class CrosswordUnitTest
 				new W(54, "Stab", 10, 7, null, null, "TRY"),
 		};
 
+		Set<Character> abSet = new HashSet<>();
+		for (char ch: alphabet.toCharArray()) {
+			abSet.add(ch);
+		}
+
 		Crossword.Builder crosswordBuilder = new Crossword.Builder()
 				.setWidth(width)
 				.setHeight(height)
@@ -170,7 +178,7 @@ public class CrosswordUnitTest
 				.setAuthor(author)
 				.setCopyright(copyright)
 				.setComment(comment)
-				.setAlphabet(alphabet.toCharArray())
+				.setAlphabet(abSet)
 				.setDate(date);
 
 		addWords(crosswordBuilder, Crossword.Word.DIR_ACROSS, across);
@@ -185,7 +193,7 @@ public class CrosswordUnitTest
 		assertEquals(crossword.getDescription(), description);
 		assertEquals(crossword.getAuthor(), author);
 		assertEquals(crossword.getCopyright(), copyright);
-		assertEquals(new String(crossword.getAlphabet()), alphabet);
+		assertEquals(crossword.getAlphabet(), abSet);
 		assertEquals(crossword.getDate(), date);
 
 		List<Crossword.Word> wordsAcross = crossword.getWordsAcross();
