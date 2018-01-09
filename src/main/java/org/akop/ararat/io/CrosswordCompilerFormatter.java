@@ -189,7 +189,7 @@ public class CrosswordCompilerFormatter
 				}
 			} else if (path.isDeadEnd()) {
 				// ?/rectangular-puzzle
-				Set<Character> abSet = new HashSet<>();
+				Set<Character> abSet = new HashSet<>(Crossword.ALPHABET_ENGLISH);
 				String alphabet = parser.getAttributeValue(null, "alphabet");
 				if (alphabet != null) {
 					for (char ch: alphabet.toCharArray()) {
