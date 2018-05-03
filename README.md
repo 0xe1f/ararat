@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/pokebyte/ararat.svg?branch=master)](https://travis-ci.org/pokebyte/ararat)
+[![Build Status](https://travis-ci.org/0xe1f/ararat.svg?branch=master)](https://travis-ci.org/0xe1f/ararat)
 
 ararat
 ======
@@ -7,14 +7,19 @@ ararat
 [alphacross](https://play.google.com/store/apps/details?id=org.akop.crosswords).
 It includes:
 
-* [Parsers](src/main/java/org/akop/ararat/io/) for various formats
-* [CrosswordRenderer](src/main/java/org/akop/ararat/graphics/CrosswordRenderer.java),
+* [Parsers](library/src/main/java/org/akop/ararat/io/) for various formats
+* [CrosswordRenderer](library/src/main/java/org/akop/ararat/graphics/CrosswordRenderer.java),
 which can render a crossword (and optionally, current state) to a `Canvas`
 object
-* [CrosswordView](src/main/java/org/akop/ararat/view/CrosswordView.java), the
+* [CrosswordView](library/src/main/java/org/akop/ararat/view/CrosswordView.java), the
 `View` subclass that handles gameplay
 
-For a demonstration, see [CrosswordDemo](https://github.com/pokebyte/CrosswordDemo).
+For a demonstration, see the included [demo app](demo/).
+
+![Screenshot](http://i.imgur.com/1lg7zhN.png)
+
+The sample crossword included in the app is Double-A's by Ben Tausig:
+http://www.inkwellxwords.com/iwxpuzzles.html
 
 License
 =======

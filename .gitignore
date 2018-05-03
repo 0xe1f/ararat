@@ -3,3 +3,13 @@
 .idea/*
 /local.properties
 .gradle
+*.apk
+*.ap_
+*.dex
+*.iml
+*.class
+Thumbs.db
+.DS_Store
+/captures
+/demo/build
+/library/build
