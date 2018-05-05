@@ -21,11 +21,14 @@
 package org.akop.ararat.io
 
 import android.util.JsonReader
+import android.util.JsonWriter
+import android.util.Log
 import org.akop.ararat.core.Crossword
 
 import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
+import java.io.StringWriter
 import java.nio.charset.Charset
 
 
@@ -158,7 +161,43 @@ class UClickJsonFormatter : CrosswordFormatter {
 
     @Throws(IOException::class)
     override fun write(crossword: Crossword, outputStream: OutputStream) {
-        throw UnsupportedOperationException("Writing not supported")
+        val writer = JsonWriter(outputStream.writer(Charset.forName(encoding)))
+
+        writer.beginObject()
+        writer.name("Width").value(crossword.width.toString())
+        writer.name("Height").value(crossword.height.toString())
+        writer.name("Author").value(crossword.author)
+        writer.name("Title").value(crossword.title)
+        writer.name("Copyright").value(crossword.copyright)
+
+        writer.name("AcrossClue").value(crossword.wordsAcross
+                .joinToString("\n") { "${"%02d".format(it.number)}|${it.hint}" })
+        writer.name("DownClue").value(crossword.wordsDown
+                .joinToString("\n", postfix = "\nend\n") { "${"%02d".format(it.number)}|${it.hint}" })
+
+        val layoutMap = Array(crossword.height, { IntArray(crossword.width) })
+
+        writer.name("Solution").beginObject()
+        val allAnswers = buildString {
+            crossword.cellMap.forEachIndexed{ i, row ->
+                row.forEachIndexed { j, col -> if (col?.chars() == null) layoutMap[i][j] = -1 }
+                writer.name("Line${i + 1}").value(row.joinToString("") { it?.chars() ?: " " })
+                append(row.joinToString("") { it?.chars() ?: "-" })
+            }
+        }
+        writer.endObject()
+
+        writer.name("Layout").beginObject()
+        crossword.wordsAcross.forEach { layoutMap[it.startRow][it.startColumn] = it.number }
+        crossword.wordsDown.forEach { layoutMap[it.startRow][it.startColumn] = it.number }
+        layoutMap.forEachIndexed { i, row ->
+            writer.name("Line${i + 1}").value(row.joinToString("") { "%02d".format(it) })
+        }
+        writer.endObject()
+
+        writer.name("AllAnswer").value(allAnswers)
+        writer.endObject()
+        writer.flush()
     }
 
     override fun canRead(): Boolean {
@@ -166,7 +205,7 @@ class UClickJsonFormatter : CrosswordFormatter {
     }
 
     override fun canWrite(): Boolean {
-        return false
+        return true
     }
 
     companion object {
