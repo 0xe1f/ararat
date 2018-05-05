@@ -96,10 +96,20 @@ public class Crossword
 			}
 		}
 
+		public int getWidth()
+		{
+			return mWidth;
+		}
+
 		public Builder setWidth(int width)
 		{
 			mWidth = width;
 			return this;
+		}
+
+		public int getHeight()
+		{
+			return mHeight;
 		}
 
 		public Builder setHeight(int height)
