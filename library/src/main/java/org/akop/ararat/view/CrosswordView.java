@@ -37,9 +37,6 @@ import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.SystemClock;
-import android.support.annotation.ColorInt;
-import android.support.annotation.NonNull;
-import android.support.v4.view.ViewCompat;
 import android.text.InputType;
 import android.text.TextUtils;
 import android.util.AttributeSet;
@@ -449,7 +446,7 @@ public class CrosswordView
 	}
 
 	@Override
-	public boolean onTouchEvent(@NonNull MotionEvent ev)
+	public boolean onTouchEvent(/* @NonNull */MotionEvent ev)
 	{
 		boolean retVal = mScaleDetector.onTouchEvent(ev);
 		retVal = mGestureDetector.onTouchEvent(ev) || retVal;
@@ -554,7 +551,7 @@ public class CrosswordView
 		}
 
 		if (invalidate) {
-			ViewCompat.postInvalidateOnAnimation(this);
+			postInvalidateOnAnimation();
 		}
 	}
 
@@ -957,7 +954,7 @@ public class CrosswordView
 		redrawInPlace();
 	}
 
-	public void setAnswerColor(@ColorInt int color)
+	public void setAnswerColor(int color)
 	{
 		mAnswerTextPaint.setColor(color);
 
@@ -1261,7 +1258,7 @@ public class CrosswordView
 		mScaleStart = mRenderScale;
 
 		mZoomer.startZoom(finalRenderScale - mScaleStart);
-		ViewCompat.postInvalidateOnAnimation(CrosswordView.this);
+		postInvalidateOnAnimation();
 
 		return true;
 	}
@@ -1550,7 +1547,7 @@ public class CrosswordView
 			}
 
 			mInPlaceRenderer.renderPuzzle(mPuzzleCanvas, mRenderScale, false);
-			ViewCompat.postInvalidateOnAnimation(this);
+			postInvalidateOnAnimation();
 		}
 	}
 
@@ -1830,7 +1827,7 @@ public class CrosswordView
 		}
 
 		@Override
-		public void writeToParcel(@NonNull Parcel dest, int flags)
+		public void writeToParcel(/* @NonNull */Parcel dest, int flags)
 		{
 			super.writeToParcel(dest, flags);
 
@@ -2379,7 +2376,7 @@ public class CrosswordView
 			mBitmapScale = 1.0f;
 
 			Log.d(LOG_TAG, "Invalidating...");
-			ViewCompat.postInvalidateOnAnimation(CrosswordView.this);
+			postInvalidateOnAnimation();
 
 			synchronized (mRendererLock) {
 				mAsyncTask = null;
