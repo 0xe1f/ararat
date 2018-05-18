@@ -65,6 +65,15 @@ public class Crossword
 		private Set<Character> mAlphabet;
 		private int mFlags;
 
+		private static Comparator<Word> mNumberComparator = new Comparator<Word>()
+		{
+			@Override
+			public int compare(Word o1, Word o2)
+			{
+				return o1.mNumber - o2.mNumber;
+			}
+		};
+
 		public Builder()
 		{
 			this(null);
@@ -269,6 +278,9 @@ public class Crossword
 					crossword.mWordsDown.add(word);
 				}
 			}
+
+			Collections.sort(crossword.mWordsAcross, mNumberComparator);
+			Collections.sort(crossword.mWordsDown, mNumberComparator);
 
 			return crossword;
 		}

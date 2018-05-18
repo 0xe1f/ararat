@@ -27,7 +27,7 @@ Add dependency to `app/build.gradle`:
 
 ```
 dependencies {
-    implementation 'com.github.0xe1f:ararat:1.0.2'
+    implementation 'com.github.0xe1f:ararat:1.0.3'
 }
 ```
 
