@@ -1,4 +1,4 @@
-// Copyright (c) 2014-2016 Akop Karapetyan
+// Copyright (c) Akop Karapetyan
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -18,47 +18,14 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-package org.akop.ararat;
-
-import org.akop.ararat.core.Crossword;
-import org.akop.ararat.io.CrosswordFormatter;
-
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.net.URLConnection;
+package org.akop.ararat.core
 
 
-abstract class UnitTestBase
-{
-	private static InputStream tryGetInputStreamConnect(String urlString)
-			throws IOException
-	{
-		URL url = new URL(urlString);
-		URLConnection connection = url.openConnection();
+data class Pos(var r: Int = 0,
+               var c: Int = 0) {
 
-		return connection.getInputStream();
-	}
-
-	static Crossword tryDownload(String urlString, CrosswordFormatter formatter)
-			throws IOException
-	{
-		InputStream inputStream;
-		try {
-			inputStream = tryGetInputStreamConnect(urlString);
-		} catch (FileNotFoundException e) {
-			return null;
-		}
-
-		Crossword.Builder cb = new Crossword.Builder();
-		try {
-			formatter.read(cb, inputStream);
-		} finally {
-			try { inputStream.close(); }
-			catch (IOException e) { e.printStackTrace(); }
-		}
-
-		return cb.build();
-	}
+    fun set(r: Int, c: Int) {
+        this.r = r
+        this.c = c
+    }
 }
