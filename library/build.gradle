@@ -49,14 +49,8 @@ task copyReleaseResources(type: Copy) {
     into "${buildDir}/intermediates/classes/test/release/res"
 }
 
-tasks.whenTaskAdded { task ->
-    if (task.name == 'assembleDebug') {
-        task.dependsOn 'copyDebugResources'
-    }
-    if (task.name == 'assembleRelease') {
-        task.dependsOn 'copyReleaseResources'
-    }
-}
+preBuild.dependsOn copyDebugResources
+preBuild.dependsOn copyReleaseResources
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])

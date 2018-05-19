@@ -30,8 +30,6 @@ class TestPuzFormatter: BaseTest() {
     @Test
     fun crossword_testReadWrite() {
         val crossword = loadResource("res/puzzle.puz", PuzFormatter())
-//        val crossword = loadResource("./res/puzzle.puz", PuzFormatter())
-//        val crossword = loadResource("/res/puzzle.puz", PuzFormatter())
 
         Assert.assertEquals("Width mismatch!", crossword.width, 15)
         Assert.assertEquals("Height mismatch!", crossword.height, 15)
