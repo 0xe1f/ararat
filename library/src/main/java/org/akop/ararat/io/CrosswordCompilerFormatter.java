@@ -78,7 +78,7 @@ public class CrosswordCompilerFormatter
 				}
 			}
 
-			mBuilder.addWord(wb.build());
+			mBuilder.getWords().add(wb.build());
 		}
 	}
 

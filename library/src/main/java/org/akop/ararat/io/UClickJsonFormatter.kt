@@ -22,13 +22,12 @@ package org.akop.ararat.io
 
 import android.util.JsonReader
 import android.util.JsonWriter
-import android.util.Log
 import org.akop.ararat.core.Crossword
+import org.akop.ararat.core.buildWord
 
 import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
-import java.io.StringWriter
 import java.nio.charset.Charset
 
 
@@ -53,9 +52,9 @@ class UClickJsonFormatter : CrosswordFormatter {
         while (reader.hasNext()) {
             val name = reader.nextName()
             when (name) {
-                "Author" -> builder.setAuthor(reader.nextString())
-                "Title" -> builder.setTitle(reader.nextString())
-                "Copyright" -> builder.setCopyright(reader.nextString())
+                "Author" -> builder.author = reader.nextString()
+                "Title" -> builder.title = reader.nextString()
+                "Copyright" -> builder.copyright = reader.nextString()
                 "Layout" -> layout = readLayout(reader)
                 "Solution" -> solution = readSolution(reader)
                 "AcrossClue" -> acrossClues = readClues(reader)
@@ -80,34 +79,36 @@ class UClickJsonFormatter : CrosswordFormatter {
 
         acrossClues.forEach { (n, hint) ->
             val start = layout[n] ?: throw FormatException("No start position for $n Across")
-            val wb = Crossword.Word.Builder()
-                    .setNumber(n)
-                    .setDirection(Crossword.Word.DIR_ACROSS)
-                    .setHint(hint)
-                    .setStartRow(start.first)
-                    .setStartColumn(start.second)
-            for (i in start.second until builder.width) {
-                val sol = solution[Pair(start.first, i)]
-                if (sol == " ") break
-                wb.addCell(sol, 0)
+            builder.words += buildWord {
+                this.number = n
+                this.direction = Crossword.Word.DIR_ACROSS
+                this.hint = hint
+                this.startRow = start.first
+                this.startColumn = start.second
+
+                for (i in start.second until builder.width) {
+                    val sol = solution[Pair(start.first, i)]!!
+                    if (sol == " ") break
+                    this.cells += Crossword.Cell(sol, 0)
+                }
             }
-            builder.addWord(wb.build())
         }
 
         downClues.forEach { (n, hint) ->
             val start = layout[n] ?: throw FormatException("No start position for number $n Down")
-            val wb = Crossword.Word.Builder()
-                    .setNumber(n)
-                    .setDirection(Crossword.Word.DIR_DOWN)
-                    .setHint(hint)
-                    .setStartRow(start.first)
-                    .setStartColumn(start.second)
-            for (i in start.first until builder.height) {
-                val sol = solution[Pair(i, start.second)]
-                if (sol == " ") break
-                wb.addCell(sol, 0)
+            builder.words += buildWord {
+                this.number = n
+                this.direction = Crossword.Word.DIR_DOWN
+                this.hint = hint
+                this.startRow = start.first
+                this.startColumn = start.second
+
+                for (i in start.first until builder.height) {
+                    val sol = solution[Pair(i, start.second)]!!
+                    if (sol == " ") break
+                    this.cells += Crossword.Cell(sol, 0)
+                }
             }
-            builder.addWord(wb.build())
         }
     }
 
@@ -179,10 +180,10 @@ class UClickJsonFormatter : CrosswordFormatter {
 
         writer.name("Solution").beginObject()
         val allAnswers = buildString {
-            crossword.cellMap.forEachIndexed{ i, row ->
-                row.forEachIndexed { j, col -> if (col?.chars() == null) layoutMap[i][j] = -1 }
-                writer.name("Line${i + 1}").value(row.joinToString("") { it?.chars() ?: " " })
-                append(row.joinToString("") { it?.chars() ?: "-" })
+            crossword.cellMap.forEachIndexed { i, row ->
+                row.forEachIndexed { j, col -> if (col?.chars == null) layoutMap[i][j] = -1 }
+                writer.name("Line${i + 1}").value(row.joinToString("") { it?.chars ?: " " })
+                append(row.joinToString("") { it?.chars ?: "-" })
             }
         }
         writer.endObject()

@@ -5,11 +5,11 @@ sudo: false
 android:
   components:
     - tools
-    - build-tools-25.0.3
-    - android-25
+    - build-tools-27.0.3
+    - android-27
     - extra-android-support
     - extra-android-m2repository
     - extra-google-m2repository
 
 script:
-  - ./gradlew test --console=plain
+  - ./gradlew -p library test --console=plain

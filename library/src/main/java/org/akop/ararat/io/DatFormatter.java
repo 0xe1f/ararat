@@ -246,7 +246,7 @@ public class DatFormatter
 				wb.addCell(map[hint.mStartRow][j], 0);
 			}
 
-			cb.addWord(wb.build());
+			cb.getWords().add(wb.build());
 		}
 
 		for (int h = 0, n = hintsDown.size(); h < n; h++) {
@@ -262,7 +262,7 @@ public class DatFormatter
 				wb.addCell(map[i][hint.mStartCol], 0);
 			}
 
-			cb.addWord(wb.build());
+			cb.getWords().add(wb.build());
 		}
 	}
 }
