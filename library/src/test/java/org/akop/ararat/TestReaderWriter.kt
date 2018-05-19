@@ -40,14 +40,14 @@ class TestReaderWriter {
         checkReadWrite(load("res/puzzle.puz", PuzFormatter()))
     }
 
-    fun load(path: String, formatter: CrosswordFormatter): Crossword {
-        val resource = TestReaderWriter::class.java.classLoader.getResource(path)
+    private fun load(path: String, formatter: CrosswordFormatter): Crossword {
+        val resource = javaClass.classLoader.getResource(path)
         return File(resource!!.path).inputStream().use {
             Crossword.Builder().apply { formatter.read(this, it) }.build()
         }
     }
 
-    fun checkReadWrite(crossword: Crossword) {
+    private fun checkReadWrite(crossword: Crossword) {
         println("Checking writing...")
 
         val content = ByteArrayOutputStream().use { stream ->
@@ -63,7 +63,16 @@ class TestReaderWriter {
         val cw = ByteArrayInputStream(content).use {
             CrosswordReader(it).use { it.read() }
         }
-
+        println("Width: ${crossword.width}")
+        println("height: ${crossword.height}")
+        println("squareCount: ${crossword.squareCount}")
+        println("Title: ${crossword.title}")
+        println("description: ${crossword.description}")
+        println("author: ${crossword.author}")
+        println("copyright: ${crossword.copyright}")
+        println("comment: ${crossword.comment}")
+        println("date: ${crossword.date}")
+        println("hash: ${crossword.hash}")
         Assert.assertEquals("Width mismatch!", crossword.width, cw.width)
         Assert.assertEquals("Height mismatch!", crossword.height, cw.height)
         Assert.assertEquals("SquareCount mismatch!", crossword.squareCount, cw.squareCount)

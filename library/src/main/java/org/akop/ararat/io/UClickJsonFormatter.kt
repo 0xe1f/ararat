@@ -23,6 +23,7 @@ package org.akop.ararat.io
 import android.util.JsonReader
 import android.util.JsonWriter
 import org.akop.ararat.core.Crossword
+import org.akop.ararat.core.Pos
 import org.akop.ararat.core.buildWord
 
 import java.io.IOException
@@ -43,8 +44,8 @@ class UClickJsonFormatter : CrosswordFormatter {
     override fun read(builder: Crossword.Builder, inputStream: InputStream) {
         val reader = JsonReader(inputStream.bufferedReader(Charset.forName(encoding)))
 
-        var layout: Map<Int, Pair<Int, Int>>? = null
-        var solution: Map<Pair<Int, Int>, String>? = null
+        var layout: Map<Int, Pos>? = null
+        var solution: Map<Pos, String>? = null
         var acrossClues: Map<Int, String>? = null
         var downClues: Map<Int, String>? = null
 
@@ -83,11 +84,11 @@ class UClickJsonFormatter : CrosswordFormatter {
                 this.number = n
                 this.direction = Crossword.Word.DIR_ACROSS
                 this.hint = hint
-                this.startRow = start.first
-                this.startColumn = start.second
+                this.startRow = start.r
+                this.startColumn = start.c
 
-                for (i in start.second until builder.width) {
-                    val sol = solution[Pair(start.first, i)]!!
+                for (i in start.c until builder.width) {
+                    val sol = solution[Pos(start.r, i)]!!
                     if (sol == " ") break
                     this.cells += Crossword.Cell(sol, 0)
                 }
@@ -100,11 +101,11 @@ class UClickJsonFormatter : CrosswordFormatter {
                 this.number = n
                 this.direction = Crossword.Word.DIR_DOWN
                 this.hint = hint
-                this.startRow = start.first
-                this.startColumn = start.second
+                this.startRow = start.r
+                this.startColumn = start.c
 
-                for (i in start.first until builder.height) {
-                    val sol = solution[Pair(i, start.second)]!!
+                for (i in start.r until builder.height) {
+                    val sol = solution[Pos(i, start.c)]!!
                     if (sol == " ") break
                     this.cells += Crossword.Cell(sol, 0)
                 }
@@ -112,8 +113,8 @@ class UClickJsonFormatter : CrosswordFormatter {
         }
     }
 
-    private fun readLayout(reader: JsonReader): Map<Int, Pair<Int, Int>> {
-        val map = HashMap<Int, Pair<Int, Int>>()
+    private fun readLayout(reader: JsonReader): Map<Int, Pos> {
+        val map = HashMap<Int, Pos>()
         reader.beginObject()
         while (reader.hasNext()) {
             val name = reader.nextName()
@@ -121,7 +122,7 @@ class UClickJsonFormatter : CrosswordFormatter {
                 name.matches("Line\\d+".toRegex()) -> {
                     val row = name.substring(4).toInt() - 1
                     val numbers = reader.nextString().chunked(2) { it.toString().toInt() }
-                    numbers.forEachIndexed { i, n -> map[n] = Pair(row,i) }
+                    numbers.forEachIndexed { i, n -> map[n] = Pos(row, i) }
                 }
                 else -> reader.skipValue()
             }
@@ -131,8 +132,8 @@ class UClickJsonFormatter : CrosswordFormatter {
         return map
     }
 
-    private fun readSolution(reader: JsonReader): Map<Pair<Int, Int>, String> {
-        val map = HashMap<Pair<Int, Int>, String>()
+    private fun readSolution(reader: JsonReader): Map<Pos, String> {
+        val map = HashMap<Pos, String>()
         reader.beginObject()
         while (reader.hasNext()) {
             val name = reader.nextName()
@@ -140,7 +141,7 @@ class UClickJsonFormatter : CrosswordFormatter {
                 name.matches("Line\\d+".toRegex()) -> {
                     val row = name.substring(4).toInt() - 1
                     val letters = reader.nextString().chunked(1)
-                    letters.forEachIndexed { i, s -> map[Pair(row,i)] = s }
+                    letters.forEachIndexed { i, s -> map[Pos(row, i)] = s }
                 }
                 else -> reader.skipValue()
             }
