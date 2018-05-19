@@ -23,28 +23,19 @@ package org.akop.ararat
 import org.akop.ararat.core.Crossword
 import org.akop.ararat.core.CrosswordReader
 import org.akop.ararat.core.CrosswordWriter
-import org.akop.ararat.io.CrosswordFormatter
 import org.akop.ararat.io.PuzFormatter
 import org.junit.Test
 import org.junit.Assert
 
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
-import java.io.File
 
 
-class TestReaderWriter {
+class TestReaderWriter: BaseTest() {
 
     @Test
     fun crossword_testReadWrite() {
-        checkReadWrite(load("res/puzzle.puz", PuzFormatter()))
-    }
-
-    private fun load(path: String, formatter: CrosswordFormatter): Crossword {
-        val resource = javaClass.classLoader.getResource(path)
-        return File(resource!!.path).inputStream().use {
-            Crossword.Builder().apply { formatter.read(this, it) }.build()
-        }
+        checkReadWrite(loadResource("res/puzzle.puz", PuzFormatter()))
     }
 
     private fun checkReadWrite(crossword: Crossword) {
@@ -63,16 +54,7 @@ class TestReaderWriter {
         val cw = ByteArrayInputStream(content).use {
             CrosswordReader(it).use { it.read() }
         }
-        println("Width: ${crossword.width}")
-        println("height: ${crossword.height}")
-        println("squareCount: ${crossword.squareCount}")
-        println("Title: ${crossword.title}")
-        println("description: ${crossword.description}")
-        println("author: ${crossword.author}")
-        println("copyright: ${crossword.copyright}")
-        println("comment: ${crossword.comment}")
-        println("date: ${crossword.date}")
-        println("hash: ${crossword.hash}")
+
         Assert.assertEquals("Width mismatch!", crossword.width, cw.width)
         Assert.assertEquals("Height mismatch!", crossword.height, cw.height)
         Assert.assertEquals("SquareCount mismatch!", crossword.squareCount, cw.squareCount)

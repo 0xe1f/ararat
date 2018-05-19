@@ -38,11 +38,13 @@ buildscript {
 }
 
 task copyDebugResources(type: Copy) {
+    println("Copying debug resources...")
     from "${projectDir}/src/test/res"
     into "${buildDir}/intermediates/classes/test/debug/res"
 }
 
 task copyReleaseResources(type: Copy) {
+    println("Copying release resources...")
     from "${projectDir}/src/test/res"
     into "${buildDir}/intermediates/classes/test/release/res"
 }
