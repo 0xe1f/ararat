@@ -1070,8 +1070,7 @@ public class CrosswordView
 		// Check the top item in the undo buffer. If it belongs to a different word, clear
 		// the buffer
 		UndoItem top = mUndoBuffer.peek();
-		if (top.mSelectable != null
-			&& !Crossword.Word.equals(selectable.mWord, top.mSelectable.mWord)) {
+		if (top.mSelectable != null && !top.mSelectable.mWord.equals(selectable.mWord)) {
 			mUndoBuffer.clear();
 		}
 	}
@@ -1947,8 +1946,7 @@ public class CrosswordView
 				return s1 == s2;
 			}
 
-			return Crossword.Word.equals(s1.mWord, s2.mWord)
-					&& s1.mCell == s2.mCell;
+			return s1.mWord == s2.mWord && s1.mCell == s2.mCell;
 		}
 
 		@Override

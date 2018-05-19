@@ -87,7 +87,7 @@ class CrosswordRenderer(context: Context) {
 
         when {
             rp.flags and FLAG_RENDER_ANSWER == FLAG_RENDER_ANSWER -> if (!cell.isEmpty) {
-                rp.canvas.drawText(cell.chars(), cellRect.left + rp.cellDim / 2,
+                rp.canvas.drawText(cell.chars, cellRect.left + rp.cellDim / 2,
                         cellRect.bottom - rp.answerMetrics.descent, rp.answerTextPaint)
             }
             rp.flags and FLAG_RENDER_ATTEMPT == FLAG_RENDER_ATTEMPT -> {

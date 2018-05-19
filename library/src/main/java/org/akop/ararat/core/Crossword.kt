@@ -72,38 +72,100 @@ class Crossword internal constructor(val width: Int = 0,
     val cellMap: Array<Array<Cell?>> by lazy { buildMap() }
     val hash: String by lazy { femputeHash() }
 
-    class Builder(var width: Int = 0,
-                  var height: Int = 0,
-                  var title: String? = null,
-                  var description: String? = null,
-                  var author: String? = null,
-                  var copyright: String? = null,
-                  var comment: String? = null,
-                  var date: Long = 0,
-                  var flags: Int = 0,
-                  alphabet: Set<Char>? = null,
-                  words: List<Word>? = null) {
+    class Builder() {
 
-        // FIXME: words should store word builders
+        @set:JvmName("width")
+        var width: Int = 0
+        @set:JvmName("height")
+        var height: Int = 0
+        @set:JvmName("title")
+        var title: String? = null
+        @set:JvmName("description")
+        var description: String? = null
+        @set:JvmName("author")
+        var author: String? = null
+        @set:JvmName("copyright")
+        var copyright: String? = null
+        @set:JvmName("comment")
+        var comment: String? = null
+        @set:JvmName("date")
+        var date: Long = 0
+        @set:JvmName("flags")
+        var flags: Int = 0
+
         val alphabet: MutableSet<Char> = HashSet(ALPHABET_ENGLISH)
         val words: MutableList<Word> = ArrayList()
 
-        constructor(crossword: Crossword): this(
-                width = crossword.width,
-                height = crossword.height,
-                title = crossword.title,
-                description = crossword.description,
-                author = crossword.author,
-                comment = crossword.comment,
-                copyright = crossword.copyright,
-                date = crossword.date,
-                flags = crossword.flags,
-                alphabet = crossword.alphabet.toMutableSet(),
-                words = crossword.wordsAcross + crossword.wordsDown)
+        constructor(crossword: Crossword): this() {
+            width = crossword.width
+            height = crossword.height
+            title = crossword.title
+            description = crossword.description
+            author = crossword.author
+            comment = crossword.comment
+            copyright = crossword.copyright
+            date = crossword.date
+            flags = crossword.flags
+            alphabet.clear()
+            alphabet += crossword.alphabet
+            words += crossword.wordsAcross + crossword.wordsDown
+        }
 
-        init {
-            words?.let { this.words += it }
-            alphabet?.let { this.alphabet += it }
+        fun setWidth(value: Int): Builder {
+            width = value
+            return this
+        }
+
+        fun setHeight(value: Int): Builder {
+            height = value
+            return this
+        }
+
+        fun setTitle(text: String?): Builder {
+            title = text
+            return this
+        }
+
+        fun setDescription(text: String?): Builder {
+            description = text
+            return this
+        }
+
+        fun setAuthor(text: String?): Builder {
+            author = text
+            return this
+        }
+
+        fun setCopyright(text: String?): Builder {
+            copyright = text
+            return this
+        }
+
+        fun setComment(text: String?): Builder {
+            comment = text
+            return this
+        }
+
+        fun setDate(value: Long): Builder {
+            date = value
+            return this
+        }
+
+        fun setFlags(value: Int): Builder {
+            flags = value
+            return this
+        }
+
+        fun addWord(word: Word): Builder {
+            words += word
+            return this
+        }
+
+        fun setAlphabet(alphabet: Set<Char>): Builder {
+            this.alphabet.clear()
+            this.alphabet += alphabet
+
+            return this
         }
 
         private fun countSquares(): Int {
@@ -377,6 +439,8 @@ class Crossword internal constructor(val width: Int = 0,
                 chars = source.readString(),
                 attrFlags = source.readByte())
 
+        fun chars(): String = chars
+
         operator fun contains(charSought: String?): Boolean = chars == charSought
 
         override fun describeContents(): Int = 0
@@ -411,13 +475,13 @@ class Crossword internal constructor(val width: Int = 0,
                                     val direction: Int = 0,
                                     val hintUrl: String? = null,
                                     val citation: String? = null,
-                                    cells: Array<Cell> = EMPTY_CELL) : Parcelable {
+                                    cells: Array<Cell>?) : Parcelable {
 
-        var cells: Array<Cell> = EMPTY_CELL
-            private set
+        // FIXME: Mutable
+        internal val cells: Array<Cell>
 
         init {
-            this.cells = cells.copyOf()
+            this.cells = cells?.copyOf() ?: EMPTY_CELL
             if (direction != DIR_ACROSS && direction != DIR_DOWN) {
                 throw IllegalArgumentException("Direction not valid: $direction")
             }
@@ -435,14 +499,56 @@ class Crossword internal constructor(val width: Int = 0,
 
         class Builder {
 
+            @set:JvmName("number")
             var number: Int = NUMBER_NONE
+            @set:JvmName("hint")
             var hint: String? = null
+            @set:JvmName("startRow")
             var startRow: Int = 0
+            @set:JvmName("startColumn")
             var startColumn: Int = 0
+            @set:JvmName("direction")
             var direction: Int = 0
+            @set:JvmName("hintUrl")
             var hintUrl: String? = null
+            @set:JvmName("citation")
             var citation: String? = null
             val cells = ArrayList<Cell>()
+
+            fun setNumber(value: Int): Builder {
+                number = value
+                return this
+            }
+
+            fun setHint(text: String?): Builder {
+                hint = text
+                return this
+            }
+
+            fun setStartRow(value: Int): Builder {
+                startRow = value
+                return this
+            }
+
+            fun setStartColumn(value: Int): Builder {
+                startColumn = value
+                return this
+            }
+
+            fun setDirection(value: Int): Builder {
+                direction = value
+                return this
+            }
+
+            fun setHintUrl(text: String?): Builder {
+                hintUrl = text
+                return this
+            }
+
+            fun setCitation(text: String?): Builder {
+                citation = text
+                return this
+            }
 
             fun addCell(ch: Char, attrFlags: Int) = addCell(ch.toString(), attrFlags)
 
@@ -481,6 +587,10 @@ class Crossword internal constructor(val width: Int = 0,
                 cells = source.readParcelableArray(Cell::class.java.classLoader)
                         .map { it as Cell }
                         .toTypedArray())
+
+        operator fun get(pos: Int): Cell = cells[pos]
+
+        fun cellAt(pos: Int): Cell = cells[pos]
 
         override fun describeContents(): Int = 0
 
@@ -532,6 +642,7 @@ class Crossword internal constructor(val width: Int = 0,
     }
 
     companion object {
+        @JvmField
         val ALPHABET_ENGLISH: Set<Char> = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".toCharArray().toSet()
 
         const val FLAG_NO_SOLUTION = 1
@@ -543,3 +654,13 @@ class Crossword internal constructor(val width: Int = 0,
         }
     }
 }
+
+fun buildCrossword(block: Crossword.Builder.() -> Unit): Crossword =
+        Crossword.Builder().apply {
+            block(this)
+        }.build()
+
+fun buildWord(block: Crossword.Word.Builder.() -> Unit): Crossword.Word =
+        Crossword.Word.Builder().apply {
+            block(this)
+        }.build()
