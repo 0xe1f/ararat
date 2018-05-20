@@ -30,7 +30,18 @@ class TestWSJFormatter: BaseTest() {
 
     @Test
     fun crossword_testMetadata() {
-        assertMetadata(crossword, Metadata(
+        assertMetadata(crossword, metadata)
+    }
+
+    @Test
+    fun crossword_testLayout() {
+        assertLayout(crossword, Array(layout.size) {
+            layout[it].chunked(1).map { when (it) { " " -> null else -> it } }.toTypedArray()
+        })
+    }
+
+    companion object {
+        val metadata = Metadata(
                 width = 15,
                 height = 15,
                 squareCount = 185,
@@ -41,6 +52,22 @@ class TestWSJFormatter: BaseTest() {
                 copyright = "The Wall Street Journal",
                 comment = null,
                 date = 1525676400000,
-                hash = "14f52e52fb2ad08278c92aae1962f8ca270b11ec"))
+                hash = "14f52e52fb2ad08278c92aae1962f8ca270b11ec")
+        val layout = arrayOf(
+                "DAMUP ALAS  TNT",
+                "OBESE CANI SHOE",
+                "POWERMOWER IRIS",
+                "EVE CAR TOPMOST",
+                "REDCHINA CROWE ",
+                "   PEN SECOND  ",
+                "GOBAD  SNOWYOWL",
+                "MOO  SOILS  WOO",
+                "COWTOWNS  MONKS",
+                "  WIDEST CAP   ",
+                " WILDE SPARTANS",
+                "RENTSTO ART LOO",
+                "ALDA BLOWBYBLOW",
+                "PLOT AGEE RAISE",
+                "SSW  YARD STEED")
     }
 }

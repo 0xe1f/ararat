@@ -550,9 +550,9 @@ class Crossword internal constructor(val width: Int = 0,
                 return this
             }
 
-            fun addCell(ch: Char, attrFlags: Int) = addCell(ch.toString(), attrFlags)
+            fun addCell(ch: Char, attrFlags: Int = 0) = addCell(ch.toString(), attrFlags)
 
-            fun addCell(chars: String, attrFlags: Int) {
+            fun addCell(chars: String, attrFlags: Int = 0) {
                 cells.add(Cell(chars, attrFlags.toByte()))
             }
 
