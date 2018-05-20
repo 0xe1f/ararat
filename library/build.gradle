@@ -37,6 +37,12 @@ buildscript {
     }
 }
 
+tasks.withType(Test) {
+    testLogging {
+        events "started", "passed", "skipped", "failed"
+    }
+}
+
 task copyDebugResources(type: Copy) {
     println("Copying debug resources...")
     from "${projectDir}/src/test/res"

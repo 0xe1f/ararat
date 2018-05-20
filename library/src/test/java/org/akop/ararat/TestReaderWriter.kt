@@ -39,7 +39,7 @@ class TestReaderWriter: BaseTest() {
     }
 
     private fun checkReadWrite(crossword: Crossword) {
-        println("Checking writing...")
+        println("Checking write..")
 
         val content = ByteArrayOutputStream().use { stream ->
             CrosswordWriter(stream).use {
@@ -49,7 +49,7 @@ class TestReaderWriter: BaseTest() {
             stream.toByteArray()
         }
 
-        println("Checking reading...")
+        println("Checking read...")
 
         val cw = ByteArrayInputStream(content).use {
             CrosswordReader(it).use { it.read() }
