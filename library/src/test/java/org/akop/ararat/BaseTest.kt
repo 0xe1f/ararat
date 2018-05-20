@@ -38,7 +38,6 @@ open class BaseTest {
     }
 
     protected fun assertMetadata(crossword: Crossword, expected: Metadata) {
-        println("Checking metadata: '${crossword.title}'")
         Assert.assertEquals("Width mismatch!", expected.width, crossword.width)
         Assert.assertEquals("Height mismatch!", expected.height, crossword.height)
         Assert.assertEquals("SquareCount mismatch!", expected.squareCount, crossword.squareCount)
@@ -53,7 +52,6 @@ open class BaseTest {
     }
 
     protected fun assertLayout(crossword: Crossword, expected: Array<Array<String?>>) {
-        println("Checking layout: '${crossword.title}'")
         crossword.cellMap.forEachIndexed { i, actualRow ->
             val expectedRow = expected[i]
             actualRow.forEachIndexed { j, actualCell ->

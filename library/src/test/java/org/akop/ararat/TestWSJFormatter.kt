@@ -26,9 +26,10 @@ import org.junit.Test
 
 class TestWSJFormatter: BaseTest() {
 
+    val crossword = loadResource("res/wsj.json", WSJFormatter())
+
     @Test
-    fun crossword_testRead() {
-        val crossword = loadResource("res/wsj.json", WSJFormatter())
+    fun crossword_testMetadata() {
         assertMetadata(crossword, Metadata(
                 width = 15,
                 height = 15,

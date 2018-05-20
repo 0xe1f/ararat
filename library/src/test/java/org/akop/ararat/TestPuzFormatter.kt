@@ -26,9 +26,10 @@ import org.junit.Test
 
 class TestPuzFormatter: BaseTest() {
 
+    val crossword = loadResource("res/puzzle.puz", PuzFormatter())
+
     @Test
-    fun crossword_testRead() {
-        val crossword = loadResource("res/puzzle.puz", PuzFormatter())
+    fun crossword_testMetadata() {
         assertMetadata(crossword, Metadata(
                 width = 15,
                 height = 15,

@@ -26,10 +26,15 @@ import org.junit.Test
 
 class TestPzzlFormatter: BaseTest() {
 
+    val crossword = loadResource("res/nytsyncrossword.pzzl", PzzlFormatter())
+
     @Test
-    fun crossword_testRead() {
-        val crossword = loadResource("res/nytsyncrossword.pzzl", PzzlFormatter())
+    fun crossword_testMetadata() {
         assertMetadata(crossword, metadata)
+    }
+
+    @Test
+    fun crossword_testLayout() {
         assertLayout(crossword, Array(layout.size) {
             layout[it].chunked(1).map { when (it) { "#" -> null else -> it } }.toTypedArray()
         })
