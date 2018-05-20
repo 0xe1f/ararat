@@ -21,6 +21,7 @@
 package org.akop.ararat
 
 import org.akop.ararat.io.WSJFormatter
+import org.akop.ararat.io.WSJFormatter.Companion.PUBLISH_DATE_FORMAT
 import org.junit.Test
 
 
@@ -51,7 +52,7 @@ class TestWSJFormatter: BaseTest() {
                 author = "By Dan Fisher/Edited by Mike Shenk",
                 copyright = "The Wall Street Journal",
                 comment = null,
-                date = 1525676400000,
+                date = PUBLISH_DATE_FORMAT.parse("Monday, 07 May 2018").time,
                 hash = "14f52e52fb2ad08278c92aae1962f8ca270b11ec")
         val layout = arrayOf(
                 "DAMUP ALAS  TNT",

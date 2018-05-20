@@ -31,7 +31,7 @@ import java.io.InputStream
 import java.io.OutputStream
 import java.nio.charset.Charset
 import java.text.SimpleDateFormat
-import java.util.Locale
+import java.util.*
 
 
 class WSJFormatter : CrosswordFormatter {
@@ -61,7 +61,6 @@ class WSJFormatter : CrosswordFormatter {
         builder.description = copyObj.optString("description")
         builder.copyright = copyObj.optString("publisher")
         builder.author = copyObj.optString("byline")
-        // FIXME
         builder.date = PUBLISH_DATE_FORMAT.parse(pubDate).time
 
         val grid = Grid(builder.width, builder.height,
@@ -199,7 +198,6 @@ class WSJFormatter : CrosswordFormatter {
 
     companion object {
         private const val DEFAULT_ENCODING = "UTF-8"
-        private val PUBLISH_DATE_FORMAT = SimpleDateFormat("EEEE, d MMMM yyyy",
-                Locale.US)
+        internal val PUBLISH_DATE_FORMAT = SimpleDateFormat("EEEE, d MMMM yyyy", Locale.US)
     }
 }
