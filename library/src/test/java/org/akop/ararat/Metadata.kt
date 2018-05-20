@@ -20,26 +20,15 @@
 
 package org.akop.ararat
 
-import org.akop.ararat.io.PuzFormatter
-import org.junit.Test
 
-
-class TestPuzFormatter: BaseTest() {
-
-    @Test
-    fun crossword_testRead() {
-        val crossword = loadResource("res/puzzle.puz", PuzFormatter())
-        assertMetadata(crossword, Metadata(
-                width = 15,
-                height = 15,
-                squareCount = 191,
-                title = "Double A's",
-                flags = 0,
-                description = null,
-                author = "Ben Tausig",
-                copyright = "",
-                comment = "",
-                date = 0,
-                hash = "8d205cdebc52f5b65fd8b3ff5f6962fcfe211a01"))
-    }
-}
+data class Metadata(val width: Int,
+                    val height: Int,
+                    val squareCount: Int,
+                    val flags: Int,
+                    val title: String?,
+                    val description: String?,
+                    val author: String?,
+                    val copyright: String?,
+                    val comment: String?,
+                    val date: Long,
+                    val hash: String)

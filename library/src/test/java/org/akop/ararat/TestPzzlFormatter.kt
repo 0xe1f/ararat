@@ -20,26 +20,49 @@
 
 package org.akop.ararat
 
-import org.akop.ararat.io.PuzFormatter
+import org.akop.ararat.io.PzzlFormatter
 import org.junit.Test
 
 
-class TestPuzFormatter: BaseTest() {
+class TestPzzlFormatter: BaseTest() {
 
     @Test
     fun crossword_testRead() {
-        val crossword = loadResource("res/puzzle.puz", PuzFormatter())
-        assertMetadata(crossword, Metadata(
+        val crossword = loadResource("res/nytsyncrossword.pzzl", PzzlFormatter())
+        assertMetadata(crossword, metadata)
+        assertLayout(crossword, Array(layout.size) {
+            layout[it].chunked(1).map { when (it) { "#" -> null else -> it } }.toTypedArray()
+        })
+    }
+
+    companion object {
+        val metadata = Metadata(
                 width = 15,
                 height = 15,
-                squareCount = 191,
-                title = "Double A's",
+                squareCount = 193,
+                title = "NY Times, Wed, May 18, 2016",
                 flags = 0,
                 description = null,
-                author = "Ben Tausig",
-                copyright = "",
-                comment = "",
+                author = "Timothy Polin / Will Shortz",
+                copyright = null,
+                comment = null,
                 date = 0,
-                hash = "8d205cdebc52f5b65fd8b3ff5f6962fcfe211a01"))
+                hash = "b789ce239187737dca1d81dd6b3b96c1628397b0")
+        val layout = arrayOf(
+                "BATS#OHYES#GIST",
+                "EURO#PAULA#ALPO",
+                "STEPHENKINGBOOK",
+                "TOERING#TKO#VIE",
+                "###ATL#SEINFELD",
+                "IRONSIDE#NEAP##",
+                "DOYOUNEED##BANS",
+                "IDS#PENTADS#ROI",
+                "GETS##SOMETHING",
+                "##EATS#INSEASON",
+                "PARTYHAT#SRI###",
+                "ARC#PUP#MEERKAT",
+                "PERSONALPRONOUN",
+                "ESAU#TREAT#ECRU",
+                "ROBE#STOAS#THAT")
     }
 }

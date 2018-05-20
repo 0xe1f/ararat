@@ -1,4 +1,4 @@
-// Copyright (c) 2014-2016 Akop Karapetyan
+// Copyright (c) Akop Karapetyan
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -18,19 +18,28 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-package org.akop.ararat.io;
+package org.akop.ararat
+
+import org.akop.ararat.io.WSJFormatter
+import org.junit.Test
 
 
-public class FormatException
-		extends RuntimeException
-{
-	public FormatException(String message)
-	{
-		super(message);
-	}
+class TestWSJFormatter: BaseTest() {
 
-	public FormatException(String message, Throwable cause)
-	{
-		super(message, cause);
-	}
+    @Test
+    fun crossword_testRead() {
+        val crossword = loadResource("res/wsj.json", WSJFormatter())
+        assertMetadata(crossword, Metadata(
+                width = 15,
+                height = 15,
+                squareCount = 185,
+                title = "That Smarts!",
+                flags = 0,
+                description = "",
+                author = "By Dan Fisher/Edited by Mike Shenk",
+                copyright = "The Wall Street Journal",
+                comment = null,
+                date = 1525676400000,
+                hash = "14f52e52fb2ad08278c92aae1962f8ca270b11ec"))
+    }
 }

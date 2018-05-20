@@ -61,4 +61,5 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     testImplementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     testImplementation 'com.github.0xe1f:kotx:1.0.7'
+    testImplementation 'org.json:json:20160212'
 }

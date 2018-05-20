@@ -12,4 +12,4 @@ android:
     - extra-google-m2repository
 
 script:
-  - ./gradlew test --console=plain
+  - ./gradlew -p library test --console=plain

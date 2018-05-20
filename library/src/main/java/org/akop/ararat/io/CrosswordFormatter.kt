@@ -1,4 +1,4 @@
-// Copyright (c) 2014-2016 Akop Karapetyan
+// Copyright (c) Akop Karapetyan
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -18,23 +18,24 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-package org.akop.ararat.io;
+package org.akop.ararat.io
+
+import org.akop.ararat.core.Crossword
+
+import java.io.IOException
+import java.io.InputStream
+import java.io.OutputStream
 
 
-import org.akop.ararat.core.Crossword;
+interface CrosswordFormatter {
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+    fun setEncoding(encoding: String)
+    @Throws(IOException::class)
+    fun read(builder: Crossword.Builder, inputStream: InputStream)
 
-public interface CrosswordFormatter
-{
-	void setEncoding(String encoding);
-	void read(Crossword.Builder builder, InputStream inputStream)
-			throws IOException;
-	void write(Crossword crossword, OutputStream outputStream)
-			throws IOException;
+    @Throws(IOException::class)
+    fun write(crossword: Crossword, outputStream: OutputStream)
 
-	boolean canRead();
-	boolean canWrite();
+    fun canRead(): Boolean
+    fun canWrite(): Boolean
 }

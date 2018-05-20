@@ -22,6 +22,7 @@ package org.akop.ararat
 
 import org.akop.ararat.core.Crossword
 import org.akop.ararat.io.CrosswordFormatter
+import org.junit.Assert
 
 import java.io.File
 
@@ -33,6 +34,32 @@ open class BaseTest {
         val resource = javaClass.classLoader.getResource(path)
         return File(resource!!.path).inputStream().use {
             Crossword.Builder().apply { formatter.read(this, it) }.build()
+        }
+    }
+
+    protected fun assertMetadata(crossword: Crossword, expected: Metadata) {
+        println("Checking metadata: '${crossword.title}'")
+        Assert.assertEquals("Width mismatch!", expected.width, crossword.width)
+        Assert.assertEquals("Height mismatch!", expected.height, crossword.height)
+        Assert.assertEquals("SquareCount mismatch!", expected.squareCount, crossword.squareCount)
+        Assert.assertEquals("Flag mismatch!", expected.flags, crossword.flags)
+        Assert.assertEquals("Title mismatch!", expected.title, crossword.title)
+        Assert.assertEquals("Description mismatch!", expected.description, crossword.description)
+        Assert.assertEquals("Author mismatch!", expected.author, crossword.author)
+        Assert.assertEquals("Copyright mismatch!", expected.copyright, crossword.copyright)
+        Assert.assertEquals("Comment mismatch!", expected.comment, crossword.comment)
+        Assert.assertEquals("Date mismatch!", expected.date, crossword.date)
+        Assert.assertEquals("Hash mismatch!", expected.hash, crossword.hash)
+    }
+
+    protected fun assertLayout(crossword: Crossword, expected: Array<Array<String?>>) {
+        println("Checking layout: '${crossword.title}'")
+        crossword.cellMap.forEachIndexed { i, actualRow ->
+            val expectedRow = expected[i]
+            actualRow.forEachIndexed { j, actualCell ->
+                val expectedCell = expectedRow[j]
+                Assert.assertEquals("Square mismatch ($i,$j)", expectedCell, actualCell?.chars)
+            }
         }
     }
 }

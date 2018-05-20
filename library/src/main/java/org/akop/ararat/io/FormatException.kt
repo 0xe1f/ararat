@@ -18,28 +18,10 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-package org.akop.ararat
-
-import org.akop.ararat.io.PuzFormatter
-import org.junit.Test
+package org.akop.ararat.io
 
 
-class TestPuzFormatter: BaseTest() {
+class FormatException(message: String, cause: Throwable?) : RuntimeException(message, cause) {
 
-    @Test
-    fun crossword_testRead() {
-        val crossword = loadResource("res/puzzle.puz", PuzFormatter())
-        assertMetadata(crossword, Metadata(
-                width = 15,
-                height = 15,
-                squareCount = 191,
-                title = "Double A's",
-                flags = 0,
-                description = null,
-                author = "Ben Tausig",
-                copyright = "",
-                comment = "",
-                date = 0,
-                hash = "8d205cdebc52f5b65fd8b3ff5f6962fcfe211a01"))
-    }
+    constructor(message: String) : this(message, null)
 }
