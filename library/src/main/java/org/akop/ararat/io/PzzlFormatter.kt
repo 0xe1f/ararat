@@ -160,8 +160,9 @@ class PzzlFormatter : CrosswordFormatter {
 
         (0..cellMap.lastIndex).forEach { i ->
             var allEmpty = true
-            (0..cellMap[i].lastIndex).forEach { j ->
-                if (cellMap[i][j] == null) return
+            (0..cellMap[i].lastIndex).forEach inner@ { j ->
+                if (cellMap[i][j] == null) return@inner
+
                 allEmpty = false
                 var incremented = false
                 if ((j == 0 || j > 0 && cellMap[i][j - 1] == null)
