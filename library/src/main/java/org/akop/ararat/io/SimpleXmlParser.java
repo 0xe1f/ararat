@@ -20,8 +20,6 @@
 
 package org.akop.ararat.io;
 
-import android.util.Xml;
-
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
@@ -31,8 +29,11 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.Stack;
 
+
 abstract class SimpleXmlParser
 {
+	private final String XML_RELAXED = "http://xmlpull.org/v1/doc/features.html#relaxed";
+
 	public static final class SimpleXmlPath
 	{
 		private List<String> mList;
@@ -124,7 +125,7 @@ abstract class SimpleXmlParser
 
 		XmlPullParser parser = factory.newPullParser();
 		parser.setInput(inputStream, "UTF-8");
-		parser.setFeature(Xml.FEATURE_RELAXED, true);
+		parser.setFeature(XML_RELAXED, true);
 
 		int eventType = parser.getEventType();
 		while (eventType != XmlPullParser.END_DOCUMENT) {

@@ -60,4 +60,10 @@ open class BaseTest {
             }
         }
     }
+
+    protected fun dumpLayout(crossword: Crossword) {
+        crossword.cellMap.forEach { row ->
+            println(row.toList().map { it?.chars ?: "-" }.joinToString(""))
+        }
+    }
 }
