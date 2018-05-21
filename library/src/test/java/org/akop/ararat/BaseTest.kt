@@ -66,4 +66,9 @@ open class BaseTest {
             println(row.toList().map { it?.chars ?: "-" }.joinToString(""))
         }
     }
+
+    protected fun dumpHints(crossword: Crossword) {
+        crossword.wordsAcross.forEach { println(it) }
+        crossword.wordsDown.forEach { println(it) }
+    }
 }
