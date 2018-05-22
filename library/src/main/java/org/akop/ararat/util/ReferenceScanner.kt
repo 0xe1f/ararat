@@ -32,8 +32,7 @@ object ReferenceScanner {
     private const val WORD_DOWN_EN = "Down"
 
     private val NUMBER_FINDER = Pattern.compile("\\b(\\d{1,3})\\b")
-    private val DIRECTION_FINDER_EN = Pattern.compile("((?:"
-            + WORD_ACROSS_EN + ")|(?:" + WORD_DOWN_EN + "))",
+    private val DIRECTION_FINDER_EN = Pattern.compile("((?:\\b$WORD_ACROSS_EN\\b)|(?:\\b$WORD_DOWN_EN\\b))",
             Pattern.CASE_INSENSITIVE)
 
     data class WordReference(val number: Int = 0,
@@ -49,10 +48,8 @@ object ReferenceScanner {
     }
 
     @JvmStatic
-    fun findReferences(hint: String?,
-                       crossword: Crossword): List<WordReference> {
+    fun findReferences(hint: String, crossword: Crossword): List<WordReference> {
         val refs = ArrayList<WordReference>()
-        if (hint == null) return refs
 
         val m = NUMBER_FINDER.matcher(hint)
         while (m.find()) {

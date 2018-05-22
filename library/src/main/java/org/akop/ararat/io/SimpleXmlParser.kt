@@ -99,12 +99,11 @@ abstract class SimpleXmlParser {
 
     protected open fun onTextContent(path: SimpleXmlPath, text: String) {}
 
-    protected fun getIntValue(parser: XmlPullParser, name: String, defaultValue: Int): Int {
-        val value = parser.getAttributeValue(null, name)
-                ?: return defaultValue
+    protected fun XmlPullParser.intValue(name: String, defaultValue: Int): Int =
+            stringValue(name)?.toIntOrNull() ?: defaultValue
 
-        return Integer.parseInt(value)
-    }
+    protected fun XmlPullParser.stringValue(name: String): String? =
+            getAttributeValue(null, name)
 
     companion object {
         private const val XML_RELAXED = "http://xmlpull.org/v1/doc/features.html#relaxed"

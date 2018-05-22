@@ -61,12 +61,29 @@ open class BaseTest {
         }
     }
 
+    @Suppress("unused")
+    protected fun dumpMetadata(crossword: Crossword) {
+        println("Width: ${crossword.width}")
+        println("Height: ${crossword.height}")
+        println("SquareCount: ${crossword.squareCount}")
+        println("Flags: ${crossword.flags}")
+        println("Title: '${crossword.title}'")
+        println("Description: '${crossword.description}'")
+        println("Author: '${crossword.author}'")
+        println("Copyright: '${crossword.copyright}'")
+        println("Comment: '${crossword.comment}'")
+        println("Date: ${crossword.date}")
+        println("Hash: '${crossword.hash}'")
+    }
+
+    @Suppress("unused")
     protected fun dumpLayout(crossword: Crossword) {
         crossword.cellMap.forEach { row ->
-            println(row.toList().map { it?.chars ?: "-" }.joinToString(""))
+            println(row.toList().joinToString("") { it?.chars ?: "-" })
         }
     }
 
+    @Suppress("unused")
     protected fun dumpHints(crossword: Crossword) {
         crossword.wordsAcross.forEach { println(it) }
         crossword.wordsDown.forEach { println(it) }

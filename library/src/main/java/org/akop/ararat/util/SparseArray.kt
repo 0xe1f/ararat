@@ -40,8 +40,11 @@ internal class SparseArray<E>(capacity: Int = DEFAULT_CAPACITY) {
 
     operator fun get(key: Int): E? = get(key, null)
 
-    operator fun set(key: Int, value: E) {
-        put(key, value)
+    operator fun set(key: Int, value: E) { put(key, value) }
+
+    @Suppress("UNCHECKED_CAST")
+    fun forEach(block: (k: Int, v: E) -> Unit) {
+        (0 until size).forEach { block(keys[it], values[it] as E) }
     }
 
     fun put(key: Int, value: E) {
