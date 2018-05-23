@@ -91,7 +91,7 @@ class CrosswordRenderer(context: Context) {
                         cellRect.bottom - rp.answerMetrics.descent, rp.answerTextPaint)
             }
             rp.flags and FLAG_RENDER_ATTEMPT == FLAG_RENDER_ATTEMPT -> {
-                rp.state.charAt(row, col)?.let {
+                rp.state?.charAt(row, col)?.let {
                     val text = if (it.length > 8) it.substring(0, 8) + "…" else it
                     var textSize = rp.answerTextSize
                     var textWidth: Float
@@ -114,7 +114,7 @@ class CrosswordRenderer(context: Context) {
     }
 
     fun renderToCanvas(canvas: Canvas, crossword: Crossword,
-                       state: CrosswordState, flags: Int) {
+                       state: CrosswordState?, flags: Int) {
         val rp = RenderParams(canvas, crossword, state, flags)
         val puzzleRect = RectF(0f, 0f, rp.bitmapWidth.toFloat(),
                 rp.bitmapHeight.toFloat())
@@ -141,7 +141,7 @@ class CrosswordRenderer(context: Context) {
 
     @Throws(IOException::class)
     fun renderToFile(path: String,
-                     crossword: Crossword, state: CrosswordState,
+                     crossword: Crossword, state: CrosswordState?,
                      width: Int, height: Int, flags: Int) {
         val bmp = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565)
         renderToCanvas(Canvas(bmp), crossword, state, flags)
@@ -153,7 +153,7 @@ class CrosswordRenderer(context: Context) {
 
     private inner class RenderParams(val canvas: Canvas,
                                      val crossword: Crossword,
-                                     val state: CrosswordState,
+                                     val state: CrosswordState?,
                                      val flags: Int) {
 
         val cellDim: Float
