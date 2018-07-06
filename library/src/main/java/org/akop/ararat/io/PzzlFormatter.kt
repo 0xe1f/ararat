@@ -86,16 +86,13 @@ class PzzlFormatter : CrosswordFormatter {
 
                     var cell: Cell? = null
                     var p = 0
-                    i = 0
+                    i = -1
 
                     inner@
-                    while (i <= line.lastIndex) {
+                    while (++i <= line.lastIndex) {
                         val ch = line[i]
                         when (ch) {
-                            '.' -> {
-                                i++
-                                continue@inner
-                            }
+                            '.' -> continue@inner
                             '#' -> {}
                             '%' -> {
                                 cell = Cell(attrs = Crossword.Cell.ATTR_CIRCLED)
@@ -126,7 +123,6 @@ class PzzlFormatter : CrosswordFormatter {
 
                         cellMap!![row][p++] = cell
                         cell = null
-                        i++
                     }
 
                     row++
