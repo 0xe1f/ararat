@@ -52,7 +52,7 @@ class CrosswordStateWriter @Throws(IOException::class) constructor(stream: Outpu
         outStream.writeInt(state.selection)
         outStream.writeObject(state.charMatrix.flatten().toTypedArray())
         outStream.writeObject(IntArray(state.height * state.width) {
-            state.attrMatrix[it / state.height][it % state.height] })
+            state.attrMatrix[it / state.width][it % state.width] })
     }
 
     @Throws(IOException::class)

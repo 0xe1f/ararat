@@ -73,16 +73,16 @@ class CrosswordStateReader @Throws(IOException::class) constructor(stream: Input
         if (version <= 1) {
             (inStream.readObject() as CharArray)
                     .forEachIndexed { i, c ->
-                        state.charMatrix[i / height][i % height] = if (c != '\u0000') c.toString() else null }
+                        state.charMatrix[i / width][i % width] = if (c != '\u0000') c.toString() else null }
         } else {
             @Suppress("UNCHECKED_CAST")
             (inStream.readObject() as Array<String?>)
                     .forEachIndexed { i, c ->
-                        state.charMatrix[i / height][i % height] = c }
+                        state.charMatrix[i / width][i % width] = c }
         }
 
         (inStream.readObject() as IntArray)
-                .forEachIndexed { i, a -> state.attrMatrix[i / height][i % height] = a }
+                .forEachIndexed { i, a -> state.attrMatrix[i / width][i % width] = a }
 
         return state
     }
