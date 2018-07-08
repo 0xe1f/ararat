@@ -99,6 +99,29 @@ public class CrosswordView
 				Crossword.Word word, int cell);
 	}
 
+	public interface InputValidator
+	{
+		boolean isCharAllowed(String ch);
+	}
+
+	private InputValidator defaultInputValidator = new InputValidator()
+	{
+		@Override
+		public boolean isCharAllowed(String ch)
+		{
+			if (ch != null) {
+				String upper = ch.toUpperCase();
+				for (int i = 0, n = ch.length(); i < n; i++) {
+					if (!isAcceptableChar(upper.charAt(i))) {
+						return false;
+					}
+				}
+			}
+
+			return true;
+		}
+	};
+
 	private static final Cell[][] EMPTY_CELLS = new Cell[0][0];
 
 	private static final int NAVIGATION_SCROLL_DURATION_MS = 500;
@@ -198,6 +221,7 @@ public class CrosswordView
 	private OnSelectionChangeListener mSelectionChangeListener;
 	private OnStateChangeListener mStateChangeListener;
 	private OnLongPressListener mLongpressListener;
+	private InputValidator mInputValidator = defaultInputValidator;
 
 	private CrosswordInputConnection.OnInputEventListener mInputEventListener
 			= new CrosswordInputConnection.OnInputEventListener()
@@ -733,7 +757,8 @@ public class CrosswordView
 						undoBuf[k][l] = vwCell.mChar;
 					}
 					String ch = Cell.canonicalize(charMatrix[k][l]);
-					if (!TextUtils.equals(ch, vwCell.mChar) && isAcceptableChar(ch)) {
+					if (!TextUtils.equals(ch, vwCell.mChar)
+							&& mInputValidator.isCharAllowed(ch)) {
 						boolean cellChanged = !TextUtils.equals(vwCell.mChar, ch);
 						if (cellChanged) {
 							vwCell.setChar(ch);
@@ -868,6 +893,11 @@ public class CrosswordView
 	public void setOnLongPressListener(OnLongPressListener listener)
 	{
 		mLongpressListener = listener;
+	}
+
+	public void setInputValidator(InputValidator validator)
+	{
+		mInputValidator = (validator != null ? validator : defaultInputValidator);
 	}
 
 	public void selectPreviousWord()
@@ -1096,7 +1126,7 @@ public class CrosswordView
 		}
 
 		String sch = String.valueOf(ch);
-		if (mSelection != null && isAcceptableChar(ch)) {
+		if (mSelection != null && mInputValidator.isCharAllowed(sch)) {
 			clearUndoBufferIfNeeded(mSelection);
 
 			int row = mSelection.getRow();
@@ -1589,22 +1619,6 @@ public class CrosswordView
 
 		// Invalidate the view
 		invalidate();
-	}
-
-	private boolean isAcceptableChar(String ch)
-	{
-		if (ch == null) {
-			return true;
-		}
-
-		String upper = ch.toUpperCase();
-		for (int i = 0, n = ch.length(); i < n; i++) {
-			if (!isAcceptableChar(upper.charAt(i))) {
-				return false;
-			}
-		}
-
-		return true;
 	}
 
 	private boolean isAcceptableChar(char ch)
