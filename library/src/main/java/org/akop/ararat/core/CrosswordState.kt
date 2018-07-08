@@ -80,9 +80,9 @@ class CrosswordState internal constructor(val width: Int = 0,
             squaresUnknown = source.readInt().toShort(),
             squareCount = source.readInt().toShort()) {
         source.createStringArray()
-                .forEachIndexed { i, c -> charMatrix[i / height][i % height] = c }
+                .forEachIndexed { i, c -> charMatrix[i / width][i % width] = c }
         source.createIntArray()
-                .forEachIndexed { i, a -> attrMatrix[i / height][i % height] = a }
+                .forEachIndexed { i, a -> attrMatrix[i / width][i % width] = a }
     }
 
     // FIXME: unneeded
@@ -135,7 +135,7 @@ class CrosswordState internal constructor(val width: Int = 0,
         dest.writeInt(squaresUnknown.toInt())
         dest.writeInt(squareCount.toInt())
         dest.writeStringArray(charMatrix.flatten().toTypedArray())
-        dest.writeIntArray(IntArray(height * width) { attrMatrix[it / height][it % height] })
+        dest.writeIntArray(IntArray(height * width) { attrMatrix[it / width][it % width] })
     }
 
     companion object {
