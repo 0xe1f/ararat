@@ -758,7 +758,7 @@ public class CrosswordView
 					}
 					String ch = Cell.canonicalize(charMatrix[k][l]);
 					if (!TextUtils.equals(ch, vwCell.mChar)
-							&& mInputValidator.isCharAllowed(ch)) {
+							&& (ch == null || mInputValidator.isCharAllowed(ch))) {
 						boolean cellChanged = !TextUtils.equals(vwCell.mChar, ch);
 						if (cellChanged) {
 							vwCell.setChar(ch);
