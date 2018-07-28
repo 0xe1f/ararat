@@ -163,7 +163,7 @@ class PuzFormatter : CrosswordFormatter {
                         val sep = it.indexOf(':')
                         when {
                             sep == -1 -> throw FormatException("Missing rebus delimiter")
-                            sep < 2 -> throw FormatException("Invalid rebus index")
+                            sep < 1 -> throw FormatException("Invalid rebus index ($sep)")
                             sep + 1 >= it.length -> throw FormatException("Missing rebus solution")
                             else -> {
                                 var ixStart = 0
