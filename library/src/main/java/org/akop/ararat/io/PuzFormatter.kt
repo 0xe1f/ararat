@@ -162,7 +162,8 @@ class PuzFormatter : CrosswordFormatter {
                     String(data).split(';').forEach {
                         val sep = it.indexOf(':')
                         when {
-                            sep == -1 -> throw FormatException("Missing rebus delimiter")
+                            it.isEmpty() -> return@forEach
+                            sep == -1 -> throw FormatException("Missing rebus delimiter (in:$it)")
                             sep < 1 -> throw FormatException("Invalid rebus index ($sep)")
                             sep + 1 >= it.length -> throw FormatException("Missing rebus solution")
                             else -> {
