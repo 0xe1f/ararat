@@ -4,6 +4,7 @@ apply from: 'maven-push.gradle'
 
 android {
     compileSdkVersion 28
+    buildToolsVersion '28.0.3'
 
     compileOptions {
         kotlinOptions.freeCompilerArgs += ['-module-name', "$GROUP.$POM_ARTIFACT_ID"]
