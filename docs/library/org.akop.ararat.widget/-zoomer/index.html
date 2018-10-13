@@ -1,0 +1,95 @@
+<HTML>
+<HEAD>
+<meta charset="UTF-8">
+<title>Zoomer - library</title>
+<link rel="stylesheet" href="../../../style.css">
+</HEAD>
+<BODY>
+<a href="../../index.html">library</a>&nbsp;/&nbsp;<a href="../index.html">org.akop.ararat.widget</a>&nbsp;/&nbsp;<a href="./index.html">Zoomer</a><br/>
+<br/>
+<h1>Zoomer</h1>
+<code><span class="keyword">class </span><span class="identifier">Zoomer</span></code>
+<p>A simple class that animates double-touch zoom gestures. Functionally similar to a [ ].</p>
+<h3>Constructors</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="-init-.html">&lt;init&gt;</a></p>
+</td>
+<td>
+<code><span class="identifier">Zoomer</span><span class="symbol">(</span><span class="identifier" id="org.akop.ararat.widget.Zoomer$<init>(android.content.Context)/context">context</span><span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/android/content/Context.html"><span class="identifier">Context</span></a><span class="symbol">)</span></code>
+<p>A simple class that animates double-touch zoom gestures. Functionally similar to a [ ].</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3>Properties</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="curr-zoom.html">currZoom</a></p>
+</td>
+<td>
+<code><span class="keyword">var </span><span class="identifier">currZoom</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-float/index.html"><span class="identifier">Float</span></a></code>
+<p>The current zoom value; computed by <a href="#">.computeZoom</a>.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="is-finished.html">isFinished</a></p>
+</td>
+<td>
+<code><span class="keyword">var </span><span class="identifier">isFinished</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a></code>
+<p>Returns whether the zoomer has finished zooming.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3>Functions</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="abort-animation.html">abortAnimation</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">abortAnimation</span><span class="symbol">(</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code>
+<p>Aborts the animation, setting the current zoom value to the ending value.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="compute-zoom.html">computeZoom</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">computeZoom</span><span class="symbol">(</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a></code>
+<p>Computes the current zoom level, returning true if the zoom is still active and false if the
+zoom has finished.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="force-finished.html">forceFinished</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">forceFinished</span><span class="symbol">(</span><span class="identifier" id="org.akop.ararat.widget.Zoomer$forceFinished(kotlin.Boolean)/finished">finished</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code>
+<p>Forces the zoom finished state to the given value. Unlike <a href="#">.abortAnimation</a>, the
+current zoom value isn't set to the ending value.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="start-zoom.html">startZoom</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">startZoom</span><span class="symbol">(</span><span class="identifier" id="org.akop.ararat.widget.Zoomer$startZoom(kotlin.Float)/endZoom">endZoom</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-float/index.html"><span class="identifier">Float</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code>
+<p>Starts a zoom from 1.0 to (1.0 + endZoom). That is, to zoom from 100% to 125%, endZoom should
+by 0.25f.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</BODY>
+</HTML>

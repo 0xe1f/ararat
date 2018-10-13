@@ -51,13 +51,8 @@ crosswordView.crossword = readPuzzle()
 Existing puzzles are usually read from a stream, e.g.:
 
 ```kotlin
-fun readPuzzle(): Crossword {
-    resources.openRawResource(R.raw.puzzle).use {
-        val cb = Crossword.Builder()
-        PuzFormatter().read(cb, it)
-
-        return cb.build()
-    }
+fun readPuzzle(): Crossword = resources.openRawResource(R.raw.puzzle).use { s ->
+    buildCrossword { PuzFormatter().read(this, s) }
 }
 ```
 

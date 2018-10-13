@@ -20,7 +20,7 @@ import android.text.TextUtils
 import java.security.MessageDigest
 
 
-fun ByteArray.toHexString(): String {
+internal fun ByteArray.toHexString(): String {
     val hexArray = "0123456789abcdef".toCharArray()
     val hexChars = CharArray(size * 2)
     for (i in 0 until size) {
@@ -32,8 +32,8 @@ fun ByteArray.toHexString(): String {
     return String(hexChars)
 }
 
-fun ByteArray.sha1(): ByteArray = MessageDigest.getInstance("SHA-1").apply {
+internal fun ByteArray.sha1(): ByteArray = MessageDigest.getInstance("SHA-1").apply {
     update(this@sha1, 0, size)
 }.digest()
 
-fun String.htmlEncode(): String = TextUtils.htmlEncode(this)
+internal fun String.htmlEncode(): String = TextUtils.htmlEncode(this)

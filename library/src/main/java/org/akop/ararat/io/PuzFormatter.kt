@@ -32,15 +32,31 @@ import java.nio.charset.Charset
 import java.util.HashSet
 
 
-// Based on https://code.google.com/p/puz/wiki/FileFormat
+/**
+ * [PuzFormatter] reads puzzles in Across Lite's .puz format, which is arguably
+ * the most popular format for exchanging crosswords.
+ *
+ * Vast majority of the code here is based on documentation found at
+ * https://code.google.com/p/puz/wiki/FileFormat
+ *
+ * In addition to the usual hint and layout data, .puz can also optionally
+ * contain state (partially filled in squares), attributes (whether a square
+ * is circled and/or has no solution), and rebuses (squares containing multiple
+ * characters). It can also contain extra text data (usually referred to as
+ * "notepad"), and be locked with a simple scrambling mechanism, which will
+ * require a 4-digit integer code to unscramble square contents.
+ *
+ * .puz is a binary format, and uses the Latin-1 encoding by default
+ * (ISO-8859-1).
+ */
 class PuzFormatter : CrosswordFormatter {
 
     private var encoding = DEFAULT_ENCODING
 
     /**
-     * Sets the text encoding for the stream. Note that not all encodings will
-     * likely work (e.g. multibytes like Unicode), as .puz is a binary file
-     * format.
+     * Sets the text encoding for the stream. Note that some encodings may not
+     * be valid and/or may result in unexpected behavior - multibyte encodings
+     * in particular.
      *
      * Default encoding is ISO-8859-1.
      */

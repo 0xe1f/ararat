@@ -1,0 +1,119 @@
+<HTML>
+<HEAD>
+<meta charset="UTF-8">
+<title>CrosswordCompilerFormatter - library</title>
+<link rel="stylesheet" href="../../../style.css">
+</HEAD>
+<BODY>
+<a href="../../index.html">library</a>&nbsp;/&nbsp;<a href="../index.html">org.akop.ararat.io</a>&nbsp;/&nbsp;<a href="./index.html">CrosswordCompilerFormatter</a><br/>
+<br/>
+<h1>CrosswordCompilerFormatter</h1>
+<code><span class="keyword">class </span><span class="identifier">CrosswordCompilerFormatter</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="../-simple-xml-parser/index.html"><span class="identifier">SimpleXmlParser</span></a><span class="symbol">, </span><a href="../-crossword-formatter/index.html"><span class="identifier">CrosswordFormatter</span></a></code>
+<h3>Constructors</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="-init-.html">&lt;init&gt;</a></p>
+</td>
+<td>
+<code><span class="identifier">CrosswordCompilerFormatter</span><span class="symbol">(</span><span class="symbol">)</span></code></td>
+</tr>
+</tbody>
+</table>
+<h3>Functions</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="can-read.html">canRead</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">canRead</span><span class="symbol">(</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a></code>
+<p>Returns true if the formatter supports reading from a stream.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="can-write.html">canWrite</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">canWrite</span><span class="symbol">(</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a></code>
+<p>Returns true if the formatter supports writing to a stream.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="on-start-element.html">onStartElement</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">onStartElement</span><span class="symbol">(</span><span class="identifier" id="org.akop.ararat.io.CrosswordCompilerFormatter$onStartElement(org.akop.ararat.io.SimpleXmlParser.SimpleXmlPath, org.xmlpull.v1.XmlPullParser)/path">path</span><span class="symbol">:</span>&nbsp;<a href="../-simple-xml-parser/-simple-xml-path/index.html"><span class="identifier">SimpleXmlPath</span></a><span class="symbol">, </span><span class="identifier" id="org.akop.ararat.io.CrosswordCompilerFormatter$onStartElement(org.akop.ararat.io.SimpleXmlParser.SimpleXmlPath, org.xmlpull.v1.XmlPullParser)/parser">parser</span><span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/org/xmlpull/v1/XmlPullParser.html"><span class="identifier">XmlPullParser</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="on-text-content.html">onTextContent</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">onTextContent</span><span class="symbol">(</span><span class="identifier" id="org.akop.ararat.io.CrosswordCompilerFormatter$onTextContent(org.akop.ararat.io.SimpleXmlParser.SimpleXmlPath, kotlin.String)/path">path</span><span class="symbol">:</span>&nbsp;<a href="../-simple-xml-parser/-simple-xml-path/index.html"><span class="identifier">SimpleXmlPath</span></a><span class="symbol">, </span><span class="identifier" id="org.akop.ararat.io.CrosswordCompilerFormatter$onTextContent(org.akop.ararat.io.SimpleXmlParser.SimpleXmlPath, kotlin.String)/text">text</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="read.html">read</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">read</span><span class="symbol">(</span><span class="identifier" id="org.akop.ararat.io.CrosswordCompilerFormatter$read(org.akop.ararat.core.Crossword.Builder, java.io.InputStream)/builder">builder</span><span class="symbol">:</span>&nbsp;<a href="../../org.akop.ararat.core/-crossword/-builder/index.html"><span class="identifier">Builder</span></a><span class="symbol">, </span><span class="identifier" id="org.akop.ararat.io.CrosswordCompilerFormatter$read(org.akop.ararat.core.Crossword.Builder, java.io.InputStream)/inputStream">inputStream</span><span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/java/io/InputStream.html"><span class="identifier">InputStream</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code>
+<p>Reads contents of an <a href="read.html#org.akop.ararat.io.CrosswordCompilerFormatter$read(org.akop.ararat.core.Crossword.Builder, java.io.InputStream)/inputStream">inputStream</a> into a <a href="read.html#org.akop.ararat.io.CrosswordCompilerFormatter$read(org.akop.ararat.core.Crossword.Builder, java.io.InputStream)/builder">builder</a>. Check <a href="can-read.html">canRead</a>
+to ensure reading is supported.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="set-encoding.html">setEncoding</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">setEncoding</span><span class="symbol">(</span><span class="identifier" id="org.akop.ararat.io.CrosswordCompilerFormatter$setEncoding(kotlin.String)/encoding">encoding</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code>
+<p>Sets the stream <a href="set-encoding.html#org.akop.ararat.io.CrosswordCompilerFormatter$setEncoding(kotlin.String)/encoding">encoding</a> for subsequent reads/writes. Almost all
+formatters are expected to have a default encoding, and not all will
+support all encodings, due to format restrictions or other reasons.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><a href="write.html">write</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">write</span><span class="symbol">(</span><span class="identifier" id="org.akop.ararat.io.CrosswordCompilerFormatter$write(org.akop.ararat.core.Crossword, java.io.OutputStream)/crossword">crossword</span><span class="symbol">:</span>&nbsp;<a href="../../org.akop.ararat.core/-crossword/index.html"><span class="identifier">Crossword</span></a><span class="symbol">, </span><span class="identifier" id="org.akop.ararat.io.CrosswordCompilerFormatter$write(org.akop.ararat.core.Crossword, java.io.OutputStream)/outputStream">outputStream</span><span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/java/io/OutputStream.html"><span class="identifier">OutputStream</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code>
+<p>Writes contents of a <a href="write.html#org.akop.ararat.io.CrosswordCompilerFormatter$write(org.akop.ararat.core.Crossword, java.io.OutputStream)/crossword">crossword</a> to an <a href="write.html#org.akop.ararat.io.CrosswordCompilerFormatter$write(org.akop.ararat.core.Crossword, java.io.OutputStream)/outputStream">outputStream</a>. Check <a href="can-write.html">canWrite</a>
+to ensure reading is supported.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3>Inherited Functions</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="../-simple-xml-parser/int-value.html">intValue</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><a href="https://developer.android.com/reference/org/xmlpull/v1/XmlPullParser.html"><span class="identifier">XmlPullParser</span></a><span class="symbol">.</span><span class="identifier">intValue</span><span class="symbol">(</span><span class="identifier" id="org.akop.ararat.io.SimpleXmlParser$intValue(org.xmlpull.v1.XmlPullParser, kotlin.String, kotlin.Int)/name">name</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">, </span><span class="identifier" id="org.akop.ararat.io.SimpleXmlParser$intValue(org.xmlpull.v1.XmlPullParser, kotlin.String, kotlin.Int)/defaultValue">defaultValue</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html"><span class="identifier">Int</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html"><span class="identifier">Int</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="../-simple-xml-parser/parse-xml.html">parseXml</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">parseXml</span><span class="symbol">(</span><span class="identifier" id="org.akop.ararat.io.SimpleXmlParser$parseXml(java.io.InputStream)/inputStream">inputStream</span><span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/java/io/InputStream.html"><span class="identifier">InputStream</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="../-simple-xml-parser/string-value.html">stringValue</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><a href="https://developer.android.com/reference/org/xmlpull/v1/XmlPullParser.html"><span class="identifier">XmlPullParser</span></a><span class="symbol">.</span><span class="identifier">stringValue</span><span class="symbol">(</span><span class="identifier" id="org.akop.ararat.io.SimpleXmlParser$stringValue(org.xmlpull.v1.XmlPullParser, kotlin.String)/name">name</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span></code></td>
+</tr>
+</tbody>
+</table>
+</BODY>
+</HTML>

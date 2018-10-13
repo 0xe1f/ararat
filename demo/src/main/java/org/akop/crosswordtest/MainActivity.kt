@@ -53,7 +53,7 @@ class MainActivity : AppCompatActivity(), CrosswordView.OnLongPressListener, Cro
         crosswordView = findViewById(R.id.crossword)
         hint = findViewById(R.id.hint)
 
-        val crossword = readPuzzle(this, R.raw.puzzle)
+        val crossword = readPuzzle(R.raw.puzzle)
 
         title = getString(R.string.title_by_author,
                 crossword.title, crossword.author)
@@ -134,10 +134,9 @@ class MainActivity : AppCompatActivity(), CrosswordView.OnLongPressListener, Cro
         solvedShown = false
     }
 
-    private fun readPuzzle(context: Context, @RawRes resourceId: Int): Crossword {
-        return buildCrossword {
-            PuzFormatter().read(this,
-                    context.resources.openRawResource(resourceId))
+    private fun readPuzzle(@RawRes resourceId: Int): Crossword {
+        return resources.openRawResource(resourceId).use { s ->
+            buildCrossword { PuzFormatter().read(this, s) }
         }
     }
 

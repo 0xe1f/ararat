@@ -1,0 +1,167 @@
+<HTML>
+<HEAD>
+<meta charset="UTF-8">
+<title>Crossword.Word.Builder - library</title>
+<link rel="stylesheet" href="../../../../../style.css">
+</HEAD>
+<BODY>
+<a href="../../../../index.html">library</a>&nbsp;/&nbsp;<a href="../../../index.html">org.akop.ararat.core</a>&nbsp;/&nbsp;<a href="../../index.html">Crossword</a>&nbsp;/&nbsp;<a href="../index.html">Word</a>&nbsp;/&nbsp;<a href="./index.html">Builder</a><br/>
+<br/>
+<h1>Builder</h1>
+<code><span class="keyword">class </span><span class="identifier">Builder</span></code>
+<h3>Constructors</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="-init-.html">&lt;init&gt;</a></p>
+</td>
+<td>
+<code><span class="identifier">Builder</span><span class="symbol">(</span><span class="symbol">)</span></code></td>
+</tr>
+</tbody>
+</table>
+<h3>Properties</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="cells.html">cells</a></p>
+</td>
+<td>
+<code><span class="keyword">val </span><span class="identifier">cells</span><span class="symbol">: </span><a href="https://developer.android.com/reference/java/util/ArrayList.html"><span class="identifier">ArrayList</span></a><span class="symbol">&lt;</span><a href="../../-cell/index.html"><span class="identifier">Cell</span></a><span class="symbol">&gt;</span></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="citation.html">citation</a></p>
+</td>
+<td>
+<code><span class="keyword">var </span><span class="identifier">citation</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="direction.html">direction</a></p>
+</td>
+<td>
+<code><span class="keyword">var </span><span class="identifier">direction</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html"><span class="identifier">Int</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="hint.html">hint</a></p>
+</td>
+<td>
+<code><span class="keyword">var </span><span class="identifier">hint</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="hint-url.html">hintUrl</a></p>
+</td>
+<td>
+<code><span class="keyword">var </span><span class="identifier">hintUrl</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="number.html">number</a></p>
+</td>
+<td>
+<code><span class="keyword">var </span><span class="identifier">number</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html"><span class="identifier">Int</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="start-column.html">startColumn</a></p>
+</td>
+<td>
+<code><span class="keyword">var </span><span class="identifier">startColumn</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html"><span class="identifier">Int</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="start-row.html">startRow</a></p>
+</td>
+<td>
+<code><span class="keyword">var </span><span class="identifier">startRow</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html"><span class="identifier">Int</span></a></code></td>
+</tr>
+</tbody>
+</table>
+<h3>Functions</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="add-cell.html">addCell</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">addCell</span><span class="symbol">(</span><span class="identifier" id="org.akop.ararat.core.Crossword.Word.Builder$addCell(kotlin.Char, kotlin.Int)/ch">ch</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-char/index.html"><span class="identifier">Char</span></a><span class="symbol">, </span><span class="identifier" id="org.akop.ararat.core.Crossword.Word.Builder$addCell(kotlin.Char, kotlin.Int)/attrFlags">attrFlags</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html"><span class="identifier">Int</span></a>&nbsp;<span class="symbol">=</span>&nbsp;0<span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code><br/>
+<code><span class="keyword">fun </span><span class="identifier">addCell</span><span class="symbol">(</span><span class="identifier" id="org.akop.ararat.core.Crossword.Word.Builder$addCell(kotlin.String, kotlin.Int)/chars">chars</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">, </span><span class="identifier" id="org.akop.ararat.core.Crossword.Word.Builder$addCell(kotlin.String, kotlin.Int)/attrFlags">attrFlags</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html"><span class="identifier">Int</span></a>&nbsp;<span class="symbol">=</span>&nbsp;0<span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="build.html">build</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">build</span><span class="symbol">(</span><span class="symbol">)</span><span class="symbol">: </span><a href="../index.html"><span class="identifier">Word</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="set-citation.html">setCitation</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">setCitation</span><span class="symbol">(</span><span class="identifier" id="org.akop.ararat.core.Crossword.Word.Builder$setCitation(kotlin.String)/text">text</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span><span class="symbol">)</span><span class="symbol">: </span><a href="./index.html"><span class="identifier">Builder</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="set-direction.html">setDirection</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">setDirection</span><span class="symbol">(</span><span class="identifier" id="org.akop.ararat.core.Crossword.Word.Builder$setDirection(kotlin.Int)/value">value</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html"><span class="identifier">Int</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="./index.html"><span class="identifier">Builder</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="set-hint.html">setHint</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">setHint</span><span class="symbol">(</span><span class="identifier" id="org.akop.ararat.core.Crossword.Word.Builder$setHint(kotlin.String)/text">text</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span><span class="symbol">)</span><span class="symbol">: </span><a href="./index.html"><span class="identifier">Builder</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="set-hint-url.html">setHintUrl</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">setHintUrl</span><span class="symbol">(</span><span class="identifier" id="org.akop.ararat.core.Crossword.Word.Builder$setHintUrl(kotlin.String)/text">text</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span><span class="symbol">)</span><span class="symbol">: </span><a href="./index.html"><span class="identifier">Builder</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="set-number.html">setNumber</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">setNumber</span><span class="symbol">(</span><span class="identifier" id="org.akop.ararat.core.Crossword.Word.Builder$setNumber(kotlin.Int)/value">value</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html"><span class="identifier">Int</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="./index.html"><span class="identifier">Builder</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="set-start-column.html">setStartColumn</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">setStartColumn</span><span class="symbol">(</span><span class="identifier" id="org.akop.ararat.core.Crossword.Word.Builder$setStartColumn(kotlin.Int)/value">value</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html"><span class="identifier">Int</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="./index.html"><span class="identifier">Builder</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="set-start-row.html">setStartRow</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">setStartRow</span><span class="symbol">(</span><span class="identifier" id="org.akop.ararat.core.Crossword.Word.Builder$setStartRow(kotlin.Int)/value">value</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html"><span class="identifier">Int</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="./index.html"><span class="identifier">Builder</span></a></code></td>
+</tr>
+</tbody>
+</table>
+<h3>Companion Object Properties</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="-n-u-m-b-e-r_-n-o-n-e.html">NUMBER_NONE</a></p>
+</td>
+<td>
+<code><span class="keyword">const</span> <span class="keyword">val </span><span class="identifier">NUMBER_NONE</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html"><span class="identifier">Int</span></a></code></td>
+</tr>
+</tbody>
+</table>
+</BODY>
+</HTML>

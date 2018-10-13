@@ -1,0 +1,12 @@
+$dokka.format:html
+$dokka.linkExtension:html
+
+org.akop.ararat
+org.akop.ararat.core
+org.akop.ararat.graphics
+org.akop.ararat.io
+org.akop.ararat.text.method
+org.akop.ararat.util
+org.akop.ararat.view
+org.akop.ararat.view.inputmethod
+org.akop.ararat.widget

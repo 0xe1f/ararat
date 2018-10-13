@@ -1,0 +1,136 @@
+<HTML>
+<HEAD>
+<meta charset="UTF-8">
+<title>WordReferenceMovementMethod - library</title>
+<link rel="stylesheet" href="../../../style.css">
+</HEAD>
+<BODY>
+<a href="../../index.html">library</a>&nbsp;/&nbsp;<a href="../index.html">org.akop.ararat.text.method</a>&nbsp;/&nbsp;<a href="./index.html">WordReferenceMovementMethod</a><br/>
+<br/>
+<h1>WordReferenceMovementMethod</h1>
+<code><span class="keyword">class </span><span class="identifier">WordReferenceMovementMethod</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/android/text/method/ScrollingMovementMethod.html"><span class="identifier">ScrollingMovementMethod</span></a></code>
+<p>This class is a modified version of LinkMovementMethod that handles
+URL's of form wordRef://direction/number by invoking listener
+OnWordReferenceSelectedListener (if specified)</p>
+<h3>Types</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="-on-word-reference-selected-listener/index.html">OnWordReferenceSelectedListener</a></p>
+</td>
+<td>
+<code><span class="keyword">interface </span><span class="identifier">OnWordReferenceSelectedListener</span></code></td>
+</tr>
+</tbody>
+</table>
+<h3>Constructors</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="-init-.html">&lt;init&gt;</a></p>
+</td>
+<td>
+<code><span class="identifier">WordReferenceMovementMethod</span><span class="symbol">(</span><span class="symbol">)</span></code>
+<p>This class is a modified version of LinkMovementMethod that handles
+URL's of form wordRef://direction/number by invoking listener
+OnWordReferenceSelectedListener (if specified)</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3>Properties</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="word-reference-selected-listener.html">wordReferenceSelectedListener</a></p>
+</td>
+<td>
+<code><span class="keyword">var </span><span class="identifier">wordReferenceSelectedListener</span><span class="symbol">: </span><a href="-on-word-reference-selected-listener/index.html"><span class="identifier">OnWordReferenceSelectedListener</span></a><span class="symbol">?</span></code></td>
+</tr>
+</tbody>
+</table>
+<h3>Functions</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="can-select-arbitrarily.html">canSelectArbitrarily</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">canSelectArbitrarily</span><span class="symbol">(</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="down.html">down</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">down</span><span class="symbol">(</span><span class="identifier" id="org.akop.ararat.text.method.WordReferenceMovementMethod$down(android.widget.TextView, android.text.Spannable)/widget">widget</span><span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/android/widget/TextView.html"><span class="identifier">TextView</span></a><span class="symbol">, </span><span class="identifier" id="org.akop.ararat.text.method.WordReferenceMovementMethod$down(android.widget.TextView, android.text.Spannable)/buffer">buffer</span><span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/android/text/Spannable.html"><span class="identifier">Spannable</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="handle-movement-key.html">handleMovementKey</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">handleMovementKey</span><span class="symbol">(</span><span class="identifier" id="org.akop.ararat.text.method.WordReferenceMovementMethod$handleMovementKey(android.widget.TextView, android.text.Spannable, kotlin.Int, kotlin.Int, android.view.KeyEvent)/widget">widget</span><span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/android/widget/TextView.html"><span class="identifier">TextView</span></a><span class="symbol">, </span><span class="identifier" id="org.akop.ararat.text.method.WordReferenceMovementMethod$handleMovementKey(android.widget.TextView, android.text.Spannable, kotlin.Int, kotlin.Int, android.view.KeyEvent)/buffer">buffer</span><span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/android/text/Spannable.html"><span class="identifier">Spannable</span></a><span class="symbol">, </span><span class="identifier" id="org.akop.ararat.text.method.WordReferenceMovementMethod$handleMovementKey(android.widget.TextView, android.text.Spannable, kotlin.Int, kotlin.Int, android.view.KeyEvent)/keyCode">keyCode</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html"><span class="identifier">Int</span></a><span class="symbol">, </span><span class="identifier" id="org.akop.ararat.text.method.WordReferenceMovementMethod$handleMovementKey(android.widget.TextView, android.text.Spannable, kotlin.Int, kotlin.Int, android.view.KeyEvent)/movementMetaState">movementMetaState</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html"><span class="identifier">Int</span></a><span class="symbol">, </span><span class="identifier" id="org.akop.ararat.text.method.WordReferenceMovementMethod$handleMovementKey(android.widget.TextView, android.text.Spannable, kotlin.Int, kotlin.Int, android.view.KeyEvent)/event">event</span><span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/android/view/KeyEvent.html"><span class="identifier">KeyEvent</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="initialize.html">initialize</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">initialize</span><span class="symbol">(</span><span class="identifier" id="org.akop.ararat.text.method.WordReferenceMovementMethod$initialize(android.widget.TextView, android.text.Spannable)/widget">widget</span><span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/android/widget/TextView.html"><span class="identifier">TextView</span></a><span class="symbol">, </span><span class="identifier" id="org.akop.ararat.text.method.WordReferenceMovementMethod$initialize(android.widget.TextView, android.text.Spannable)/text">text</span><span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/android/text/Spannable.html"><span class="identifier">Spannable</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="left.html">left</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">left</span><span class="symbol">(</span><span class="identifier" id="org.akop.ararat.text.method.WordReferenceMovementMethod$left(android.widget.TextView, android.text.Spannable)/widget">widget</span><span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/android/widget/TextView.html"><span class="identifier">TextView</span></a><span class="symbol">, </span><span class="identifier" id="org.akop.ararat.text.method.WordReferenceMovementMethod$left(android.widget.TextView, android.text.Spannable)/buffer">buffer</span><span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/android/text/Spannable.html"><span class="identifier">Spannable</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="on-take-focus.html">onTakeFocus</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">onTakeFocus</span><span class="symbol">(</span><span class="identifier" id="org.akop.ararat.text.method.WordReferenceMovementMethod$onTakeFocus(android.widget.TextView, android.text.Spannable, kotlin.Int)/view">view</span><span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/android/widget/TextView.html"><span class="identifier">TextView</span></a><span class="symbol">, </span><span class="identifier" id="org.akop.ararat.text.method.WordReferenceMovementMethod$onTakeFocus(android.widget.TextView, android.text.Spannable, kotlin.Int)/text">text</span><span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/android/text/Spannable.html"><span class="identifier">Spannable</span></a><span class="symbol">, </span><span class="identifier" id="org.akop.ararat.text.method.WordReferenceMovementMethod$onTakeFocus(android.widget.TextView, android.text.Spannable, kotlin.Int)/dir">dir</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html"><span class="identifier">Int</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="on-touch-event.html">onTouchEvent</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">onTouchEvent</span><span class="symbol">(</span><span class="identifier" id="org.akop.ararat.text.method.WordReferenceMovementMethod$onTouchEvent(android.widget.TextView, android.text.Spannable, android.view.MotionEvent)/widget">widget</span><span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/android/widget/TextView.html"><span class="identifier">TextView</span></a><span class="symbol">, </span><span class="identifier" id="org.akop.ararat.text.method.WordReferenceMovementMethod$onTouchEvent(android.widget.TextView, android.text.Spannable, android.view.MotionEvent)/buffer">buffer</span><span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/android/text/Spannable.html"><span class="identifier">Spannable</span></a><span class="symbol">, </span><span class="identifier" id="org.akop.ararat.text.method.WordReferenceMovementMethod$onTouchEvent(android.widget.TextView, android.text.Spannable, android.view.MotionEvent)/event">event</span><span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/android/view/MotionEvent.html"><span class="identifier">MotionEvent</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="right.html">right</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">right</span><span class="symbol">(</span><span class="identifier" id="org.akop.ararat.text.method.WordReferenceMovementMethod$right(android.widget.TextView, android.text.Spannable)/widget">widget</span><span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/android/widget/TextView.html"><span class="identifier">TextView</span></a><span class="symbol">, </span><span class="identifier" id="org.akop.ararat.text.method.WordReferenceMovementMethod$right(android.widget.TextView, android.text.Spannable)/buffer">buffer</span><span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/android/text/Spannable.html"><span class="identifier">Spannable</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a></code></td>
+</tr>
+<tr>
+<td>
+<p><a href="up.html">up</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">up</span><span class="symbol">(</span><span class="identifier" id="org.akop.ararat.text.method.WordReferenceMovementMethod$up(android.widget.TextView, android.text.Spannable)/widget">widget</span><span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/android/widget/TextView.html"><span class="identifier">TextView</span></a><span class="symbol">, </span><span class="identifier" id="org.akop.ararat.text.method.WordReferenceMovementMethod$up(android.widget.TextView, android.text.Spannable)/buffer">buffer</span><span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/android/text/Spannable.html"><span class="identifier">Spannable</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a></code></td>
+</tr>
+</tbody>
+</table>
+<h3>Companion Object Functions</h3>
+<table>
+<tbody>
+<tr>
+<td>
+<p><a href="linkify.html">linkify</a></p>
+</td>
+<td>
+<code><span class="keyword">fun </span><span class="identifier">linkify</span><span class="symbol">(</span><span class="identifier" id="org.akop.ararat.text.method.WordReferenceMovementMethod.Companion$linkify(org.akop.ararat.core.Crossword.Word, kotlin.String, org.akop.ararat.core.Crossword)/word">word</span><span class="symbol">:</span>&nbsp;<a href="../../org.akop.ararat.core/-crossword/-word/index.html"><span class="identifier">Word</span></a><span class="symbol">, </span><span class="identifier" id="org.akop.ararat.text.method.WordReferenceMovementMethod.Companion$linkify(org.akop.ararat.core.Crossword.Word, kotlin.String, org.akop.ararat.core.Crossword)/hint">hint</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span><span class="symbol">, </span><span class="identifier" id="org.akop.ararat.text.method.WordReferenceMovementMethod.Companion$linkify(org.akop.ararat.core.Crossword.Word, kotlin.String, org.akop.ararat.core.Crossword)/crossword">crossword</span><span class="symbol">:</span>&nbsp;<a href="../../org.akop.ararat.core/-crossword/index.html"><span class="identifier">Crossword</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a></code></td>
+</tr>
+</tbody>
+</table>
+</BODY>
+</HTML>
