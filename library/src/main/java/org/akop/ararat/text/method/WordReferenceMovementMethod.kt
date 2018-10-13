@@ -33,7 +33,7 @@ import android.widget.TextView
 
 import org.akop.ararat.core.Crossword
 import org.akop.ararat.util.ReferenceScanner
-import org.akop.kotx.ext.basic.htmlEncode
+import org.akop.ararat.util.htmlEncode
 import java.util.regex.Pattern
 
 /**

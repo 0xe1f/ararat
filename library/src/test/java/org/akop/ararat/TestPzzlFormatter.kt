@@ -26,7 +26,7 @@ import org.junit.Test
 
 class TestPzzlFormatter: BaseTest() {
 
-    val crossword = loadResource("res/nytsyn-180703.pzzl", PzzlFormatter())
+    val crossword = PzzlFormatter().load("nytsyn-180703.pzzl")
 
     @Test
     fun crossword_testMetadata() {
@@ -35,15 +35,15 @@ class TestPzzlFormatter: BaseTest() {
 
     @Test
     fun crossword_testCharLayout() {
-        assertLayout(crossword, Array(charMap.size) {
-            charMap[it].chunked(1).map { when (it) { "#" -> null else -> it } }.toTypedArray()
+        assertLayout(crossword, Array(charMap.size) { row ->
+            charMap[row].chunked(1).map { when (it) { "#" -> null else -> it } }.toTypedArray()
         })
     }
 
     @Test
     fun crossword_testAttrLayout() {
-        assertAttrLayout(crossword, Array(attrMap.size) {
-            attrMap[it].chunked(1).map { when (it) { "#" -> null else -> it } }.toTypedArray()
+        assertAttrLayout(crossword, Array(attrMap.size) { row ->
+            attrMap[row].chunked(1).map { when (it) { "#" -> null else -> it } }.toTypedArray()
         })
     }
 

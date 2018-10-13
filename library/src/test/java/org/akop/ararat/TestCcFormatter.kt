@@ -26,7 +26,7 @@ import org.junit.Test
 
 class TestCcFormatter: BaseTest() {
 
-    val crossword = loadResource("res/la180519.xml", CrosswordCompilerFormatter())
+    val crossword = CrosswordCompilerFormatter().load("la180519.xml")
 
     @Test
     fun crossword_testMetadata() {
@@ -35,8 +35,8 @@ class TestCcFormatter: BaseTest() {
 
     @Test
     fun crossword_testLayout() {
-        assertLayout(crossword, Array(layout.size) {
-            layout[it].chunked(1).map { when (it) { "#" -> null else -> it } }.toTypedArray()
+        assertLayout(crossword, Array(layout.size) { row ->
+            layout[row].chunked(1).map { when (it) { "#" -> null else -> it } }.toTypedArray()
         })
     }
 

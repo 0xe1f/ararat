@@ -29,7 +29,7 @@ import org.junit.Test
 
 class TestReferenceScanner: BaseTest() {
 
-    val crossword = loadResource("res/nytsyncrossword.pzzl", PzzlFormatter())
+    val crossword = PzzlFormatter().load("nytsyncrossword.pzzl")
 
     @Test
     fun crossword_testMetadata() {

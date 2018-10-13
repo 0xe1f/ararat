@@ -21,6 +21,7 @@
 package org.akop.ararat
 
 import org.akop.ararat.core.Crossword
+import org.akop.ararat.core.buildCrossword
 import org.akop.ararat.io.CrosswordFormatter
 import org.junit.Assert
 
@@ -29,13 +30,10 @@ import java.io.File
 
 open class BaseTest {
 
-    protected fun loadResource(path: String, formatter: CrosswordFormatter): Crossword {
-        println("Loading '$path': (loader resource path: ${javaClass.classLoader.getResource(".")})")
-        val resource = javaClass.classLoader.getResource(path)
-        return File(resource!!.path).inputStream().use {
-            Crossword.Builder().apply { formatter.read(this, it) }.build()
-        }
-    }
+    val root = File("src/test/res")
+
+    protected fun CrosswordFormatter.load(path: String): Crossword =
+            File(root, path).inputStream().use { s -> buildCrossword { read(this, s) } }
 
     protected fun assertMetadata(actual: Crossword, expected: Metadata) {
         Assert.assertEquals("Width mismatch!", expected.width, actual.width)

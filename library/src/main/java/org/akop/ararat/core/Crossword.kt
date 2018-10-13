@@ -22,8 +22,8 @@ package org.akop.ararat.core
 
 import android.os.Parcel
 import android.os.Parcelable
-import org.akop.kotx.ext.basic.sha1
-import org.akop.kotx.ext.basic.toHexString
+import org.akop.ararat.util.sha1
+import org.akop.ararat.util.toHexString
 
 import java.io.ByteArrayOutputStream
 import java.util.ArrayList
@@ -337,9 +337,9 @@ class Crossword internal constructor(val width: Int = 0,
         }
     }
 
-    private fun femputeHash(): String = ByteArrayOutputStream().use {
-        CrosswordWriter(it).use { it.writeForHash(this) }
-        it.toByteArray()
+    private fun femputeHash(): String = ByteArrayOutputStream().use { s ->
+        CrosswordWriter(s).use { it.writeForHash(this) }
+        s.toByteArray()
     }.sha1().toHexString()
 
     private fun buildMap(): Array<Array<Cell?>> {

@@ -26,7 +26,7 @@ import org.junit.Test
 
 class TestUClickFormatter: BaseTest() {
 
-    val crossword = loadResource("res/univ-daily-180401.xml", UClickFormatter())
+    val crossword = UClickFormatter().load("univ-daily-180401.xml")
 
     @Test
     fun crossword_testMetadata() {
@@ -35,8 +35,8 @@ class TestUClickFormatter: BaseTest() {
 
     @Test
     fun crossword_testLayout() {
-        assertLayout(crossword, Array(layout.size) {
-            layout[it].chunked(1).map { when (it) { "#" -> null else -> it } }.toTypedArray()
+        assertLayout(crossword, Array(layout.size) { row ->
+            layout[row].chunked(1).map { when (it) { "#" -> null else -> it } }.toTypedArray()
         })
     }
 

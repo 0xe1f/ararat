@@ -35,7 +35,7 @@ class TestReaderWriter: BaseTest() {
 
     @Test
     fun crossword_testReadWrite() {
-        checkReadWrite(loadResource("res/puzzle.puz", PuzFormatter()))
+        checkReadWrite(PuzFormatter().load("puzzle.puz"))
     }
 
     private fun checkReadWrite(crossword: Crossword) {
@@ -51,8 +51,8 @@ class TestReaderWriter: BaseTest() {
 
         println("Checking read...")
 
-        val cw = ByteArrayInputStream(content).use {
-            CrosswordReader(it).use { it.read() }
+        val cw = ByteArrayInputStream(content).use { s ->
+            CrosswordReader(s).use { it.read() }
         }
 
         Assert.assertEquals("Width mismatch!", crossword.width, cw.width)

@@ -37,12 +37,36 @@ class PuzFormatter : CrosswordFormatter {
 
     private var encoding = DEFAULT_ENCODING
 
+    /**
+     * Sets the text encoding for the stream. Note that not all encodings will
+     * likely work (e.g. multibytes like Unicode), as .puz is a binary file
+     * format.
+     *
+     * Default encoding is ISO-8859-1.
+     */
     override fun setEncoding(encoding: String) {
         this.encoding = encoding
     }
 
+    /**
+     * Initializes [builder] by reading a crossword from [inputStream].
+     * If the crossword requires a key to unlock, one will be brute-forced.
+     */
     @Throws(IOException::class)
     override fun read(builder: Crossword.Builder, inputStream: InputStream) {
+        readWithKey(builder, inputStream, null)
+    }
+
+    /**
+     * Initializes [builder] by reading a crossword from [inputStream] using a
+     * specific [key]. Use a null [key] to brute force.
+     */
+    @Throws(IOException::class)
+    fun readWithKey(builder: Crossword.Builder, inputStream: InputStream,
+                    key: Int?) {
+        if (key != null && key !in (0..9999))
+            throw IllegalArgumentException("Key is out of range")
+
         val reader = inputStream.reader(Charset.forName(encoding))
 
         // Overall checksum
@@ -185,9 +209,9 @@ class PuzFormatter : CrosswordFormatter {
             // Verify rebus solutions
             for (i in 0 until height) {
                 for (j in 0 until width) {
-                    val key = rebusMap[i][j]
-                    if (key != 0 && rebusSols[key] == null)
-                        throw FormatException("Missing rebus solution for key $key")
+                    val rk = rebusMap[i][j]
+                    if (rk != 0 && rebusSols[rk] == null)
+                        throw FormatException("Missing rebus solution for key $rk")
                 }
             }
         }
@@ -196,8 +220,9 @@ class PuzFormatter : CrosswordFormatter {
         val hasSolution = puzzleType != PUZZLE_TYPE_NO_SOLUTION
 
         // If scrambled, unscramble by brute-forcing a key (0000-9999)
-        if (isScrambled && !bruteForceKey(charMap, unscrambledChecksum))
-            throw FormatException("Unable to locate a key (brute-force failed)")
+        if (isScrambled && !unlock(charMap, unscrambledChecksum,
+                        if (key == null) 0..9999 else key..key))
+            throw FormatException("Crossword locked, unlock failed")
 
         builder.flags = if (hasSolution) 0 else Crossword.FLAG_NO_SOLUTION
         builder.width = width
@@ -210,13 +235,24 @@ class PuzFormatter : CrosswordFormatter {
         buildWords(builder, clues, charMap, attrMap, rebusMap, rebusSols, hasSolution)
     }
 
+    /**
+     * Writes [crossword] to [outputStream]. Currently not implemented.
+     */
     @Throws(IOException::class)
     override fun write(crossword: Crossword, outputStream: OutputStream) {
         throw UnsupportedOperationException("Writing not supported")
     }
 
+    /**
+     * Returns true if formatter supports reading. Always true for
+     * [PuzFormatter].
+     */
     override fun canRead(): Boolean = true
 
+    /**
+     * Returns true if formatter supports writing. Always false for
+     * [PuzFormatter].
+     */
     override fun canWrite(): Boolean = false
 
     private fun buildWords(cb: Crossword.Builder,
@@ -370,20 +406,20 @@ class PuzFormatter : CrosswordFormatter {
         val width = map[0].size
 
         val keyDigits = intArrayOf(
-                key % 10,
-                key / 10 % 10,
+                key / 1000 % 10,
                 key / 100 % 10,
-                key / 1000 % 10)
+                key / 10 % 10,
+                key % 10)
         val input = toColumnMajorOrder(map)
         var unscrambled = StringBuilder(input)
 
-        val len = unscrambled.length
-        keyDigits.forEach { kd ->
+        val lastIndex = unscrambled.lastIndex
+        for (k in keyDigits.lastIndex downTo 0) {
             unscrambleString(unscrambled)
-            unshift(unscrambled, kd)
+            unshift(unscrambled, keyDigits[k])
 
             val sb = StringBuilder()
-            for (i in 0 until len) {
+            for (i in 0..lastIndex) {
                 var code = unscrambled[i].toInt() - keyDigits[i % keyDigits.size]
                 if (code < 65) code += 26
                 sb.append(code.toChar())
@@ -400,17 +436,19 @@ class PuzFormatter : CrosswordFormatter {
         }
     }
 
-    private fun bruteForceKey(map: Array<CharArray>, unscrambledChecksum: Short): Boolean {
+    private fun unlock(map: Array<CharArray>,
+                       unscrambledChecksum: Short,
+                       keyRange: IntRange): Boolean {
         val height = map.size
         if (height == 0) return false
         val width = map[0].size
 
         val copy = Array(height) { CharArray(width) }
-        for (code in 0..9999) {
+        for (key in keyRange) {
             for (i in 0 until height)
                 System.arraycopy(map[i], 0, copy[i], 0, width)
 
-            unscramble(copy, code)
+            unscramble(copy, key)
             if (mapChecksum(copy) == unscrambledChecksum) {
                 for (i in 0 until height)
                     System.arraycopy(copy[i], 0, map[i], 0, width)

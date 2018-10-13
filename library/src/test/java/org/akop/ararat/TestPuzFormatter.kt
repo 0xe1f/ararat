@@ -26,7 +26,7 @@ import org.junit.Test
 
 class TestPuzFormatter: BaseTest() {
 
-    val crossword = loadResource("res/puzzle.puz", PuzFormatter())
+    val crossword = PuzFormatter().load("puzzle.puz")
 
     @Test
     fun crossword_testMetadata() {
@@ -35,8 +35,8 @@ class TestPuzFormatter: BaseTest() {
 
     @Test
     fun crossword_testCharLayout() {
-        assertLayout(crossword, Array(charMap.size) {
-            charMap[it].chunked(1).map { when (it) { "#" -> null else -> it } }.toTypedArray()
+        assertLayout(crossword, Array(charMap.size) { row ->
+            charMap[row].chunked(1).map { when (it) { "#" -> null else -> it } }.toTypedArray()
         })
     }
 
