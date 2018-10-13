@@ -20,7 +20,6 @@
 
 package org.akop.crosswordtest
 
-import android.content.Context
 import android.support.annotation.RawRes
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
@@ -62,7 +61,7 @@ class MainActivity : AppCompatActivity(), CrosswordView.OnLongPressListener, Cro
         crosswordView!!.setOnLongPressListener(this)
         crosswordView!!.setOnStateChangeListener(this)
         crosswordView!!.setOnSelectionChangeListener(this)
-        crosswordView!!.setInputValidator { ch -> ch?.first()?.isISOControl() == false }
+        crosswordView!!.setInputValidator { ch -> !ch.first().isISOControl() }
 
         crosswordView!!.undoMode = CrosswordView.UNDO_NONE
         crosswordView!!.markerDisplayMode = CrosswordView.MARKER_CHEAT
@@ -97,12 +96,12 @@ class MainActivity : AppCompatActivity(), CrosswordView.OnLongPressListener, Cro
                 return true
             }
             R.id.menu_solve_cell -> {
-                crosswordView!!.solveChar(crosswordView!!.selectedWord,
+                crosswordView!!.solveChar(crosswordView!!.selectedWord!!,
                         crosswordView!!.selectedCell)
                 return true
             }
             R.id.menu_solve_word -> {
-                crosswordView!!.solveWord(crosswordView!!.selectedWord)
+                crosswordView!!.solveWord(crosswordView!!.selectedWord!!)
                 return true
             }
             R.id.menu_solve_puzzle -> {

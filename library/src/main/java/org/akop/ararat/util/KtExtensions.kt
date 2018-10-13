@@ -1,6 +1,6 @@
 // Copyright (c) Akop Karapetyan
 //
-// Part of KotX: https://github.com/0xe1f/KotX
+// Some of these are part of KotX: https://github.com/0xe1f/KotX
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,7 +16,15 @@
 
 package org.akop.ararat.util
 
+import android.content.Context
+import android.content.res.TypedArray
+import android.graphics.Color
+import android.graphics.PointF
+import android.graphics.RectF
+import android.os.Parcel
+import android.os.Parcelable
 import android.text.TextUtils
+import android.util.AttributeSet
 import java.security.MessageDigest
 
 
@@ -37,3 +45,25 @@ internal fun ByteArray.sha1(): ByteArray = MessageDigest.getInstance("SHA-1").ap
 }.digest()
 
 internal fun String.htmlEncode(): String = TextUtils.htmlEncode(this)
+
+internal fun PointF.clampTo(rect: RectF) {
+    if (x < rect.left) x = rect.left else if (x > rect.right) x = rect.right
+    if (y < rect.top) y = rect.top else if (y > rect.bottom) y = rect.bottom
+}
+
+internal fun String.toColor(): Int = Color.parseColor(this)
+
+internal inline fun <reified T: Parcelable> Parcel.readTypedParcelable(): T? =
+        readParcelable(T::class.java.classLoader)
+
+internal fun Context.withStyledAttributes(attrs: IntArray,
+                                          set: AttributeSet? = null,
+                                          defStyleAttr: Int = 0,
+                                          defStyleRes: Int = 0,
+                                          block: TypedArray.() -> Unit) {
+    set?.let {
+        theme.obtainStyledAttributes(set, attrs, defStyleAttr, defStyleRes)
+                .apply(block)
+                .recycle()
+    }
+}
