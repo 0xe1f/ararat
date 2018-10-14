@@ -63,11 +63,11 @@ class CrosswordReader @Throws(IOException::class) constructor(stream: InputStrea
         val flags = if (version >= 4) inStream.readInt() else 0
 
         val wordsAcross = ArrayList<Crossword.Word>()
-        (0 until inStream.readInt()).forEach {
+        (0 until inStream.readInt()).forEach { _ ->
             wordsAcross.add(readWord(version, Crossword.Word.DIR_ACROSS))
         }
         val wordsDown = ArrayList<Crossword.Word>()
-        (0 until inStream.readInt()).forEach {
+        (0 until inStream.readInt()).forEach { _ ->
             wordsDown.add(readWord(version, Crossword.Word.DIR_DOWN))
         }
 
@@ -96,7 +96,7 @@ class CrosswordReader @Throws(IOException::class) constructor(stream: InputStrea
         val hintUrl = inStream.readObject() as String?
         val citation = inStream.readObject() as String?
         val cells = ArrayList<Crossword.Cell>().apply {
-            (0 until inStream.readInt()).forEach { add(readCell(version)) }
+            (0 until inStream.readInt()).forEach { _ -> add(readCell(version)) }
         }
 
         return Crossword.Word(

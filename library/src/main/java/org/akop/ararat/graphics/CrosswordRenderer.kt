@@ -42,8 +42,8 @@ class CrosswordRenderer(context: Context) {
     private val cellFillPaint = Paint()
     private val puzzleBackgroundPaint = Paint()
     private val circleStrokePaint = Paint(Paint.ANTI_ALIAS_FLAG)
-    private var scaledDensity: Float = 0.toFloat()
-    private var cellStrokeWidthPx: Float = 0.toFloat()
+    private var scaledDensity: Float = 0f
+    private var cellStrokeWidthPx: Float = 0f
         set(value) {
             field = value
             cellStrokePaint.strokeWidth = value

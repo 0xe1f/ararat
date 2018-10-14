@@ -61,7 +61,7 @@ class Crossword internal constructor(val width: Int = 0,
             date = source.readLong(),
             wordsAcross = source.createTypedArrayList(Word.CREATOR),
             wordsDown = source.createTypedArrayList(Word.CREATOR),
-            alphabet = source.createCharArray().toSet())
+            alphabet = source.createCharArray()!!.toSet())
 
     init {
         wordsAcross?.let { (this.wordsAcross as MutableList) += it }

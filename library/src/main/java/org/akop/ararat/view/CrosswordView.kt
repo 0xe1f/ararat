@@ -31,7 +31,6 @@ import android.graphics.Rect
 import android.graphics.RectF
 import android.graphics.Typeface
 import android.os.AsyncTask
-import android.os.Build
 import android.os.Parcel
 import android.os.Parcelable
 import android.os.SystemClock
@@ -54,6 +53,7 @@ import org.akop.ararat.core.CrosswordState
 import org.akop.ararat.util.*
 import org.akop.ararat.view.inputmethod.CrosswordInputConnection
 import org.akop.ararat.widget.Zoomer
+import java.lang.ref.WeakReference
 
 import java.util.HashSet
 import java.util.Stack
@@ -138,41 +138,20 @@ class CrosswordView(context: Context, attrs: AttributeSet?) : View(context, attr
     private var ignoreZoom: Boolean = false
     private val zoomer: Zoomer
     private val scroller: Scroller
-    private val revealSetsCheatFlag: Boolean
+    private val revealSetsCheatFlag: Boolean = true
     private var isSolved: Boolean = false
 
-    private var _inputMode: Int = 0
-    private var _isEditable: Boolean = false
+    private var _inputMode: Int = INPUT_MODE_KEYBOARD
+    private var _isEditable: Boolean = true
+    private var _maxBitmapSize: Int = DEFAULT_MAX_BITMAP_DIMENSION
 
     private val tempRect = Rect()
-    private val answerTextRect = RectF()
 
     private val rendererLock = Any()
-    private val inPlaceRenderer = Renderer()
-
-    var skipOccupiedOnType: Boolean = false
-    var selectFirstUnoccupiedOnNav: Boolean = false
-    var undoMode: Int = 0
-    var markerDisplayMode: Int = 0
-        set(newMode) {
-            if (markerDisplayMode != newMode) {
-                val oldMode = markerDisplayMode
-                field = newMode
-                if (oldMode and MARKER_ERROR != newMode and MARKER_ERROR) {
-                    resetErrorMarkers()
-                }
-
-                redrawInPlace()
-            }
-        }
-    private var _maxBitmapSize: Int = 0
-
-    var onSelectionChangeListener: OnSelectionChangeListener? = null
-    var onStateChangeListener: OnStateChangeListener? = null
-    var onLongPressListener: OnLongPressListener? = null
-    var inputValidator: InputValidator? = null
+    private val inPlaceRenderer = Renderer(this)
 
     private val inputEventListener = object : CrosswordInputConnection.OnInputEventListener {
+
         override fun onWordEntered(text: CharSequence) {
             val sel = selection ?: return
 
@@ -231,6 +210,27 @@ class CrosswordView(context: Context, attrs: AttributeSet?) : View(context, attr
         }
     }
 
+    var skipOccupiedOnType: Boolean = false
+    var selectFirstUnoccupiedOnNav: Boolean = true
+    var undoMode: Int = 0
+    var markerDisplayMode: Int = 0
+        set(newMode) {
+            if (markerDisplayMode != newMode) {
+                val oldMode = markerDisplayMode
+                field = newMode
+                if (oldMode and MARKER_ERROR != newMode and MARKER_ERROR) {
+                    resetErrorMarkers()
+                }
+
+                redrawInPlace()
+            }
+        }
+
+    var onSelectionChangeListener: OnSelectionChangeListener? = null
+    var onStateChangeListener: OnStateChangeListener? = null
+    var onLongPressListener: OnLongPressListener? = null
+    var inputValidator: InputValidator? = null
+
     var selectedWord: Crossword.Word?
         get() = selection?.word
         set(value) { selectWord(value) }
@@ -245,8 +245,8 @@ class CrosswordView(context: Context, attrs: AttributeSet?) : View(context, attr
 
             selection?.let { state.setSelection(it.direction, it.word.number, it.cell) }
 
-            for (i in 0 until puzzleHeight) {
-                for (j in 0 until puzzleWidth) {
+            for (i in 0..(puzzleHeight - 1)) {
+                for (j in 0..(puzzleWidth - 1)) {
                     puzzleCells[i][j]?.let { cell ->
                         if (!cell.isEmpty) state.setCharAt(i, j, cell.char)
                         state.setFlagAt(CrosswordState.FLAG_CHEATED,
@@ -264,29 +264,37 @@ class CrosswordView(context: Context, attrs: AttributeSet?) : View(context, attr
     var answerTypeface: Typeface
         get() = answerTextPaint.typeface
         set(typeface) {
-            answerTextPaint.typeface = typeface
-            redrawInPlace()
+            if (typeface !== answerTypeface) {
+                answerTextPaint.typeface = typeface
+                redrawInPlace()
+            }
         }
 
     var answerColor: Int
         get() = answerTextPaint.color
         set(value) {
-            answerTextPaint.color = value
-            redrawInPlace()
+            if (value != answerColor) {
+                answerTextPaint.color = value
+                redrawInPlace()
+            }
         }
 
     var isEditable: Boolean
         get() = _isEditable
         set(value) {
-            _isEditable = value
-            resetInputMode()
+            if (value != isEditable) {
+                _isEditable = value
+                resetInputMode()
+            }
         }
 
     var inputMode: Int
         get() = _inputMode
         set(value) {
-            _inputMode = value
-            resetInputMode()
+            if (value != inputMode) {
+                _inputMode = value
+                resetInputMode()
+            }
         }
 
     /**
@@ -296,7 +304,7 @@ class CrosswordView(context: Context, attrs: AttributeSet?) : View(context, attr
     var maxBitmapSize: Int
         get() = _maxBitmapSize
         set(value) {
-            if (_maxBitmapSize != value) {
+            if (value != maxBitmapSize) {
                 _maxBitmapSize = value
                 resetConstraintsAndRedraw(true)
             }
@@ -338,11 +346,6 @@ class CrosswordView(context: Context, attrs: AttributeSet?) : View(context, attr
 
         cellSize = CELL_SIZE * dm.density
         numberTextPadding = NUMBER_TEXT_PADDING * dm.density
-        _isEditable = true
-        _inputMode = INPUT_MODE_KEYBOARD
-        skipOccupiedOnType = false
-        selectFirstUnoccupiedOnNav = true
-        _maxBitmapSize = DEFAULT_MAX_BITMAP_DIMENSION
 
         // Read supplied attributes
         context.withStyledAttributes(R.styleable.CrosswordView, attrs) {
@@ -366,7 +369,6 @@ class CrosswordView(context: Context, attrs: AttributeSet?) : View(context, attr
                     selectFirstUnoccupiedOnNav)
         }
 
-        revealSetsCheatFlag = true
         markerSideLength = cellSize * MARKER_TRIANGLE_LENGTH_FRACTION
 
         // Init paints
@@ -415,7 +417,6 @@ class CrosswordView(context: Context, attrs: AttributeSet?) : View(context, attr
 
         // Init rest of the values
         circleRadius = cellSize / 2 - circleStrokePaint.strokeWidth
-        renderScale = 0f
 
         scaleDetector = ScaleGestureDetector(context, ScaleListener())
         gestureDetector = GestureDetector(context, GestureListener())
@@ -653,82 +654,6 @@ class CrosswordView(context: Context, attrs: AttributeSet?) : View(context, attr
 
         onBoardChanged()
         redrawInPlace()
-    }
-
-    private fun setChars(startRow: Int, startColumn: Int, charMatrix: Array<Array<String?>>,
-                         setCheatFlag: Boolean, bypassUndoBuffer: Boolean = false) {
-        // Check startRow/startColumn
-        if (startRow < 0 || startColumn < 0) {
-            throw IllegalArgumentException("Invalid startRow/startColumn")
-        }
-
-        // Check dimensions
-        if (charMatrix.isEmpty() || charMatrix[0].isEmpty()) {
-            throw IllegalArgumentException("Invalid matrix size")
-        }
-
-        val charHeight = charMatrix.size
-        val charWidth = charMatrix[0].size
-        val endRow = startRow + charHeight - 1
-        val endColumn = startColumn + charWidth - 1
-
-        // Check bounds
-        if (endRow >= puzzleHeight || endColumn >= puzzleWidth) {
-            throw IllegalArgumentException("Chars out of bounds")
-        }
-
-        // Set up undo buffer
-        var undoBuf: Array<Array<String?>>? = null
-        if (!bypassUndoBuffer && undoMode != UNDO_NONE) {
-            undoBuf = Array(charHeight) { arrayOfNulls<String?>(charWidth) }
-        }
-
-        // Fill in the char array
-        var cwChanged = false
-        val map = crossword!!.cellMap
-        var i = startRow
-        var k = 0
-        while (i <= endRow) {
-            var j = startColumn
-            var l = 0
-            while (j <= endColumn) {
-                val vwCell = puzzleCells[i][j]
-                if (vwCell != null) {
-                    if (undoBuf != null) {
-                        undoBuf[k][l] = vwCell.char
-                    }
-                    val ch = charMatrix[k][l].canonicalize()
-                    val validator = inputValidator ?: defaultInputValidator
-                    if (ch != vwCell.char && (ch == null || validator.invoke(ch))) {
-                        val cellChanged = vwCell.char != ch
-                        if (cellChanged) {
-                            vwCell.setChar(ch)
-                            cwChanged = true
-                        }
-                        if (setCheatFlag) {
-                            vwCell.setFlag(Cell.FLAG_CHEATED, true)
-                        }
-                        if (markerDisplayMode and MARKER_ERROR != 0) {
-                            vwCell.markError(map[i][j]!!, revealSetsCheatFlag)
-                        }
-                    }
-                }
-                j++
-                l++
-            }
-            i++
-            k++
-        }
-
-        // Redraw selection
-        redrawInPlace()
-        if (cwChanged) {
-            if (undoBuf != null) {
-                clearUndoBufferIfNeeded(selection)
-                undoBuffer.push(UndoItem(undoBuf, startRow, startColumn, selection))
-            }
-            onBoardChanged()
-        }
     }
 
     fun restoreState(state: CrosswordState) {
@@ -994,6 +919,82 @@ class CrosswordView(context: Context, attrs: AttributeSet?) : View(context, attr
         }
     }
 
+    private fun setChars(startRow: Int, startColumn: Int, charMatrix: Array<Array<String?>>,
+                         setCheatFlag: Boolean, bypassUndoBuffer: Boolean = false) {
+        // Check startRow/startColumn
+        if (startRow < 0 || startColumn < 0) {
+            throw IllegalArgumentException("Invalid startRow/startColumn")
+        }
+
+        // Check dimensions
+        if (charMatrix.isEmpty() || charMatrix[0].isEmpty()) {
+            throw IllegalArgumentException("Invalid matrix size")
+        }
+
+        val charHeight = charMatrix.size
+        val charWidth = charMatrix[0].size
+        val endRow = startRow + charHeight - 1
+        val endColumn = startColumn + charWidth - 1
+
+        // Check bounds
+        if (endRow >= puzzleHeight || endColumn >= puzzleWidth) {
+            throw IllegalArgumentException("Chars out of bounds")
+        }
+
+        // Set up undo buffer
+        var undoBuf: Array<Array<String?>>? = null
+        if (!bypassUndoBuffer && undoMode != UNDO_NONE) {
+            undoBuf = Array(charHeight) { arrayOfNulls<String?>(charWidth) }
+        }
+
+        // Fill in the char array
+        var cwChanged = false
+        val map = crossword!!.cellMap
+        var i = startRow
+        var k = 0
+        while (i <= endRow) {
+            var j = startColumn
+            var l = 0
+            while (j <= endColumn) {
+                val vwCell = puzzleCells[i][j]
+                if (vwCell != null) {
+                    if (undoBuf != null) {
+                        undoBuf[k][l] = vwCell.char
+                    }
+                    val ch = charMatrix[k][l].canonicalize()
+                    val validator = inputValidator ?: defaultInputValidator
+                    if (ch != vwCell.char && (ch == null || validator.invoke(ch))) {
+                        val cellChanged = vwCell.char != ch
+                        if (cellChanged) {
+                            vwCell.setChar(ch)
+                            cwChanged = true
+                        }
+                        if (setCheatFlag) {
+                            vwCell.setFlag(Cell.FLAG_CHEATED, true)
+                        }
+                        if (markerDisplayMode and MARKER_ERROR != 0) {
+                            vwCell.markError(map[i][j]!!, revealSetsCheatFlag)
+                        }
+                    }
+                }
+                j++
+                l++
+            }
+            i++
+            k++
+        }
+
+        // Redraw selection
+        redrawInPlace()
+        if (cwChanged) {
+            if (undoBuf != null) {
+                clearUndoBufferIfNeeded(selection)
+                undoBuffer.push(UndoItem(undoBuf, startRow, startColumn, selection))
+            }
+            onBoardChanged()
+        }
+    }
+
     private fun zoomTo(finalRenderScale: Float): Boolean {
         if ((finalRenderScale - renderScale).absoluteValue < .01f) return false
 
@@ -1149,7 +1150,7 @@ class CrosswordView(context: Context, attrs: AttributeSet?) : View(context, attr
             // A 1px size line is always present, so it's not enough to just
             // check for zero
             if (puzzleRect.width() > 1 && puzzleRect.height() > 1) {
-                renderTask = RenderTask(renderScale)
+                renderTask = RenderTask(this, renderScale)
                 renderTask!!.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR)
             }
         }
@@ -1431,14 +1432,14 @@ class CrosswordView(context: Context, attrs: AttributeSet?) : View(context, attr
         var renderScale: Float
         var bitmapOffset: PointF
 
-        constructor(superState: Parcelable) : super(superState) {
+        constructor(superState: Parcelable?) : super(superState) {
             renderScale = 0f
             bitmapOffset = PointF()
         }
 
-        private constructor(`in`: Parcel) : super(`in`) {
-            renderScale = `in`.readFloat()
-            bitmapOffset = `in`.readParcelable(PointF::class.java.classLoader)
+        private constructor(parcel: Parcel) : super(parcel) {
+            renderScale = parcel.readFloat()
+            bitmapOffset = parcel.readTypedParcelable()!!
         }
 
         override fun writeToParcel(dest: Parcel, flags: Int) {
@@ -1632,75 +1633,66 @@ class CrosswordView(context: Context, attrs: AttributeSet?) : View(context, attr
         }
     }
 
-    private inner class Renderer {
+    private class Renderer(private val v: CrosswordView) {
 
         var cancelRender: Boolean = false
-        private val cellPath = Path()
 
-        fun renderCell(canvas: Canvas, cell: Cell,
-                       cellRect: RectF, fillPaint: Paint, fastRender: Boolean) {
+        private val cellPath = Path()
+        private val cellRect = RectF()
+        private val tempRect = Rect()
+        private val answerTextRect = RectF()
+
+        fun renderCell(v: CrosswordView, canvas: Canvas,
+                       cell: Cell, fillPaint: Paint, fastRender: Boolean) {
             canvas.drawRect(cellRect, fillPaint)
 
             if (!fastRender) {
                 // Render the markers first, so that the cell stroke paints over
-                if (cell.isFlagSet(Cell.FLAG_MARKED) && markerDisplayMode and MARKER_CUSTOM != 0) {
-                    cellPath.apply {
-                        reset()
-                        moveTo(cellRect.right - markerSideLength, cellRect.top)
+                if (cell.isFlagSet(Cell.FLAG_MARKED) && v.markerDisplayMode and MARKER_CUSTOM != 0) {
+                    canvas.drawPath(cellPath.with(true) {
+                        moveTo(cellRect.right - v.markerSideLength, cellRect.top)
                         lineTo(cellRect.right, cellRect.top)
-                        lineTo(cellRect.right, cellRect.top + markerSideLength)
-                        close()
-                    }
-                    canvas.drawPath(cellPath, markedCellFillPaint)
+                        lineTo(cellRect.right, cellRect.top + v.markerSideLength)
+                    }, v.markedCellFillPaint)
                 }
 
-                if (cell.isFlagSet(Cell.FLAG_CHEATED) && markerDisplayMode and MARKER_CHEAT != 0) {
-                    cellPath.apply {
-                        reset()
+                if (cell.isFlagSet(Cell.FLAG_CHEATED) && v.markerDisplayMode and MARKER_CHEAT != 0) {
+                    canvas.drawPath(cellPath.with(true) {
                         moveTo(cellRect.right, cellRect.bottom)
-                        lineTo(cellRect.right - markerSideLength, cellRect.bottom)
-                        lineTo(cellRect.right, cellRect.bottom - markerSideLength)
-                        close()
-                    }
-
-                    canvas.drawPath(cellPath, cheatedCellFillPaint)
+                        lineTo(cellRect.right - v.markerSideLength, cellRect.bottom)
+                        lineTo(cellRect.right, cellRect.bottom - v.markerSideLength)
+                    }, v.cheatedCellFillPaint)
                 }
 
-                if (cell.isFlagSet(Cell.FLAG_ERROR) && markerDisplayMode and MARKER_ERROR != 0) {
-                    cellPath.apply {
-                        reset()
+                if (cell.isFlagSet(Cell.FLAG_ERROR) && v.markerDisplayMode and MARKER_ERROR != 0) {
+                    canvas.drawPath(cellPath.with(true) {
                         moveTo(cellRect.left, cellRect.bottom)
-                        lineTo(cellRect.left + markerSideLength, cellRect.bottom)
-                        lineTo(cellRect.left, cellRect.bottom - markerSideLength)
-                        close()
-                    }
-
-                    canvas.drawPath(cellPath, mistakeCellFillPaint)
+                        lineTo(cellRect.left + v.markerSideLength, cellRect.bottom)
+                        lineTo(cellRect.left, cellRect.bottom - v.markerSideLength)
+                    }, v.mistakeCellFillPaint)
                 }
             }
 
-            canvas.drawRect(cellRect, cellStrokePaint)
+            canvas.drawRect(cellRect, v.cellStrokePaint)
 
             if (fastRender) return
 
             if (cell.isFlagSet(Cell.FLAG_CIRCLED)) {
                 canvas.drawCircle(cellRect.centerX(), cellRect.centerY(),
-                        circleRadius, circleStrokePaint)
+                        v.circleRadius, v.circleStrokePaint)
             }
 
-            val numberY = cellRect.top + numberTextPadding + numberTextHeight
+            val numberY = cellRect.top + v.numberTextPadding + v.numberTextHeight
 
-            if (cell.number != null) {
-                val textWidth = numberTextPaint.measureText(cell.number)
-                val numberX = cellRect.left + numberTextPadding + textWidth / 2
+            cell.number?.let { num ->
+                val textWidth = v.numberTextPaint.measureText(num)
+                val numberX = cellRect.left + v.numberTextPadding + textWidth / 2
 
                 if (cell.isFlagSet(Cell.FLAG_CIRCLED)) {
-                    canvas.drawText(cell.number!!,
-                            numberX, numberY, numberStrokePaint)
+                    canvas.drawText(num, numberX, numberY, v.numberStrokePaint)
                 }
 
-                canvas.drawText(cell.number!!,
-                        numberX, numberY, numberTextPaint)
+                canvas.drawText(num, numberX, numberY, v.numberTextPaint)
             }
 
             if (!cell.isEmpty) {
@@ -1713,103 +1705,86 @@ class CrosswordView(context: Context, attrs: AttributeSet?) : View(context, attr
                 answerTextRect.set(cellRect.left, numberY,
                         cellRect.right, cellRect.bottom)
 
-                var textSize = answerTextSize
+                var textSize = v.answerTextSize
                 var textWidth: Float
 
                 do {
-                    answerTextPaint.textSize = textSize
-                    textWidth = answerTextPaint.measureText(text)
-                    textSize -= scaledDensity
-                } while (textWidth >= cellSize)
+                    v.answerTextPaint.textSize = textSize
+                    textWidth = v.answerTextPaint.measureText(text)
+                    textSize -= v.scaledDensity
+                } while (textWidth >= v.cellSize)
 
-                answerTextPaint.getTextBounds("A", 0, 1, tempRect)
+                v.answerTextPaint.getTextBounds("A", 0, 1, tempRect)
                 val xOffset = textWidth / 2f
                 val yOffset = (tempRect.height() / 2).toFloat()
 
                 canvas.drawText(text, answerTextRect.centerX() - xOffset,
-                        answerTextRect.centerY() + yOffset, answerTextPaint)
+                        answerTextRect.centerY() + yOffset, v.answerTextPaint)
             }
         }
 
         fun renderSelection(canvas: Canvas, clearSelection: Boolean) {
-            if (selection == null) return
+            val sel = v.selection ?: return
 
             cancelRender = false
-            val startRow = selection!!.startRow
-            val endRow = selection!!.endRow
-            val startColumn = selection!!.startColumn
-            val endColumn = selection!!.endColumn
-            val cellRect = RectF()
 
             canvas.save()
-            canvas.scale(renderScale, renderScale)
+            canvas.scale(v.renderScale, v.renderScale)
 
-            var top = selection!!.startRow * cellSize
-            var row = startRow
+            var top = sel.startRow * v.cellSize
             var index = 0
-            while (row <= endRow) {
-                var left = selection!!.startColumn * cellSize
-                var column = startColumn
-                while (column <= endColumn) {
-                    val cell = puzzleCells[row][column]
-                    if (cell != null) {
-                        if (cancelRender) {
-                            canvas.restore()
-                            return
-                        }
-
-                        // Draw the unselected cell
-                        val paint: Paint = when {
-                            clearSelection -> cellFillPaint
-                            index == selection!!.cell -> selectedCellFillPaint
-                            else -> selectedWordFillPaint
-                        }
-
-                        cellRect.set(left, top, left + cellSize, top + cellSize)
-                        renderCell(canvas, cell, cellRect, paint, false)
-                    }
-
-                    index++
-                    column++
-                    left += cellSize
-                }
-                row++
-                top += cellSize
-            }
-
-            canvas.restore()
-        }
-
-        // FIXME
-        fun renderPuzzle(canvas: Canvas, scale: Float, fastRender: Boolean) {
-            cancelRender = false
-            val startedMillis = SystemClock.uptimeMillis()
-            val cellRect = RectF()
-
-            canvas.save()
-            canvas.scale(scale, scale)
-
-            var top = 0f
-            var i = 0
-            while (i < puzzleHeight) {
-                var left = 0f
-                var j = 0
-                while (j < puzzleWidth) {
+            for (row in sel.startRow..sel.endRow) {
+                var left = sel.startColumn * v.cellSize
+                for (column in sel.startColumn..sel.endColumn) {
                     if (cancelRender) {
                         canvas.restore()
                         return
                     }
 
-                    val cell = puzzleCells[i][j]
-                    if (cell != null) {
-                        cellRect.set(left, top, left + cellSize, top + cellSize)
-                        renderCell(canvas, cell, cellRect, cellFillPaint, fastRender)
+                    v.puzzleCells[row][column]?.let { cell ->
+                        // Draw the unselected cell
+                        val paint = when {
+                            clearSelection -> v.cellFillPaint
+                            index == sel.cell -> v.selectedCellFillPaint
+                            else -> v.selectedWordFillPaint
+                        }
+
+                        cellRect.set(left, top, left + v.cellSize, top + v.cellSize)
+                        renderCell(v, canvas, cell, paint, false)
                     }
-                    j++
-                    left += cellSize
+
+                    index++
+                    left += v.cellSize
                 }
-                i++
-                top += cellSize
+                top += v.cellSize
+            }
+
+            canvas.restore()
+        }
+
+        fun renderPuzzle(canvas: Canvas, scale: Float, fastRender: Boolean) {
+            cancelRender = false
+            val startedMillis = SystemClock.uptimeMillis()
+
+            canvas.save()
+            canvas.scale(scale, scale)
+
+            var top = 0f
+            for (i in 0..(v.puzzleHeight - 1)) {
+                var left = 0f
+                for (j in 0..(v.puzzleWidth - 1)) {
+                    if (cancelRender) {
+                        canvas.restore()
+                        return
+                    }
+
+                    v.puzzleCells[i][j]?.let { cell ->
+                        cellRect.set(left, top, left + v.cellSize, top + v.cellSize)
+                        renderCell(v, canvas, cell, v.cellFillPaint, fastRender)
+                    }
+                    left += v.cellSize
+                }
+                top += v.cellSize
             }
 
             canvas.restore()
@@ -1821,66 +1796,54 @@ class CrosswordView(context: Context, attrs: AttributeSet?) : View(context, attr
         }
     }
 
-    // FIXME
-    private inner class RenderTask(var mScale: Float) : AsyncTask<Void?, Void?, Void?>() {
+    private class RenderTask(view: CrosswordView,
+                             var scale: Float) : AsyncTask<Void?, Void?, Bitmap?>() {
 
-        private var mRenderingCanvas: Canvas? = null
-        private var mRenderedPuzzle: Bitmap? = null
-        private var mRenderer = Renderer()
+        private val viewRef = WeakReference(view)
+        private val renderer = Renderer(view)
 
-        override fun doInBackground(vararg params: Void?): Void? {
-            if (puzzleWidth > 0 && puzzleHeight > 0) {
-                val width = puzzleRect.width().toInt()
-                val height = puzzleRect.height().toInt()
+        override fun doInBackground(vararg params: Void?): Bitmap? {
+            val v = viewRef.get() ?: return null
+            if (v.puzzleWidth == 0 || v.puzzleHeight == 0) return null
 
-                val puzzleBmp = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565)
-                val puzzleCanvas = Canvas(puzzleBmp)
+            val width = v.puzzleRect.width().toInt()
+            val height = v.puzzleRect.height().toInt()
 
-                val sizeBytes = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-                    puzzleBmp.allocationByteCount
-                } else {
-                    puzzleBmp.byteCount
-                }
+            val puzzleBmp = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565)
+            val puzzleCanvas = Canvas(puzzleBmp)
 
-                Log.d(LOG_TAG, String.format("Created a new %dx%d puzzle bitmap (%,dkB)...",
-                        width, height, sizeBytes / 1024))
+            Log.d(LOG_TAG, String.format("Created a new %dx%d puzzle bitmap (%,dkB)...",
+                    width, height, puzzleBmp.sizeInBytes / 1024))
 
-                mRenderer.renderPuzzle(puzzleCanvas, mScale, false)
+            renderer.renderPuzzle(puzzleCanvas, scale, false)
 
-                mRenderedPuzzle = puzzleBmp
-                mRenderingCanvas = puzzleCanvas
-            } else {
-                Log.d(LOG_TAG, "Not creating an empty puzzle bitmap")
-            }
-
-            return null
+            return puzzleBmp
         }
 
-        override fun onPostExecute(param: Void?) {
-            super.onPostExecute(param)
+        override fun onPostExecute(param: Bitmap?) {
+            val v = viewRef.get() ?: return
+            if (isCancelled || param == null) return
 
-            if (isCancelled) return
-
-            puzzleCanvas = mRenderingCanvas
-            puzzleBitmap = mRenderedPuzzle
-            bitmapScale = 1.0f
+            v.puzzleCanvas = Canvas(param)
+            v.puzzleBitmap = param
+            v.bitmapScale = 1.0f
 
             Log.d(LOG_TAG, "Invalidating...")
-            postInvalidateOnAnimation()
+            v.postInvalidateOnAnimation()
 
-            synchronized(rendererLock) {
-                renderTask = null
+            synchronized(v.rendererLock) {
+                v.renderTask = null
             }
         }
 
-        override fun onCancelled(aVoid: Void?) {
-            super.onCancelled(aVoid)
+        override fun onCancelled(aVoid: Bitmap?) {
+            val v = viewRef.get() ?: return
 
-            mRenderer.cancelRender = true
+            renderer.cancelRender = true
             Log.d(LOG_TAG, "Task cancelled")
 
-            synchronized(rendererLock) {
-                renderTask = null
+            synchronized(v.rendererLock) {
+                v.renderTask = null
             }
         }
     }
@@ -1924,7 +1887,7 @@ class CrosswordView(context: Context, attrs: AttributeSet?) : View(context, attr
 
     private inner class GestureListener: GestureDetector.SimpleOnGestureListener() {
 
-        private var tapLocation: CellOffset = CellOffset()
+        private val tapLocation = CellOffset()
 
         override fun onDown(e: MotionEvent): Boolean {
             if (!scroller.isFinished) scroller.forceFinished(true)

@@ -18,9 +18,8 @@ package org.akop.ararat.util
 
 import android.content.Context
 import android.content.res.TypedArray
-import android.graphics.Color
-import android.graphics.PointF
-import android.graphics.RectF
+import android.graphics.*
+import android.os.Build
 import android.os.Parcel
 import android.os.Parcelable
 import android.text.TextUtils
@@ -53,6 +52,17 @@ internal fun PointF.clampTo(rect: RectF) {
 }
 
 internal fun String.toColor(): Int = Color.parseColor(this)
+
+internal fun Path.with(reset: Boolean = false, block: Path.() -> Unit): Path {
+    if (reset) reset()
+    block(this)
+    close()
+
+    return this
+}
+
+internal val Bitmap.sizeInBytes
+    get() = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) allocationByteCount else byteCount
 
 internal inline fun <reified T: Parcelable> Parcel.readTypedParcelable(): T? =
         readParcelable(T::class.java.classLoader)

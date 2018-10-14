@@ -79,9 +79,9 @@ class CrosswordState internal constructor(val width: Int = 0,
             squaresWrong = source.readInt().toShort(),
             squaresUnknown = source.readInt().toShort(),
             squareCount = source.readInt().toShort()) {
-        source.createStringArray()
+        source.createStringArray()!!
                 .forEachIndexed { i, c -> charMatrix[i / width][i % width] = c }
-        source.createIntArray()
+        source.createIntArray()!!
                 .forEachIndexed { i, a -> attrMatrix[i / width][i % width] = a }
     }
 
