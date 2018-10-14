@@ -25,6 +25,7 @@ import android.os.Parcel
 import android.os.Parcelable
 import android.text.TextUtils
 import android.util.AttributeSet
+import android.view.inputmethod.InputMethodManager
 import java.security.MessageDigest
 
 
@@ -67,3 +68,6 @@ internal fun Context.withStyledAttributes(attrs: IntArray,
                 .recycle()
     }
 }
+
+internal val Context.inputMethodManager: InputMethodManager?
+    get() = getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager

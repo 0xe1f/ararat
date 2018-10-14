@@ -51,10 +51,7 @@ import android.widget.Scroller
 import org.akop.ararat.R
 import org.akop.ararat.core.Crossword
 import org.akop.ararat.core.CrosswordState
-import org.akop.ararat.util.clampTo
-import org.akop.ararat.util.readTypedParcelable
-import org.akop.ararat.util.toColor
-import org.akop.ararat.util.withStyledAttributes
+import org.akop.ararat.util.*
 import org.akop.ararat.view.inputmethod.CrosswordInputConnection
 import org.akop.ararat.widget.Zoomer
 
@@ -86,24 +83,6 @@ class CrosswordView(context: Context, attrs: AttributeSet?) : View(context, attr
         val upper = ch.toUpperCase()
         !(0..ch.length).any { !isAcceptableChar(upper[it]) }
     }
-
-    // Will recompute when reset
-    var crossword: Crossword? = null
-        set(crossword) {
-            puzzleHeight = 0
-            puzzleWidth = 0
-            puzzleCells = EMPTY_CELLS
-            allowedChars.clear()
-            field = crossword
-
-            if (crossword != null) {
-                initializeCrossword(crossword)
-                selectNextWord()
-            }
-
-            renderScale = 0f
-            resetConstraintsAndRedraw(true)
-        }
 
     private val contentRect = RectF() // Content rectangle - bounds of the view
     private val puzzleRect = RectF() // Puzzle rectangle - basically the output size of the bitmap
@@ -142,29 +121,36 @@ class CrosswordView(context: Context, attrs: AttributeSet?) : View(context, attr
     private var bitmapScale: Float = 0f // This is the scaling applied to the bitmap in touch resize mode
     private var scaleStart: Float = 0f // The value of mRenderScale when touch resizing begins
     private var bitmapOffset = PointF() // Offset of the rendered bitmap
-    private val mCenteredOffset = PointF() // Offset at which the puzzle appears exactly in the middle
-    private val mTranslationBounds = RectF() // Bitmap translation limits
+    private val centeredOffset = PointF() // Offset at which the puzzle appears exactly in the middle
+    private val translationBounds = RectF() // Bitmap translation limits
 
     private val scaleDetector: ScaleGestureDetector
     private val gestureDetector: GestureDetector
 
-    private var mAsyncTask: RenderTask? = null
-    private var mPuzzleCanvas: Canvas? = null
-    private var mPuzzleBitmap: Bitmap? = null
-    private val mBitmapPaint = Paint(Paint.FILTER_BITMAP_FLAG)
+    private var renderTask: RenderTask? = null
+    private var puzzleCanvas: Canvas? = null
+    private var puzzleBitmap: Bitmap? = null
+    private val bitmapPaint = Paint(Paint.FILTER_BITMAP_FLAG)
 
-    private var mIsZooming: Boolean = false
-    private var mIgnoreZoom: Boolean = false
+    private var isZooming: Boolean = false
+    private var ignoreZoom: Boolean = false
     private val zoomer: Zoomer
     private val scroller: Scroller
-    private var mIsSolved: Boolean = false
+    private val revealSetsCheatFlag: Boolean
+    private var isSolved: Boolean = false
 
-    private var mInputMode: Int = 0
+    private var _inputMode: Int = 0
     private var mIsEditable: Boolean = false
-    private var mSkipOccupiedOnType: Boolean = false
-    private var mSelectFirstUnoccupiedOnNav: Boolean = false
+
+    private val tempRect = Rect()
+    private val answerTextRect = RectF()
+
+    private val rendererLock = Any()
+    private val inPlaceRenderer = Renderer()
+
+    var skipOccupiedOnType: Boolean = false
+    var selectFirstUnoccupiedOnNav: Boolean = false
     var undoMode: Int = 0
-    private val mRevealSetsCheatFlag: Boolean
     var markerDisplayMode: Int = 0
         set(newMode) {
             if (markerDisplayMode != newMode) {
@@ -179,16 +165,10 @@ class CrosswordView(context: Context, attrs: AttributeSet?) : View(context, attr
         }
     private var mMaxBitmapSize: Int = 0
 
-    private val tempRect = Rect()
-    private val answerTextRect = RectF()
-
-    private val rendererLock = Any()
-    private val inPlaceRenderer = Renderer()
-
-    private var mSelectionChangeListener: OnSelectionChangeListener? = null
-    private var mStateChangeListener: OnStateChangeListener? = null
-    private var mLongpressListener: OnLongPressListener? = null
-    private var mInputValidator = defaultInputValidator
+    var onSelectionChangeListener: OnSelectionChangeListener? = null
+    var onStateChangeListener: OnStateChangeListener? = null
+    var onLongPressListener: OnLongPressListener? = null
+    var inputValidator: InputValidator? = null
 
     private val inputEventListener = object : CrosswordInputConnection.OnInputEventListener {
         override fun onWordEntered(text: CharSequence) {
@@ -249,8 +229,9 @@ class CrosswordView(context: Context, attrs: AttributeSet?) : View(context, attr
         }
     }
 
-    val selectedWord: Crossword.Word?
+    var selectedWord: Crossword.Word?
         get() = selection?.word
+        set(value) { selectWord(value) }
 
     val selectedCell: Int
         get() = selection?.cell ?: -1
@@ -282,7 +263,13 @@ class CrosswordView(context: Context, attrs: AttributeSet?) : View(context, attr
         get() = answerTextPaint.typeface
         set(typeface) {
             answerTextPaint.typeface = typeface
+            redrawInPlace()
+        }
 
+    var answerColor: Int
+        get() = answerTextPaint.color
+        set(value) {
+            answerTextPaint.color = value
             redrawInPlace()
         }
 
@@ -294,9 +281,9 @@ class CrosswordView(context: Context, attrs: AttributeSet?) : View(context, attr
         }
 
     var inputMode: Int
-        get() = mInputMode
+        get() = _inputMode
         set(mode) {
-            mInputMode = mode
+            _inputMode = mode
             resetInputMode()
         }
 
@@ -309,27 +296,16 @@ class CrosswordView(context: Context, attrs: AttributeSet?) : View(context, attr
             }
         }
 
-    val isSolved: Boolean
-        get() {
-            if (crossword!!.flags and Crossword.FLAG_NO_SOLUTION != 0) {
-                return false
-            }
+    // Will recompute when reset
+    var crossword: Crossword? = null
+        set(value) {
+            field = value
 
-            var solved = true
-            val map = crossword!!.cellMap
-            for (i in map.indices) {
-                for (j in 0 until map[i].size) {
-                    val vwCell = puzzleCells[i][j]
-                    if (vwCell != null) {
-                        if (!vwCell.isSolved(map[i][j]!!)) {
-                            solved = false
-                            break
-                        }
-                    }
-                }
-            }
+            initializeCrossword()
+            selectNextWord()
 
-            return solved
+            renderScale = 0f
+            resetConstraintsAndRedraw(true)
         }
 
     init {
@@ -357,9 +333,9 @@ class CrosswordView(context: Context, attrs: AttributeSet?) : View(context, attr
         cellSize = CELL_SIZE * dm.density
         numberTextPadding = NUMBER_TEXT_PADDING * dm.density
         mIsEditable = true
-        mInputMode = INPUT_MODE_KEYBOARD
-        mSkipOccupiedOnType = false
-        mSelectFirstUnoccupiedOnNav = true
+        _inputMode = INPUT_MODE_KEYBOARD
+        skipOccupiedOnType = false
+        selectFirstUnoccupiedOnNav = true
         mMaxBitmapSize = DEFAULT_MAX_BITMAP_DIMENSION
 
         // Read supplied attributes
@@ -379,12 +355,12 @@ class CrosswordView(context: Context, attrs: AttributeSet?) : View(context, attr
             circleStrokeColor = getColor(R.styleable.CrosswordView_circleStrokeColor, circleStrokeColor)
             numberTextColor = getColor(R.styleable.CrosswordView_numberTextColor, numberTextColor)
             mIsEditable = getBoolean(R.styleable.CrosswordView_editable, mIsEditable)
-            mSkipOccupiedOnType = getBoolean(R.styleable.CrosswordView_skipOccupiedOnType, mSkipOccupiedOnType)
-            mSelectFirstUnoccupiedOnNav = getBoolean(R.styleable.CrosswordView_selectFirstUnoccupiedOnNav,
-                    mSelectFirstUnoccupiedOnNav)
+            skipOccupiedOnType = getBoolean(R.styleable.CrosswordView_skipOccupiedOnType, skipOccupiedOnType)
+            selectFirstUnoccupiedOnNav = getBoolean(R.styleable.CrosswordView_selectFirstUnoccupiedOnNav,
+                    selectFirstUnoccupiedOnNav)
         }
 
-        mRevealSetsCheatFlag = true
+        revealSetsCheatFlag = true
         markerSideLength = cellSize * MARKER_TRIANGLE_LENGTH_FRACTION
 
         // Init paints
@@ -441,7 +417,7 @@ class CrosswordView(context: Context, attrs: AttributeSet?) : View(context, attr
         scroller = Scroller(context, null, true)
         zoomer = Zoomer(context)
 
-        isFocusableInTouchMode = mIsEditable && mInputMode != INPUT_MODE_NONE
+        isFocusableInTouchMode = mIsEditable && _inputMode != INPUT_MODE_NONE
         setOnKeyListener(this)
     }
 
@@ -485,8 +461,8 @@ class CrosswordView(context: Context, attrs: AttributeSet?) : View(context, attr
         canvas.translate(bitmapOffset.x, bitmapOffset.y)
         canvas.scale(bitmapScale, bitmapScale)
 
-        if (mPuzzleBitmap != null) {
-            canvas.drawBitmap(mPuzzleBitmap!!, 0f, 0f, mBitmapPaint)
+        if (puzzleBitmap != null) {
+            canvas.drawBitmap(puzzleBitmap!!, 0f, 0f, bitmapPaint)
         } else {
             // Perform a fast, barebones render so that the screen doesn't
             // look completely empty
@@ -512,7 +488,7 @@ class CrosswordView(context: Context, attrs: AttributeSet?) : View(context, attr
         Log.v(LOG_TAG, "onCreateInputConnection()")
 
         var inputConnection: CrosswordInputConnection? = null
-        if (mInputMode != INPUT_MODE_NONE) {
+        if (_inputMode != INPUT_MODE_NONE) {
             outAttrs.actionLabel = null
             outAttrs.inputType = InputType.TYPE_NULL
             outAttrs.imeOptions = outAttrs.imeOptions or EditorInfo.IME_FLAG_NO_FULLSCREEN
@@ -529,7 +505,7 @@ class CrosswordView(context: Context, attrs: AttributeSet?) : View(context, attr
     }
 
     override fun onCheckIsTextEditor(): Boolean =
-            mIsEditable && mInputMode != INPUT_MODE_NONE
+            mIsEditable && _inputMode != INPUT_MODE_NONE
 
     override fun computeScroll() {
         super.computeScroll()
@@ -545,9 +521,9 @@ class CrosswordView(context: Context, attrs: AttributeSet?) : View(context, attr
             bitmapScale = renderScale / scaleStart
             invalidate = true
         } else {
-            if (mIsZooming) {
+            if (isZooming) {
                 regenerateBitmaps()
-                mIsZooming = false
+                isZooming = false
             }
         }
 
@@ -618,7 +594,7 @@ class CrosswordView(context: Context, attrs: AttributeSet?) : View(context, attr
         val cell = puzzleCells[s.row][s.column]
 
         if (cell?.setFlag(Cell.FLAG_MARKED, mark) == true) {
-            mStateChangeListener?.onCrosswordChanged(this)
+            onStateChangeListener?.onCrosswordChanged(this)
             redrawInPlace()
         }
     }
@@ -715,7 +691,8 @@ class CrosswordView(context: Context, attrs: AttributeSet?) : View(context, attr
                         undoBuf[k][l] = vwCell.char
                     }
                     val ch = charMatrix[k][l].canonicalize()
-                    if (!TextUtils.equals(ch, vwCell.char) && (ch == null || mInputValidator(ch))) {
+                    val validator = inputValidator ?: defaultInputValidator
+                    if (!TextUtils.equals(ch, vwCell.char) && (ch == null || validator.invoke(ch))) {
                         val cellChanged = !TextUtils.equals(vwCell.char, ch)
                         if (cellChanged) {
                             vwCell.setChar(ch)
@@ -725,7 +702,7 @@ class CrosswordView(context: Context, attrs: AttributeSet?) : View(context, attr
                             vwCell.setFlag(Cell.FLAG_CHEATED, true)
                         }
                         if (markerDisplayMode and MARKER_ERROR != 0) {
-                            vwCell.markError(map[i][j]!!, mRevealSetsCheatFlag)
+                            vwCell.markError(map[i][j]!!, revealSetsCheatFlag)
                         }
                     }
                 }
@@ -762,7 +739,7 @@ class CrosswordView(context: Context, attrs: AttributeSet?) : View(context, attr
                             state.isFlagSet(CrosswordState.FLAG_MARKED, i, j))
                     cell.setChar(state.charAt(i, j))
                     if (markerDisplayMode and MARKER_ERROR != 0) {
-                        cell.markError(map[i][j]!!, mRevealSetsCheatFlag)
+                        cell.markError(map[i][j]!!, revealSetsCheatFlag)
                     }
                 }
             }
@@ -781,45 +758,16 @@ class CrosswordView(context: Context, attrs: AttributeSet?) : View(context, attr
         onBoardChanged()
     }
 
-    fun setOnSelectionChangeListener(listener: OnSelectionChangeListener) {
-        mSelectionChangeListener = listener
-    }
-
-    fun setOnStateChangeListener(listener: OnStateChangeListener) {
-        mStateChangeListener = listener
-    }
-
-    fun setOnLongPressListener(listener: OnLongPressListener) {
-        mLongpressListener = listener
-    }
-
-    fun setInputValidator(validator: InputValidator?) {
-        mInputValidator = validator ?: defaultInputValidator
-    }
-
     fun selectPreviousWord() {
-        if (crossword != null) selectWord(crossword!!.previousWord(selection?.word))
+        crossword?.let { selectWord(it.previousWord(selection?.word)) }
     }
 
     fun selectNextWord() {
-        if (crossword != null) selectWord(crossword!!.nextWord(selection?.word))
+        crossword?.let { selectWord(it.nextWord(selection?.word)) }
     }
 
     fun selectWord(direction: Int, number: Int) {
-        val word = crossword!!.findWord(direction, number)
-        if (word != null) {
-            selectWord(word)
-        }
-    }
-
-    fun selectWord(word: Crossword.Word?) {
-        if (crossword != null) {
-            var cell = 0
-            if (mSelectFirstUnoccupiedOnNav && word != null) {
-                cell = Math.max(firstFreeCell(word, 0), 0)
-            }
-            resetSelection(if (word != null) Selectable(word, cell) else null)
-        }
+        crossword?.findWord(direction, number)?.let { selectWord(it) }
     }
 
     fun getCellRect(word: Crossword.Word, cell: Int): Rect? =
@@ -835,9 +783,7 @@ class CrosswordView(context: Context, attrs: AttributeSet?) : View(context, attr
             row += charIndex
         }
 
-        val cell = puzzleCells[row][column] ?: return null
-
-        return cell.char
+        return puzzleCells[row][column]?.char
     }
 
     fun setCellContents(word: Crossword.Word, charIndex: Int,
@@ -854,26 +800,36 @@ class CrosswordView(context: Context, attrs: AttributeSet?) : View(context, attr
         setChars(row, column, arrayOf(arrayOf<String?>(sol)), markAsCheated)
     }
 
-    fun setAnswerColor(color: Int) {
-        answerTextPaint.color = color
+    fun isSolved(): Boolean {
+        val cw = crossword ?: return false
+        if (cw.flags and Crossword.FLAG_NO_SOLUTION != 0) {
+            return false
+        }
 
-        redrawInPlace()
+        var solved = true
+        val map = cw.cellMap
+        for (i in map.indices) {
+            for (j in 0 until map[i].size) {
+                val vwCell = puzzleCells[i][j]
+                if (vwCell != null) {
+                    if (!vwCell.isSolved(map[i][j]!!)) {
+                        solved = false
+                        break
+                    }
+                }
+            }
+        }
+
+        return solved
     }
 
-    fun skipOccupiedOnType(): Boolean {
-        return mSkipOccupiedOnType
-    }
-
-    fun setSkipOccupiedOnType(skip: Boolean) {
-        mSkipOccupiedOnType = skip
-    }
-
-    fun selectFirstUnoccupiedOnNav(): Boolean {
-        return mSelectFirstUnoccupiedOnNav
-    }
-
-    fun setSelectFirstUnoccupiedOnNav(selectFirst: Boolean) {
-        mSelectFirstUnoccupiedOnNav = selectFirst
+    private fun selectWord(word: Crossword.Word?) {
+        if (word == null) {
+            resetSelection(null)
+        } else {
+            resetSelection(Selectable(word,
+                    if (selectFirstUnoccupiedOnNav) maxOf(firstFreeCell(word, 0), 0) else 0))
+        }
     }
 
     private fun getCellRect(sel: Selectable?): Rect? {
@@ -906,24 +862,19 @@ class CrosswordView(context: Context, attrs: AttributeSet?) : View(context, attr
     }
 
     private fun resetInputMode() {
-        isFocusableInTouchMode = mIsEditable && mInputMode != INPUT_MODE_NONE
-
-        val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-        if (imm != null) {
-            if (imm.isActive(this)) {
-                imm.hideSoftInputFromWindow(windowToken, 0)
-            }
+        isFocusableInTouchMode = mIsEditable && _inputMode != INPUT_MODE_NONE
+        context.inputMethodManager?.let { imm ->
+            if (imm.isActive(this)) imm.hideSoftInputFromWindow(windowToken, 0)
             imm.restartInput(this)
         }
     }
 
-    protected fun handleInput(ch: Char) {
-        if (!mIsEditable) {
-            return
-        }
+    private fun handleInput(ch: Char) {
+        if (!mIsEditable) return
 
         val sch = ch.toString()
-        if (selection != null && mInputValidator(sch)) {
+        val validator = inputValidator ?: defaultInputValidator
+        if (selection != null && validator.invoke(sch)) {
             clearUndoBufferIfNeeded(selection)
 
             val row = selection!!.row
@@ -932,12 +883,12 @@ class CrosswordView(context: Context, attrs: AttributeSet?) : View(context, attr
             val cell = puzzleCells[row][col]
             val changed = cell!!.char != sch
             if (changed) {
-                undoBuffer.push(UndoItem(cell.char!!, row, col, selection))
+                undoBuffer.push(UndoItem(cell.char, row, col, selection))
                 cell.setChar(sch)
             }
 
             if (markerDisplayMode and MARKER_ERROR != 0) {
-                cell.markError(crossword!!.cellMap[row][col]!!, mRevealSetsCheatFlag)
+                cell.markError(crossword!!.cellMap[row][col]!!, revealSetsCheatFlag)
             }
 
             resetSelection(nextSelectable(selection!!))
@@ -950,7 +901,7 @@ class CrosswordView(context: Context, attrs: AttributeSet?) : View(context, attr
         var word: Crossword.Word? = selected.word
         var nextCell = -1
 
-        if (mSkipOccupiedOnType) {
+        if (skipOccupiedOnType) {
             nextCell = firstFreeCell(word, cell + 1)
             if (nextCell == -1 && cell + 1 < word!!.length) {
                 // No more free cells from this point, but we're still not
@@ -965,7 +916,7 @@ class CrosswordView(context: Context, attrs: AttributeSet?) : View(context, attr
 
         if (nextCell == -1) {
             word = crossword!!.nextWord(word)
-            nextCell = if (mSelectFirstUnoccupiedOnNav) maxOf(firstFreeCell(word, 0), 0) else 0
+            nextCell = if (selectFirstUnoccupiedOnNav) maxOf(firstFreeCell(word, 0), 0) else 0
         }
 
         return Selectable(word!!, nextCell)
@@ -1064,7 +1015,7 @@ class CrosswordView(context: Context, attrs: AttributeSet?) : View(context, attr
         }
 
         zoomer.forceFinished(true)
-        mIsZooming = true
+        isZooming = true
         scaleStart = renderScale
 
         zoomer.startZoom(finalRenderScale - scaleStart)
@@ -1073,10 +1024,12 @@ class CrosswordView(context: Context, attrs: AttributeSet?) : View(context, attr
         return true
     }
 
-    protected fun showKeyboard() {
-        if (mInputMode != INPUT_MODE_NONE) {
-            val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-            imm.showSoftInput(this@CrosswordView, InputMethodManager.SHOW_IMPLICIT)
+    private fun showKeyboard() {
+        if (_inputMode != INPUT_MODE_NONE) {
+            context.inputMethodManager?.let { imm ->
+                if (!imm.isActive(this)) requestFocus()
+                imm.showSoftInput(this, InputMethodManager.SHOW_IMPLICIT)
+            }
         }
     }
 
@@ -1087,7 +1040,7 @@ class CrosswordView(context: Context, attrs: AttributeSet?) : View(context, attr
                 val vwCell = puzzleCells[i][j]
                 if (vwCell != null) {
                     if (markerDisplayMode and MARKER_ERROR != 0) {
-                        vwCell.markError(map[i][j]!!, mRevealSetsCheatFlag)
+                        vwCell.markError(map[i][j]!!, revealSetsCheatFlag)
                     } else {
                         vwCell.setFlag(Cell.FLAG_ERROR, false)
                     }
@@ -1096,7 +1049,14 @@ class CrosswordView(context: Context, attrs: AttributeSet?) : View(context, attr
         }
     }
 
-    private fun initializeCrossword(crossword: Crossword) {
+    private fun initializeCrossword() {
+        puzzleHeight = 0
+        puzzleWidth = 0
+        puzzleCells = EMPTY_CELLS
+        allowedChars.clear()
+
+        val crossword = crossword ?: return
+
         puzzleWidth = crossword.width
         puzzleHeight = crossword.height
         puzzleCells = Array(puzzleHeight) { arrayOfNulls<Cell?>(puzzleWidth) }
@@ -1163,7 +1123,7 @@ class CrosswordView(context: Context, attrs: AttributeSet?) : View(context, attr
     }
 
     private fun resetConstraintsAndRedraw(forceBitmapRegen: Boolean) {
-        val regenBitmaps = mPuzzleBitmap == null && (mAsyncTask == null || mAsyncTask!!.isCancelled)
+        val regenBitmaps = puzzleBitmap == null && (renderTask == null || renderTask!!.isCancelled)
 
         // Determine the scale at which the puzzle takes up the entire width
         val unscaledWidth = puzzleWidth * cellSize + 1 // +1px for stroke brush
@@ -1189,7 +1149,7 @@ class CrosswordView(context: Context, attrs: AttributeSet?) : View(context, attr
         maxScaleFactor = Math.max(maxScaleFactor, minScaleFactor)
 
         bitmapScale = 1.0f
-        mIsZooming = false
+        isZooming = false
 
         // Recompute scaled puzzle size
         recomputePuzzleRect()
@@ -1201,15 +1161,15 @@ class CrosswordView(context: Context, attrs: AttributeSet?) : View(context, attr
 
     private fun regenerateBitmaps() {
         synchronized(rendererLock) {
-            if (mAsyncTask != null) {
-                mAsyncTask!!.cancel(false)
+            if (renderTask != null) {
+                renderTask!!.cancel(false)
             }
 
             // A 1px size line is always present, so it's not enough to just
             // check for zero
             if (puzzleRect.width() > 1 && puzzleRect.height() > 1) {
-                mAsyncTask = RenderTask(renderScale)
-                mAsyncTask!!.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR)
+                renderTask = RenderTask(renderScale)
+                renderTask!!.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR)
             }
         }
     }
@@ -1222,11 +1182,11 @@ class CrosswordView(context: Context, attrs: AttributeSet?) : View(context, attr
                 puzzleHeight * scaledCellSize + 1) // hairline-wide stroke of the cell
 
         // Determine center locations
-        mCenteredOffset.set(contentRect.left + (contentRect.width() - puzzleRect.width()) / 2.0f,
+        centeredOffset.set(contentRect.left + (contentRect.width() - puzzleRect.width()) / 2.0f,
                 contentRect.top + (contentRect.height() - puzzleRect.height()) / 2.0f)
 
         // Compute translation bounds
-        mTranslationBounds.set(contentRect.right - puzzleRect.right,
+        translationBounds.set(contentRect.right - puzzleRect.right,
                 contentRect.bottom - puzzleRect.bottom,
                 contentRect.left - puzzleRect.left,
                 contentRect.top - puzzleRect.top)
@@ -1236,17 +1196,17 @@ class CrosswordView(context: Context, attrs: AttributeSet?) : View(context, attr
 
     private fun constrainTranslation() {
         // Clamp the offset to fit within the view
-        bitmapOffset.clampTo(mTranslationBounds)
+        bitmapOffset.clampTo(translationBounds)
 
         if (puzzleRect.width() < contentRect.width()) {
             // Puzzle is narrower than the available width - center it horizontally
-            bitmapOffset.x = mCenteredOffset.x
+            bitmapOffset.x = centeredOffset.x
         }
 
         // Vertical
         if (puzzleRect.height() < contentRect.height()) {
             // Puzzle is shorter than the available height - center it vertically
-            bitmapOffset.y = mCenteredOffset.y
+            bitmapOffset.y = centeredOffset.y
         }
     }
 
@@ -1311,7 +1271,7 @@ class CrosswordView(context: Context, attrs: AttributeSet?) : View(context, attr
                 (visibleArea.height() - objectRect.height()) / 2.0f - objectRect.top)
 
         // Clamp the values
-        end.clampTo(mTranslationBounds)
+        end.clampTo(translationBounds)
 
         // Compute the distance to travel from current location
         val distanceX = end.x - bitmapOffset.x
@@ -1323,10 +1283,10 @@ class CrosswordView(context: Context, attrs: AttributeSet?) : View(context, attr
     }
 
     private fun redrawInPlace() {
-        val canvas = mPuzzleCanvas ?: return
+        val canvas = puzzleCanvas ?: return
 
         synchronized(rendererLock) {
-            mAsyncTask?.cancel(false)
+            renderTask?.cancel(false)
         }
 
         inPlaceRenderer.renderPuzzle(canvas, renderScale, false)
@@ -1336,7 +1296,7 @@ class CrosswordView(context: Context, attrs: AttributeSet?) : View(context, attr
     private fun resetSelection(selection: Selectable?, bringIntoView: Boolean = true) {
         val selectionChanged = selection != this.selection
 
-        val canvas = mPuzzleCanvas
+        val canvas = puzzleCanvas
         if (canvas != null) {
             // Create a canvas on top of the existing bitmap
             if (this.selection != null && selectionChanged) {
@@ -1359,16 +1319,15 @@ class CrosswordView(context: Context, attrs: AttributeSet?) : View(context, attr
         }
 
         // Notify the listener of the change in selection
-        if (selectionChanged) mSelectionChangeListener?.onSelectionChanged(this,
+        if (selectionChanged) onSelectionChangeListener?.onSelectionChanged(this,
                 this.selection?.word, this.selection?.cell ?: -1)
 
         // Invalidate the view
         invalidate()
     }
 
-    private fun isAcceptableChar(ch: Char): Boolean {
-        return allowedChars.contains(Character.toUpperCase(ch))
-    }
+    private fun isAcceptableChar(ch: Char): Boolean =
+            allowedChars.contains(Character.toUpperCase(ch))
 
     private fun getCellOffset(viewX: Float, viewY: Float, offset: CellOffset): Boolean {
         var viewX = viewX
@@ -1427,7 +1386,7 @@ class CrosswordView(context: Context, attrs: AttributeSet?) : View(context, attr
         val dir = selection?.direction ?: Crossword.Word.DIR_ACROSS
         getSelectable(offset, dir)?.let { sel ->
             resetSelection(sel, false)
-            mLongpressListener?.onCellLongPressed(this, sel.word, sel.cell)
+            onLongPressListener?.onCellLongPressed(this, sel.word, sel.cell)
         }
     }
 
@@ -1457,16 +1416,16 @@ class CrosswordView(context: Context, attrs: AttributeSet?) : View(context, attr
     }
 
     private fun onBoardChanged() {
-        val solved = isSolved
-        mStateChangeListener?.onCrosswordChanged(this)
-        if (solved != mIsSolved) {
+        val solved = isSolved()
+        onStateChangeListener?.onCrosswordChanged(this)
+        if (solved != isSolved) {
             if (solved) {
-                mStateChangeListener?.onCrosswordSolved(this)
+                onStateChangeListener?.onCrosswordSolved(this)
             } else {
-                mStateChangeListener?.onCrosswordUnsolved(this)
+                onStateChangeListener?.onCrosswordUnsolved(this)
             }
         }
-        mIsSolved = solved
+        isSolved = solved
     }
 
     private fun getSelectable(co: CellOffset, preferredDir: Int): Selectable? {
@@ -1534,7 +1493,7 @@ class CrosswordView(context: Context, attrs: AttributeSet?) : View(context, attr
                            val startCol: Int = 0,
                            val selectable: Selectable? = null) {
 
-        constructor(ch: String, row: Int, col: Int, selectable: Selectable? = null) : this(
+        constructor(ch: String?, row: Int, col: Int, selectable: Selectable? = null) : this(
                 chars = arrayOf<Array<String?>>(arrayOf(ch)),
                 startRow = row,
                 startCol = col,
@@ -1936,15 +1895,15 @@ class CrosswordView(context: Context, attrs: AttributeSet?) : View(context, attr
 
             if (isCancelled) return
 
-            mPuzzleCanvas = mRenderingCanvas
-            mPuzzleBitmap = mRenderedPuzzle
+            puzzleCanvas = mRenderingCanvas
+            puzzleBitmap = mRenderedPuzzle
             bitmapScale = 1.0f
 
             Log.d(LOG_TAG, "Invalidating...")
             postInvalidateOnAnimation()
 
             synchronized(rendererLock) {
-                mAsyncTask = null
+                renderTask = null
             }
         }
 
@@ -1955,7 +1914,7 @@ class CrosswordView(context: Context, attrs: AttributeSet?) : View(context, attr
             Log.d(LOG_TAG, "Task cancelled")
 
             synchronized(rendererLock) {
-                mAsyncTask = null
+                renderTask = null
             }
         }
     }
@@ -1963,22 +1922,22 @@ class CrosswordView(context: Context, attrs: AttributeSet?) : View(context, attr
     private inner class ScaleListener : ScaleGestureDetector.SimpleOnScaleGestureListener() {
 
         override fun onScaleBegin(detector: ScaleGestureDetector): Boolean {
-            if (mIsZooming) {
+            if (isZooming) {
                 // Double-tap scaling interferes with autozoom, so ignore
                 // zoom requests
-                mIgnoreZoom = true
+                ignoreZoom = true
                 return true
             }
 
             zoomer.forceFinished(true)
-            mIsZooming = false
+            isZooming = false
 
             scaleStart = renderScale
             return true
         }
 
         override fun onScale(detector: ScaleGestureDetector): Boolean {
-            if (mIgnoreZoom) return true
+            if (ignoreZoom) return true
 
             renderScale *= detector.scaleFactor
 
@@ -1992,8 +1951,8 @@ class CrosswordView(context: Context, attrs: AttributeSet?) : View(context, attr
         }
 
         override fun onScaleEnd(detector: ScaleGestureDetector) {
-            if (!mIgnoreZoom) regenerateBitmaps()
-            mIgnoreZoom = false
+            if (!ignoreZoom) regenerateBitmaps()
+            ignoreZoom = false
         }
     }
 
@@ -2053,8 +2012,8 @@ class CrosswordView(context: Context, attrs: AttributeSet?) : View(context, attr
             var maxX = startX
             if (puzzleRect.width() >= contentRect.width()) {
                 // Puzzle exceeds content, set horizontal flinging bounds
-                minX = mTranslationBounds.left.toInt()
-                maxX = mTranslationBounds.right.toInt()
+                minX = translationBounds.left.toInt()
+                maxX = translationBounds.right.toInt()
             }
 
             // Vertical
@@ -2063,8 +2022,8 @@ class CrosswordView(context: Context, attrs: AttributeSet?) : View(context, attr
             var maxY = startY
             if (puzzleRect.height() >= contentRect.height()) {
                 // Puzzle exceeds content, set vertical flinging bounds
-                minY = mTranslationBounds.top.toInt()
-                maxY = mTranslationBounds.bottom.toInt()
+                minY = translationBounds.top.toInt()
+                maxY = translationBounds.bottom.toInt()
             }
 
             scroller.fling(startX, startY,

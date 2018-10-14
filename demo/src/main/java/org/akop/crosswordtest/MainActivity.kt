@@ -42,8 +42,6 @@ class MainActivity : AppCompatActivity(), CrosswordView.OnLongPressListener, Cro
     private var crosswordView: CrosswordView? = null
     private var hint: TextView? = null
 
-    private var solvedShown: Boolean = false
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -57,31 +55,29 @@ class MainActivity : AppCompatActivity(), CrosswordView.OnLongPressListener, Cro
         title = getString(R.string.title_by_author,
                 crossword.title, crossword.author)
 
-        crosswordView!!.crossword = crossword
-        crosswordView!!.setOnLongPressListener(this)
-        crosswordView!!.setOnStateChangeListener(this)
-        crosswordView!!.setOnSelectionChangeListener(this)
-        crosswordView!!.setInputValidator { ch -> !ch.first().isISOControl() }
+        crosswordView!!.let { cv ->
+            cv.crossword = crossword
+            cv.onLongPressListener = this
+            cv.onStateChangeListener = this
+            cv.onSelectionChangeListener = this
+            cv.inputValidator = { ch -> !ch.first().isISOControl() }
+            cv.undoMode = CrosswordView.UNDO_NONE
+            cv.markerDisplayMode = CrosswordView.MARKER_CHEAT
 
-        crosswordView!!.undoMode = CrosswordView.UNDO_NONE
-        crosswordView!!.markerDisplayMode = CrosswordView.MARKER_CHEAT
-
-        onSelectionChanged(crosswordView!!,
-                crosswordView!!.selectedWord, crosswordView!!.selectedCell)
+            onSelectionChanged(cv, cv.selectedWord, cv.selectedCell)
+        }
     }
 
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
         super.onRestoreInstanceState(savedInstanceState)
 
         crosswordView!!.restoreState(savedInstanceState.getParcelable("state") as CrosswordState)
-        solvedShown = savedInstanceState.getBoolean("solved")
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
 
         outState.putParcelable("state", crosswordView!!.state)
-        outState.putBoolean("solved", solvedShown)
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -122,35 +118,23 @@ class MainActivity : AppCompatActivity(), CrosswordView.OnLongPressListener, Cro
     override fun onCrosswordChanged(view: CrosswordView) {}
 
     override fun onCrosswordSolved(view: CrosswordView) {
-        if (solvedShown) return
-
-        solvedShown = true
-        Toast.makeText(this, "You've solved the puzzle!",
+        Toast.makeText(this, R.string.youve_solved_the_puzzle,
                 Toast.LENGTH_SHORT).show()
     }
 
-    override fun onCrosswordUnsolved(view: CrosswordView) {
-        solvedShown = false
-    }
+    override fun onCrosswordUnsolved(view: CrosswordView) { }
 
-    private fun readPuzzle(@RawRes resourceId: Int): Crossword {
-        return resources.openRawResource(resourceId).use { s ->
-            buildCrossword { PuzFormatter().read(this, s) }
-        }
-    }
+    private fun readPuzzle(@RawRes resourceId: Int): Crossword =
+            resources.openRawResource(resourceId).use { s ->
+                buildCrossword { PuzFormatter().read(this, s) }
+            }
 
     override fun onSelectionChanged(view: CrosswordView,
                                     word: Crossword.Word?, position: Int) {
-        hint!!.text = buildString {
-            word?.let {
-                append(it.number)
-                append(when {
-                    it.direction == Crossword.Word.DIR_ACROSS -> getString(R.string.across)
-                    it.direction == Crossword.Word.DIR_DOWN -> getString(R.string.down)
-                    else -> ""
-                })
-                append(" • ${it.hint}")
-            }
+        hint!!.text = when (word?.direction) {
+            Crossword.Word.DIR_ACROSS -> getString(R.string.across, word.number, word.hint)
+            Crossword.Word.DIR_DOWN -> getString(R.string.down, word.number, word.hint)
+            else -> ""
         }
     }
 }
