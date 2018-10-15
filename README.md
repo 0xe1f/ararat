@@ -1,5 +1,5 @@
 [![Build Status](https://travis-ci.org/0xe1f/ararat.svg?branch=master)](https://travis-ci.org/0xe1f/ararat)
-[![Sonatype Nexus (Releases)](https://img.shields.io/nexus/r/https/oss.sonatype.org/com.github.0xe1f/ararat.svg)](http://repo1.maven.org/maven2/com/github/0xe1f/ararat/)
+[![Sonatype Nexus (Releases)](https://img.shields.io/nexus/r/https/oss.sonatype.org/com.github.0xe1f/ararat.svg)](https://repo1.maven.org/maven2/com/github/0xe1f/ararat/)
 [![License](https://img.shields.io/badge/license-MIT-4EB1BA.svg)](https://opensource.org/licenses/MIT)
 
 Ararat
@@ -18,17 +18,17 @@ object
 
 For a demonstration, see the included [demo app](demo/).
 
-![Screenshot](http://i.imgur.com/1lg7zhN.png)
+![Screenshot](https://i.imgur.com/1lg7zhN.png)
 
 The sample crossword included in the app is Double-A's by Ben Tausig.
 
 ## Quick Start
 
-Add dependency to `app/build.gradle`:
+Add dependency to `app/build.gradle` (check to make sure you're using the [latest version](https://repo1.maven.org/maven2/com/github/0xe1f/ararat/maven-metadata.xml)):
 
 ```
 dependencies {
-    implementation 'com.github.0xe1f:ararat:1.0.3'
+    implementation 'com.github.0xe1f:ararat:1.0.15'
 }
 ```
 
