@@ -261,7 +261,7 @@ class CrosswordView(context: Context, attrs: AttributeSet?) : View(context, attr
             return state
         }
 
-    var answerTypeface: Typeface
+    var answerTypeface: Typeface?
         get() = answerTextPaint.typeface
         set(typeface) {
             if (typeface !== answerTypeface) {

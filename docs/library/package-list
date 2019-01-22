@@ -1,7 +1,6 @@
 $dokka.format:html
 $dokka.linkExtension:html
 
-org.akop.ararat
 org.akop.ararat.core
 org.akop.ararat.graphics
 org.akop.ararat.io

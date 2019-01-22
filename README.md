@@ -12,7 +12,6 @@ It includes:
 * [Parsers](library/src/main/java/org/akop/ararat/io/) for various formats
 * [CrosswordRenderer](library/src/main/java/org/akop/ararat/graphics/CrosswordRenderer.kt),
 which can render a crossword (and optionally, current state) to a `Canvas`
-object
 * [CrosswordView](library/src/main/java/org/akop/ararat/view/CrosswordView.kt),
 the `View` subclass that handles gameplay
 
@@ -69,14 +68,13 @@ For the activity to respond to soft keyboard changes, set
 
 `CrosswordView` was designed to work with the Android soft keyboard.
 Unfortunately, with the exception of maybe Google and the AOSP codebase,
-virtually no one follows the rules of Android IME, including third-party
-manufacturers and authors of many soft keyboard apps. As a result, keyboards
-will often assume that a view (meaning, `CrosswordView`) has full support of
-things like autocorrect and swiping - concepts that don't work in the limited
-scope of a basic crossword soft keyboard, and will ignore any attempts to
-disable those features.
+virtually no one follows the rules of Android IME, including many third-party
+manufacturers and authors of soft keyboards. They will often mistakenly assume
+that any view has full support of things like autocorrect and swiping -
+concepts that don't work in the limited scope of input needed for crosswords,
+and will ignore any attempts to disable those features.
 
-Long-term, if you're serious about your own crossword app, your best bet is
+If you're serious about your own crossword app, your best long term bet is
 to use your own
 [KeyboardView](https://developer.android.com/reference/android/inputmethodservice/KeyboardView)
 and have it provide the input instead.
@@ -84,7 +82,7 @@ and have it provide the input instead.
 ## License
 
 ```
-Copyright (c) 2014-2018 Akop Karapetyan
+Copyright (c) 2014-2019 Akop Karapetyan
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

@@ -291,7 +291,7 @@ class PuzFormatter : CrosswordFormatter {
 
                 var incremented = false
                 if ((j == 0 || j > 0 && charMap[i][j - 1] == EMPTY)
-                        && j + 1 < jend && charMap[i][j + 1] != EMPTY) {
+                        && j + 1 <= jend && charMap[i][j + 1] != EMPTY) {
                     // Start of a new Across word
                     number++
                     incremented = true
