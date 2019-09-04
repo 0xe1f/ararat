@@ -436,7 +436,7 @@ class Crossword internal constructor(val width: Int = 0,
             get() = attrFlags.toInt() and ATTR_CIRCLED == ATTR_CIRCLED
 
         private constructor(source: Parcel): this(
-                chars = source.readString(),
+                chars = source.readString()!!,
                 attrFlags = source.readByte())
 
         fun chars(): String = chars
@@ -460,6 +460,7 @@ class Crossword internal constructor(val width: Int = 0,
             const val ATTR_CIRCLED = 1
             const val ATTR_NO_SOLUTION = 2
 
+            @Suppress("unused")
             @JvmField
             val CREATOR: Parcelable.Creator<Cell> = object : Parcelable.Creator<Cell> {
                 override fun createFromParcel(source: Parcel): Cell = Cell(source)
@@ -584,7 +585,7 @@ class Crossword internal constructor(val width: Int = 0,
                 direction = source.readInt(),
                 hintUrl = source.readString(),
                 citation = source.readString(),
-                cells = source.readParcelableArray(Cell::class.java.classLoader)
+                cells = source.readParcelableArray(Cell::class.java.classLoader)!!
                         .map { it as Cell }
                         .toTypedArray())
 

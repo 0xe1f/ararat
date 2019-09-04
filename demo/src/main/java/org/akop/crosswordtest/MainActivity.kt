@@ -20,8 +20,8 @@
 
 package org.akop.crosswordtest
 
-import android.support.annotation.RawRes
-import android.support.v7.app.AppCompatActivity
+import androidx.annotation.RawRes
+import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
@@ -71,7 +71,7 @@ class MainActivity : AppCompatActivity(), CrosswordView.OnLongPressListener, Cro
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
         super.onRestoreInstanceState(savedInstanceState)
 
-        crosswordView!!.restoreState(savedInstanceState.getParcelable("state") as CrosswordState)
+        crosswordView!!.restoreState(savedInstanceState.getParcelable("state")!!)
     }
 
     override fun onSaveInstanceState(outState: Bundle) {

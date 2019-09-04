@@ -61,7 +61,7 @@ class WSJFormatter : CrosswordFormatter {
         builder.description = copyObj.optString("description")
         builder.copyright = copyObj.optString("publisher")
         builder.author = copyObj.optString("byline")
-        builder.date = PUBLISH_DATE_FORMAT.parse(pubDate).time
+        builder.date = PUBLISH_DATE_FORMAT.parse(pubDate)!!.time
 
         val grid = Grid(builder.width, builder.height,
                 dataObj.getJSONArray("grid"))
