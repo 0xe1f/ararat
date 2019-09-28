@@ -297,16 +297,16 @@ object HtmlUtility {
                                 r = j
                                 continue@outer
                             }
-                            !in '0'..'9' -> break@inner
+                            in '0'..'9' -> {}
+                            else -> break@inner
                         }
                     }
                 } else {
                     // Potential named entity
                     var j = r
                     inner@while (++j < s.length) {
-                        val ch2 = s[j]
-                        when {
-                            ch2 == ';' -> {
+                        when (s[j]) {
+                            ';' -> {
                                 // potential valid entity name
                                 val name = s.substring(r + 1 until j)
                                 val p = entities.binarySearchBy(name) { it.name }
@@ -316,7 +316,8 @@ object HtmlUtility {
                                 r = j
                                 continue@outer
                             }
-                            ch2 !in 'a'..'z' && ch2 !in 'A'..'Z' -> break@inner
+                            in 'a'..'z', in 'A'..'Z', in '0'..'9' -> {}
+                            else -> break@inner
                         }
                     }
                 }

@@ -49,6 +49,7 @@ class TestHtmlUtility {
             Pair("&amp;hf346,1", "&hf346,1"),
             Pair("Here&apos;s Johnny!", "Here's Johnny!"),
             Pair("&quot;Quote un-quote&quot;", "\"Quote un-quote\""),
+            Pair("Here's a fraction: &frac34;", "Here's a fraction: ¾"),
 
             Pair("Sister of Chekhov&rsquo;s Masha and Irina",
                     "Sister of Chekhov’s Masha and Irina"),
