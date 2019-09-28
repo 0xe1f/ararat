@@ -18,11 +18,10 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-package org.akop.ararat
+package org.akop.ararat.formatter
 
 import org.akop.ararat.io.WSJFormatter
 import org.akop.ararat.io.WSJFormatter.Companion.PUBLISH_DATE_FORMAT
-import org.akop.ararat.util.HtmlUtility
 import org.junit.Test
 
 
@@ -161,7 +160,7 @@ class TestWSJFormatter: BaseTest() {
                                 author = "by Mike Shenk/Edited by Mike Shenk",
                                 copyright = "The Wall Street Journal",
                                 comment = null,
-                                date = 1569654000000,
+                                date = PUBLISH_DATE_FORMAT.parse("Saturday, 28 September 2019").time,
                                 hash = "14e6595b021e7fe4fdc4e71b5740740d2c18ded8"
                         ),
                         hints = arrayOf(

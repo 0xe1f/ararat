@@ -264,22 +264,25 @@ object HtmlUtility {
         Pair("diams", 9830)
     ).sortedBy { it.first }
 
-    fun stripEntities(s: String): String = buildString(s.length) {
-        var i = -1
-        outer@while (++i < s.length) {
-            val ch = s[i]
+    fun stripEntities(s: String): String {
+        val out = CharArray(s.length)
+        var r = -1
+        var w = 0
+
+        outer@while (++r < s.length) {
+            val ch = s[r]
             if (ch == '&') {
-                if (i + 1 < s.length && s[i + 1] == '#') {
+                if (r + 1 < s.length && s[r + 1] == '#') {
                     // Potential numeric entity
-                    var j = i + 1
+                    var j = r + 1
                     inner@while (++j < s.length) {
                         when (s[j]) {
                             ';' -> {
-                                val v = s.substring(i + 2 until j)
+                                val v = s.substring(r + 2 until j)
                                 if (v.isEmpty()) break@inner // No digits
 
-                                append(v.toInt().toChar())
-                                i = j
+                                out[w++] = v.toInt().toChar()
+                                r = j
                                 continue@outer
                             }
                             !in '0'..'9' -> break@inner
@@ -287,18 +290,18 @@ object HtmlUtility {
                     }
                 } else {
                     // Potential named entity
-                    var j = i
+                    var j = r
                     inner@while (++j < s.length) {
                         val ch2 = s[j]
                         when {
                             ch2 == ';' -> {
                                 // potential valid entity name
-                                val name = s.substring(i + 1 until j)
+                                val name = s.substring(r + 1 until j)
                                 val p = entityList.binarySearchBy(name) { it.first }
                                 if (p < 0) break@inner // No match
 
-                                append(entityList[p].second.toChar())
-                                i = j
+                                out[w++] = entityList[p].second.toChar()
+                                r = j
                                 continue@outer
                             }
                             ch2 !in 'a'..'z' && ch2 !in 'A'..'Z' -> break@inner
@@ -306,7 +309,9 @@ object HtmlUtility {
                     }
                 }
             }
-            append(ch)
+            out[w++] = ch
         }
+
+        return String(out, 0, w)
     }
 }

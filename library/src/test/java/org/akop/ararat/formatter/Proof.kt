@@ -18,17 +18,10 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-package org.akop.ararat
+package org.akop.ararat.formatter
 
 
-data class Metadata(val width: Int,
-                    val height: Int,
-                    val squareCount: Int,
-                    val flags: Int,
-                    val title: String?,
-                    val description: String?,
-                    val author: String?,
-                    val copyright: String?,
-                    val comment: String?,
-                    val date: Long,
-                    val hash: String)
+class Proof(val filePath: String,
+            val metadata: Metadata? = null,
+            val hints: Array<String>? = null,
+            val layout: Array<String>? = null)
