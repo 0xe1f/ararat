@@ -288,37 +288,33 @@ object HtmlUtility {
                 if (r + 1 < s.length && s[r + 1] == '#') {
                     // Potential numeric entity
                     var j = r + 1
-                    inner@while (++j < s.length) {
-                        when (s[j]) {
-                            ';' -> {
-                                if (r + 2 < j)
-                                    out[w++] = s.substring(r + 2 until j).toInt().toChar()
+                    inner@while (++j < s.length) when (s[j]) {
+                        ';' -> {
+                            if (r + 2 < j)
+                                out[w++] = s.substring(r + 2 until j).toInt().toChar()
 
-                                r = j
-                                continue@outer
-                            }
-                            in '0'..'9' -> {}
-                            else -> break@inner
+                            r = j
+                            continue@outer
                         }
+                        in '0'..'9' -> {}
+                        else -> break@inner
                     }
                 } else {
                     // Potential named entity
                     var j = r
-                    inner@while (++j < s.length) {
-                        when (s[j]) {
-                            ';' -> {
-                                // potential valid entity name
-                                val name = s.substring(r + 1 until j)
-                                val p = entities.binarySearchBy(name) { it.name }
-                                if (p >= 0)
-                                    out[w++] = entities[p].code.toChar()
+                    inner@while (++j < s.length) when (s[j]) {
+                        ';' -> {
+                            // potential valid entity name
+                            val name = s.substring(r + 1 until j)
+                            val p = entities.binarySearchBy(name) { it.name }
+                            if (p >= 0)
+                                out[w++] = entities[p].code.toChar()
 
-                                r = j
-                                continue@outer
-                            }
-                            in 'a'..'z', in 'A'..'Z', in '0'..'9' -> {}
-                            else -> break@inner
+                            r = j
+                            continue@outer
                         }
+                        in 'a'..'z', in 'A'..'Z', in '0'..'9' -> {}
+                        else -> break@inner
                     }
                 }
             }
