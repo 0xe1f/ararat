@@ -415,7 +415,7 @@
 <a href="/Users/akop/code/android/ararat/docs/library/index"><a href="org.akop.ararat.view/-crossword-view/-u-n-d-o_-n-o-n-e.html"><span class="keyword">const</span> <span class="keyword">val </span><span class="identifier">UNDO_NONE</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html"><span class="identifier">Int</span></a></a></a><br/>
 <a href="/Users/akop/code/android/ararat/docs/library/index"><a href="org.akop.ararat.view/-crossword-view/-u-n-d-o_-s-m-a-r-t.html"><span class="keyword">const</span> <span class="keyword">val </span><span class="identifier">UNDO_SMART</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html"><span class="identifier">Int</span></a></a></a><br/>
 <a href="/Users/akop/code/android/ararat/docs/library/index"><a href="org.akop.ararat.view/-crossword-view/answer-color.html"><span class="keyword">var </span><span class="identifier">answerColor</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html"><span class="identifier">Int</span></a></a></a><br/>
-<a href="/Users/akop/code/android/ararat/docs/library/index"><a href="org.akop.ararat.view/-crossword-view/answer-typeface.html"><span class="keyword">var </span><span class="identifier">answerTypeface</span><span class="symbol">: </span><a href="https://developer.android.com/reference/android/graphics/Typeface.html"><span class="identifier">Typeface</span></a></a></a><br/>
+<a href="/Users/akop/code/android/ararat/docs/library/index"><a href="org.akop.ararat.view/-crossword-view/answer-typeface.html"><span class="keyword">var </span><span class="identifier">answerTypeface</span><span class="symbol">: </span><a href="https://developer.android.com/reference/android/graphics/Typeface.html"><span class="identifier">Typeface</span></a><span class="symbol">?</span></a></a><br/>
 <a href="/Users/akop/code/android/ararat/docs/library/index"><a href="org.akop.ararat.view/-crossword-view/compute-scroll.html"><span class="keyword">fun </span><span class="identifier">computeScroll</span><span class="symbol">(</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></a></a><br/>
 <a href="/Users/akop/code/android/ararat/docs/library/index"><a href="org.akop.ararat.view/-crossword-view/crossword.html"><span class="keyword">var </span><span class="identifier">crossword</span><span class="symbol">: </span><a href="org.akop.ararat.core/-crossword/index.html"><span class="identifier">Crossword</span></a><span class="symbol">?</span></a></a><br/>
 <a href="/Users/akop/code/android/ararat/docs/library/index"><a href="org.akop.ararat.view/-crossword-view/get-cell-contents.html"><span class="keyword">fun </span><span class="identifier">getCellContents</span><span class="symbol">(</span><span class="identifier" id="org.akop.ararat.view.CrosswordView$getCellContents(org.akop.ararat.core.Crossword.Word, kotlin.Int)/word">word</span><span class="symbol">:</span>&nbsp;<a href="org.akop.ararat.core/-crossword/-word/index.html"><span class="identifier">Word</span></a><span class="symbol">, </span><span class="identifier" id="org.akop.ararat.view.CrosswordView$getCellContents(org.akop.ararat.core.Crossword.Word, kotlin.Int)/charIndex">charIndex</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html"><span class="identifier">Int</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span></a></a><br/>
@@ -484,6 +484,19 @@
 <BODY>
 <a href="/Users/akop/code/android/ararat/docs/library/index"><a href="org.akop.ararat.io/-format-exception/-init-.html"><span class="identifier">FormatException</span><span class="symbol">(</span><span class="identifier" id="org.akop.ararat.io.FormatException$<init>(kotlin.String)/message">message</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">)</span></a></a><br/>
 <a href="/Users/akop/code/android/ararat/docs/library/index"><a href="org.akop.ararat.io/-format-exception/-init-.html"><span class="identifier">FormatException</span><span class="symbol">(</span><span class="identifier" id="org.akop.ararat.io.FormatException$<init>(kotlin.String, kotlin.Throwable)/message">message</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">, </span><span class="identifier" id="org.akop.ararat.io.FormatException$<init>(kotlin.String, kotlin.Throwable)/cause">cause</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-throwable/index.html"><span class="identifier">Throwable</span></a><span class="symbol">?</span><span class="symbol">)</span></a></a><br/>
+</BODY>
+</HTML>
+</ul>
+<a href="/Users/akop/code/android/ararat/docs/library/index"><a href="org.akop.ararat.util/-html-utility/index.html"><span class="keyword">object </span><span class="identifier">HtmlUtility</span></a></a><br/>
+<ul>
+<HTML>
+<HEAD>
+<meta charset="UTF-8">
+<title>Module Contents</title>
+<link rel="stylesheet" href="../style.css">
+</HEAD>
+<BODY>
+<a href="/Users/akop/code/android/ararat/docs/library/index"><a href="org.akop.ararat.util/-html-utility/strip-entities.html"><span class="keyword">fun </span><span class="identifier">stripEntities</span><span class="symbol">(</span><span class="identifier" id="org.akop.ararat.util.HtmlUtility$stripEntities(kotlin.String)/s">s</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a></a></a><br/>
 </BODY>
 </HTML>
 </ul>
@@ -1292,6 +1305,19 @@
 <link rel="stylesheet" href="../style.css">
 </HEAD>
 <BODY>
+<a href="/Users/akop/code/android/ararat/docs/library/index"><a href="org.akop.ararat.util/-html-utility/index.html"><span class="keyword">object </span><span class="identifier">HtmlUtility</span></a></a><br/>
+<ul>
+<HTML>
+<HEAD>
+<meta charset="UTF-8">
+<title>Module Contents</title>
+<link rel="stylesheet" href="../style.css">
+</HEAD>
+<BODY>
+<a href="/Users/akop/code/android/ararat/docs/library/index"><a href="org.akop.ararat.util/-html-utility/strip-entities.html"><span class="keyword">fun </span><span class="identifier">stripEntities</span><span class="symbol">(</span><span class="identifier" id="org.akop.ararat.util.HtmlUtility$stripEntities(kotlin.String)/s">s</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a></a></a><br/>
+</BODY>
+</HTML>
+</ul>
 <a href="/Users/akop/code/android/ararat/docs/library/index"><a href="org.akop.ararat.util/-reference-scanner/index.html"><span class="keyword">object </span><span class="identifier">ReferenceScanner</span></a></a><br/>
 <ul>
 <HTML>
@@ -1394,7 +1420,7 @@
 <a href="/Users/akop/code/android/ararat/docs/library/index"><a href="org.akop.ararat.view/-crossword-view/-u-n-d-o_-n-o-n-e.html"><span class="keyword">const</span> <span class="keyword">val </span><span class="identifier">UNDO_NONE</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html"><span class="identifier">Int</span></a></a></a><br/>
 <a href="/Users/akop/code/android/ararat/docs/library/index"><a href="org.akop.ararat.view/-crossword-view/-u-n-d-o_-s-m-a-r-t.html"><span class="keyword">const</span> <span class="keyword">val </span><span class="identifier">UNDO_SMART</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html"><span class="identifier">Int</span></a></a></a><br/>
 <a href="/Users/akop/code/android/ararat/docs/library/index"><a href="org.akop.ararat.view/-crossword-view/answer-color.html"><span class="keyword">var </span><span class="identifier">answerColor</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html"><span class="identifier">Int</span></a></a></a><br/>
-<a href="/Users/akop/code/android/ararat/docs/library/index"><a href="org.akop.ararat.view/-crossword-view/answer-typeface.html"><span class="keyword">var </span><span class="identifier">answerTypeface</span><span class="symbol">: </span><a href="https://developer.android.com/reference/android/graphics/Typeface.html"><span class="identifier">Typeface</span></a></a></a><br/>
+<a href="/Users/akop/code/android/ararat/docs/library/index"><a href="org.akop.ararat.view/-crossword-view/answer-typeface.html"><span class="keyword">var </span><span class="identifier">answerTypeface</span><span class="symbol">: </span><a href="https://developer.android.com/reference/android/graphics/Typeface.html"><span class="identifier">Typeface</span></a><span class="symbol">?</span></a></a><br/>
 <a href="/Users/akop/code/android/ararat/docs/library/index"><a href="org.akop.ararat.view/-crossword-view/compute-scroll.html"><span class="keyword">fun </span><span class="identifier">computeScroll</span><span class="symbol">(</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></a></a><br/>
 <a href="/Users/akop/code/android/ararat/docs/library/index"><a href="org.akop.ararat.view/-crossword-view/crossword.html"><span class="keyword">var </span><span class="identifier">crossword</span><span class="symbol">: </span><a href="org.akop.ararat.core/-crossword/index.html"><span class="identifier">Crossword</span></a><span class="symbol">?</span></a></a><br/>
 <a href="/Users/akop/code/android/ararat/docs/library/index"><a href="org.akop.ararat.view/-crossword-view/get-cell-contents.html"><span class="keyword">fun </span><span class="identifier">getCellContents</span><span class="symbol">(</span><span class="identifier" id="org.akop.ararat.view.CrosswordView$getCellContents(org.akop.ararat.core.Crossword.Word, kotlin.Int)/word">word</span><span class="symbol">:</span>&nbsp;<a href="org.akop.ararat.core/-crossword/-word/index.html"><span class="identifier">Word</span></a><span class="symbol">, </span><span class="identifier" id="org.akop.ararat.view.CrosswordView$getCellContents(org.akop.ararat.core.Crossword.Word, kotlin.Int)/charIndex">charIndex</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html"><span class="identifier">Int</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">?</span></a></a><br/>
