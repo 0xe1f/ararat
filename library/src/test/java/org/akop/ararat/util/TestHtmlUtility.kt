@@ -37,11 +37,18 @@ class TestHtmlUtility {
     // Pair(before, expected)
     private val strings = listOf(
             Pair("", ""),
+            Pair("&#;", ""), // Invalid num. entity
+            Pair("&#", "&#"),
+            Pair("&;", ""), // Invalid named entity
+            Pair("&", "&"),
             Pair("&amp;", "&"),
-            Pair("&am;", "&am;"), // Invalid entity
+            Pair("&amp", "&amp"),
+            Pair("&am;", ""), // Invalid named entity
             Pair("It's all about the &#36;&#36;", "It's all about the $$"),
             Pair("5 &#8805; 2", "5 ≥ 2"),
             Pair("&amp;hf346,1", "&hf346,1"),
+            Pair("Here&apos;s Johnny!", "Here's Johnny!"),
+            Pair("&quot;Quote un-quote&quot;", "\"Quote un-quote\""),
 
             Pair("Sister of Chekhov&rsquo;s Masha and Irina",
                     "Sister of Chekhov’s Masha and Irina"),

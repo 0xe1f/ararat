@@ -81,5 +81,3 @@ internal fun Context.withStyledAttributes(attrs: IntArray,
 
 internal val Context.inputMethodManager: InputMethodManager?
     get() = getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
-
-internal fun String.stripHtmlEntities(): String = HtmlUtility.stripEntities(this)

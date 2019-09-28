@@ -1,6 +1,6 @@
 $dokka.format:html
 $dokka.linkExtension:html
-
+$dokka.location:org.akop.ararat.util$stripHtmlEntities(kotlin.String)org.akop.ararat.util/kotlin.-string/strip-html-entities.html
 org.akop.ararat.core
 org.akop.ararat.graphics
 org.akop.ararat.io
