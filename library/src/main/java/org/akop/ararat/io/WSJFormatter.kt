@@ -23,6 +23,7 @@ package org.akop.ararat.io
 import org.akop.ararat.core.Crossword
 import org.akop.ararat.core.buildWord
 import org.akop.ararat.util.SparseArray
+import org.akop.ararat.util.stripHtmlEntities
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -114,7 +115,7 @@ class WSJFormatter : CrosswordFormatter {
                                     val word = words[it.optInt("word", -1)]!!
 
                                     direction = dir
-                                    hint = it.optString("clue")
+                                    hint = it.optString("clue")?.stripHtmlEntities()
                                     number = it.optInt("number")
                                     startColumn = word.column
                                     startRow = word.row
@@ -181,16 +182,16 @@ class WSJFormatter : CrosswordFormatter {
             val yDashIdx = yStr.indexOf('-')
 
             column = when {
-                xDashIdx != -1 -> Integer.parseInt(xStr.substring(0, xDashIdx)) - 1
-                else -> Integer.parseInt(xStr) - 1
+                xDashIdx != -1 -> xStr.substring(0, xDashIdx).toInt() - 1
+                else -> xStr.toInt() - 1
             }
             row = when {
-                yDashIdx != -1 -> Integer.parseInt(yStr.substring(0, yDashIdx)) - 1
-                else -> Integer.parseInt(yStr) - 1
+                yDashIdx != -1 -> yStr.substring(0, yDashIdx).toInt() - 1
+                else -> yStr.toInt() - 1
             }
             length = when {
-                xDashIdx != -1 -> Integer.parseInt(xStr.substring(xDashIdx + 1)) - column
-                yDashIdx != -1 -> Integer.parseInt(yStr.substring(yDashIdx + 1)) - row
+                xDashIdx != -1 -> xStr.substring(xDashIdx + 1).toInt() - column
+                yDashIdx != -1 -> yStr.substring(yDashIdx + 1).toInt() - row
                 else -> 1
             }
         }

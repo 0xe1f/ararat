@@ -84,25 +84,45 @@ open class BaseTest {
         }
     }
 
+    protected fun assertProof(actual: Crossword,
+                              expected: Proof) {
+        expected.metadata?.let { m ->
+            println("\tassertMetadata")
+            assertMetadata(actual, m)
+        }
+
+        expected.hints?.let { h ->
+            println("\tassertHints")
+            assertHints(actual, h)
+        }
+
+        expected.layout?.let { l ->
+            println("\tassertLayout")
+            assertLayout(actual, Array(l.size) { row ->
+                l[row].chunked(1).map { when (it) { "#" -> null else -> it } }.toTypedArray()
+            })
+        }
+    }
+
     @Suppress("unused")
     protected fun Crossword.dumpMetadata() {
-        println("width = $width")
-        println("height = $height")
-        println("squareCount = $squareCount")
-        println("title = ${title.enquote()}")
-        println("flags = $flags")
-        println("description = ${description.enquote()}")
-        println("author = ${author.enquote()}")
-        println("copyright = ${copyright.enquote()}")
-        println("comment = ${comment.enquote()}")
-        println("date = $date")
+        println("width = $width,")
+        println("height = $height,")
+        println("squareCount = $squareCount,")
+        println("title = ${title.enquote()},")
+        println("flags = $flags,")
+        println("description = ${description.enquote()},")
+        println("author = ${author.enquote()},")
+        println("copyright = ${copyright.enquote()},")
+        println("comment = ${comment.enquote()},")
+        println("date = $date,")
         println("hash = ${hash.enquote()}")
     }
 
     @Suppress("unused")
     protected fun Crossword.dumpLayout() {
         cellMap.forEach { row ->
-            println(row.toList().joinToString("") { it?.chars ?: "#" })
+            println("\"${row.toList().joinToString("") { it?.chars ?: "#" }}\",")
         }
     }
 
@@ -124,7 +144,7 @@ open class BaseTest {
     @Suppress("unused")
     protected fun Crossword.dumpHints() {
         (wordsAcross + wordsDown).forEach {
-            println(it.hintSynopsis().replace("\"", "\\\""))
+            println("\"${it.hintSynopsis().replace("\"", "\\\"")}\",")
         }
     }
 
