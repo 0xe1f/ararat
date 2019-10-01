@@ -29,7 +29,6 @@ import android.widget.TextView
 import android.widget.Toast
 
 import org.akop.ararat.core.Crossword
-import org.akop.ararat.core.CrosswordState
 import org.akop.ararat.core.buildCrossword
 import org.akop.ararat.io.PuzFormatter
 import org.akop.ararat.view.CrosswordView
