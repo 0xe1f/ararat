@@ -40,5 +40,6 @@
         <attr name="editable" format="boolean" />
         <attr name="skipOccupiedOnType" format="boolean" />
         <attr name="selectFirstUnoccupiedOnNav" format="boolean" />
+        <attr name="skipCompletedWords" format="boolean" />
     </declare-styleable>
 </resources>
