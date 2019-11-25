@@ -84,8 +84,7 @@ open class BaseTest {
         }
     }
 
-    protected fun assertProof(actual: Crossword,
-                              expected: Proof) {
+    protected fun assertProof(actual: Crossword, expected: Proof) {
         expected.metadata?.let { m ->
             println("\tassertMetadata")
             assertMetadata(actual, m)
@@ -99,6 +98,12 @@ open class BaseTest {
         expected.layout?.let { l ->
             println("\tassertLayout")
             assertLayout(actual, Array(l.size) { row ->
+                l[row].chunked(1).map { when (it) { "#" -> null else -> it } }.toTypedArray()
+            })
+        }
+        expected.attrLayout?.let { l ->
+            println("\tassertAttrLayout")
+            assertAttrLayout(actual, Array(l.size) { row ->
                 l[row].chunked(1).map { when (it) { "#" -> null else -> it } }.toTypedArray()
             })
         }
@@ -146,6 +151,14 @@ open class BaseTest {
         (wordsAcross + wordsDown).forEach {
             println("\"${it.hintSynopsis().replace("\"", "\\\"")}\",")
         }
+    }
+
+    @Suppress("unused")
+    protected fun Crossword.dumpAll() {
+        dumpMetadata()
+        dumpLayout()
+        dumpAttrLayout()
+        dumpHints()
     }
 
     private fun Crossword.Word.hintSynopsis(): String {

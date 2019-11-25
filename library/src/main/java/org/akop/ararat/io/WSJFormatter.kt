@@ -115,7 +115,7 @@ class WSJFormatter : CrosswordFormatter {
                                     val word = words[it.optInt("word", -1)]!!
 
                                     direction = dir
-                                    hint = it.optString("clue")?.stripHtmlEntities()
+                                    hint = it.optString("clue").stripHtmlEntities()
                                     number = it.optInt("number")
                                     startColumn = word.column
                                     startRow = word.row
@@ -123,11 +123,11 @@ class WSJFormatter : CrosswordFormatter {
                                     if (dir == Crossword.Word.DIR_ACROSS) {
                                         (startColumn until startColumn + word.length)
                                                 .map { grid.squares[startRow][it]!! }
-                                                .forEach { addCell(it.char) }
+                                                .forEach { c -> addCell(c.char, c.attrFlags) }
                                     } else {
                                         (startRow until startRow + word.length)
                                                 .map { grid.squares[it][startColumn]!! }
-                                                .forEach { addCell(it.char) }
+                                                .forEach { c -> addCell(c.char, c.attrFlags) }
                                     }
                                 }
                             }
@@ -157,14 +157,19 @@ class WSJFormatter : CrosswordFormatter {
 
         private fun parseSquare(squareObj: JSONObject): Square? {
             val letter = squareObj.optString("Letter")
+            val shapeBg = squareObj.optJSONObject("style")?.optString("shapebg")
             return when {
-                letter?.isEmpty() == false -> Square(letter)
+                letter.isNotEmpty() -> Square(letter, when (shapeBg) {
+                    "circle" -> Crossword.Cell.ATTR_CIRCLED
+                    else -> 0
+                })
                 else -> null
             }
         }
     }
 
-    private class Square(val char: String)
+    private class Square(val char: String,
+                         val attrFlags: Int = 0)
 
     private class Word(wordObj: JSONObject) {
 
