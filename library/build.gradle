@@ -1,6 +1,6 @@
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
-apply plugin: 'org.jetbrains.dokka-android'
+apply plugin: 'org.jetbrains.dokka'
 apply from: 'maven-push.gradle'
 
 android {
@@ -65,5 +65,4 @@ dependencies {
 dokka {
     outputFormat = 'html'
     outputDirectory = "$rootDir/docs"
-    moduleName = 'library'
 }

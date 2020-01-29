@@ -105,6 +105,9 @@ class PuzFormatter : CrosswordFormatter {
         // Version
         if (reader.read(temp, 0, 4) != 4)
             throw FormatException("Version information incomplete")
+        val version = String(temp, 0, 4)
+        val verNum = version.substring(0..2).toFloat()
+        val verRev = if (version.length > 2) version.last() else '\u0000'
 
         // Garbage
         reader.ensureSkip(2)
@@ -155,7 +158,7 @@ class PuzFormatter : CrosswordFormatter {
                 .map { reader.readNullTerminatedString() }
 
         // Notes
-        val notes = reader.readNullTerminatedString()
+        val notes = if (verNum > 1f) reader.readNullTerminatedString() else null
 
         // Sections
         var rebusMap: Array<IntArray>? = null

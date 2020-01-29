@@ -26,13 +26,12 @@ require a 4-digit integer code to unscramble square contents.</p>
 <tbody>
 <tr>
 <td>
-<p><a href="-init-.html">&lt;init&gt;</a></p>
+<h4><a href="-init-.html">&lt;init&gt;</a></h4>
 </td>
 <td>
-<code><span class="identifier">PuzFormatter</span><span class="symbol">(</span><span class="symbol">)</span></code>
 <p><a href="./index.html">PuzFormatter</a> reads puzzles in Across Lite's .puz format, which is arguably
 the most popular format for exchanging crosswords.</p>
-</td>
+<code><span class="identifier">PuzFormatter</span><span class="symbol">(</span><span class="symbol">)</span></code></td>
 </tr>
 </tbody>
 </table>
@@ -41,63 +40,57 @@ the most popular format for exchanging crosswords.</p>
 <tbody>
 <tr>
 <td>
-<p><a href="can-read.html">canRead</a></p>
+<h4><a href="can-read.html">canRead</a></h4>
 </td>
 <td>
-<code><span class="keyword">fun </span><span class="identifier">canRead</span><span class="symbol">(</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a></code>
 <p>Returns true if formatter supports reading. Always true for
 <a href="./index.html">PuzFormatter</a>.</p>
-</td>
+<code><span class="keyword">fun </span><span class="identifier">canRead</span><span class="symbol">(</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a></code></td>
 </tr>
 <tr>
 <td>
-<p><a href="can-write.html">canWrite</a></p>
+<h4><a href="can-write.html">canWrite</a></h4>
 </td>
 <td>
-<code><span class="keyword">fun </span><span class="identifier">canWrite</span><span class="symbol">(</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a></code>
 <p>Returns true if formatter supports writing. Always false for
 <a href="./index.html">PuzFormatter</a>.</p>
-</td>
+<code><span class="keyword">fun </span><span class="identifier">canWrite</span><span class="symbol">(</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a></code></td>
 </tr>
 <tr>
 <td>
-<p><a href="read.html">read</a></p>
+<h4><a href="read.html">read</a></h4>
 </td>
 <td>
-<code><span class="keyword">fun </span><span class="identifier">read</span><span class="symbol">(</span><span class="identifier" id="org.akop.ararat.io.PuzFormatter$read(org.akop.ararat.core.Crossword.Builder, java.io.InputStream)/builder">builder</span><span class="symbol">:</span>&nbsp;<a href="../../org.akop.ararat.core/-crossword/-builder/index.html"><span class="identifier">Builder</span></a><span class="symbol">, </span><span class="identifier" id="org.akop.ararat.io.PuzFormatter$read(org.akop.ararat.core.Crossword.Builder, java.io.InputStream)/inputStream">inputStream</span><span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/java/io/InputStream.html"><span class="identifier">InputStream</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code>
 <p>Initializes <a href="read.html#org.akop.ararat.io.PuzFormatter$read(org.akop.ararat.core.Crossword.Builder, java.io.InputStream)/builder">builder</a> by reading a crossword from <a href="read.html#org.akop.ararat.io.PuzFormatter$read(org.akop.ararat.core.Crossword.Builder, java.io.InputStream)/inputStream">inputStream</a>.
 If the crossword requires a key to unlock, one will be brute-forced.</p>
-</td>
+<code><span class="keyword">fun </span><span class="identifier">read</span><span class="symbol">(</span><span class="identifier" id="org.akop.ararat.io.PuzFormatter$read(org.akop.ararat.core.Crossword.Builder, java.io.InputStream)/builder">builder</span><span class="symbol">:</span>&nbsp;<span class="identifier">Builder</span><span class="symbol">, </span><span class="identifier" id="org.akop.ararat.io.PuzFormatter$read(org.akop.ararat.core.Crossword.Builder, java.io.InputStream)/inputStream">inputStream</span><span class="symbol">:</span>&nbsp;<a href="https://docs.oracle.com/javase/6/docs/api/java/io/InputStream.html"><span class="identifier">InputStream</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code></td>
 </tr>
 <tr>
 <td>
-<p><a href="read-with-key.html">readWithKey</a></p>
+<h4><a href="read-with-key.html">readWithKey</a></h4>
 </td>
 <td>
-<code><span class="keyword">fun </span><span class="identifier">readWithKey</span><span class="symbol">(</span><span class="identifier" id="org.akop.ararat.io.PuzFormatter$readWithKey(org.akop.ararat.core.Crossword.Builder, java.io.InputStream, kotlin.Int)/builder">builder</span><span class="symbol">:</span>&nbsp;<a href="../../org.akop.ararat.core/-crossword/-builder/index.html"><span class="identifier">Builder</span></a><span class="symbol">, </span><span class="identifier" id="org.akop.ararat.io.PuzFormatter$readWithKey(org.akop.ararat.core.Crossword.Builder, java.io.InputStream, kotlin.Int)/inputStream">inputStream</span><span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/java/io/InputStream.html"><span class="identifier">InputStream</span></a><span class="symbol">, </span><span class="identifier" id="org.akop.ararat.io.PuzFormatter$readWithKey(org.akop.ararat.core.Crossword.Builder, java.io.InputStream, kotlin.Int)/key">key</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html"><span class="identifier">Int</span></a><span class="symbol">?</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code>
 <p>Initializes <a href="read-with-key.html#org.akop.ararat.io.PuzFormatter$readWithKey(org.akop.ararat.core.Crossword.Builder, java.io.InputStream, kotlin.Int)/builder">builder</a> by reading a crossword from <a href="read-with-key.html#org.akop.ararat.io.PuzFormatter$readWithKey(org.akop.ararat.core.Crossword.Builder, java.io.InputStream, kotlin.Int)/inputStream">inputStream</a> using a
 specific <a href="read-with-key.html#org.akop.ararat.io.PuzFormatter$readWithKey(org.akop.ararat.core.Crossword.Builder, java.io.InputStream, kotlin.Int)/key">key</a>. Use a null <a href="read-with-key.html#org.akop.ararat.io.PuzFormatter$readWithKey(org.akop.ararat.core.Crossword.Builder, java.io.InputStream, kotlin.Int)/key">key</a> to brute force.</p>
-</td>
+<code><span class="keyword">fun </span><span class="identifier">readWithKey</span><span class="symbol">(</span><span class="identifier" id="org.akop.ararat.io.PuzFormatter$readWithKey(org.akop.ararat.core.Crossword.Builder, java.io.InputStream, kotlin.Int)/builder">builder</span><span class="symbol">:</span>&nbsp;<span class="identifier">Builder</span><span class="symbol">, </span><span class="identifier" id="org.akop.ararat.io.PuzFormatter$readWithKey(org.akop.ararat.core.Crossword.Builder, java.io.InputStream, kotlin.Int)/inputStream">inputStream</span><span class="symbol">:</span>&nbsp;<a href="https://docs.oracle.com/javase/6/docs/api/java/io/InputStream.html"><span class="identifier">InputStream</span></a><span class="symbol">, </span><span class="identifier" id="org.akop.ararat.io.PuzFormatter$readWithKey(org.akop.ararat.core.Crossword.Builder, java.io.InputStream, kotlin.Int)/key">key</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html"><span class="identifier">Int</span></a><span class="symbol">?</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code></td>
 </tr>
 <tr>
 <td>
-<p><a href="set-encoding.html">setEncoding</a></p>
+<h4><a href="set-encoding.html">setEncoding</a></h4>
 </td>
 <td>
-<code><span class="keyword">fun </span><span class="identifier">setEncoding</span><span class="symbol">(</span><span class="identifier" id="org.akop.ararat.io.PuzFormatter$setEncoding(kotlin.String)/encoding">encoding</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code>
 <p>Sets the text encoding for the stream. Note that some encodings may not
 be valid and/or may result in unexpected behavior - multibyte encodings
 in particular.</p>
-</td>
+<code><span class="keyword">fun </span><span class="identifier">setEncoding</span><span class="symbol">(</span><span class="identifier" id="org.akop.ararat.io.PuzFormatter$setEncoding(kotlin.String)/encoding">encoding</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code></td>
 </tr>
 <tr>
 <td>
-<p><a href="write.html">write</a></p>
+<h4><a href="write.html">write</a></h4>
 </td>
 <td>
-<code><span class="keyword">fun </span><span class="identifier">write</span><span class="symbol">(</span><span class="identifier" id="org.akop.ararat.io.PuzFormatter$write(org.akop.ararat.core.Crossword, java.io.OutputStream)/crossword">crossword</span><span class="symbol">:</span>&nbsp;<a href="../../org.akop.ararat.core/-crossword/index.html"><span class="identifier">Crossword</span></a><span class="symbol">, </span><span class="identifier" id="org.akop.ararat.io.PuzFormatter$write(org.akop.ararat.core.Crossword, java.io.OutputStream)/outputStream">outputStream</span><span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/java/io/OutputStream.html"><span class="identifier">OutputStream</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code>
 <p>Writes <a href="write.html#org.akop.ararat.io.PuzFormatter$write(org.akop.ararat.core.Crossword, java.io.OutputStream)/crossword">crossword</a> to <a href="write.html#org.akop.ararat.io.PuzFormatter$write(org.akop.ararat.core.Crossword, java.io.OutputStream)/outputStream">outputStream</a>. Currently not implemented.</p>
-</td>
+<code><span class="keyword">fun </span><span class="identifier">write</span><span class="symbol">(</span><span class="identifier" id="org.akop.ararat.io.PuzFormatter$write(org.akop.ararat.core.Crossword, java.io.OutputStream)/crossword">crossword</span><span class="symbol">:</span>&nbsp;<a href="../../org.akop.ararat.core/-crossword/index.html"><span class="identifier">Crossword</span></a><span class="symbol">, </span><span class="identifier" id="org.akop.ararat.io.PuzFormatter$write(org.akop.ararat.core.Crossword, java.io.OutputStream)/outputStream">outputStream</span><span class="symbol">:</span>&nbsp;<a href="https://docs.oracle.com/javase/6/docs/api/java/io/OutputStream.html"><span class="identifier">OutputStream</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code></td>
 </tr>
 </tbody>
 </table>

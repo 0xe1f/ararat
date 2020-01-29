@@ -16,52 +16,47 @@ crosswords to/from streams.</p>
 <tbody>
 <tr>
 <td>
-<p><a href="can-read.html">canRead</a></p>
+<h4><a href="can-read.html">canRead</a></h4>
 </td>
 <td>
-<code><span class="keyword">abstract</span> <span class="keyword">fun </span><span class="identifier">canRead</span><span class="symbol">(</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a></code>
 <p>Returns true if the formatter supports reading from a stream.</p>
-</td>
+<code><span class="keyword">abstract</span> <span class="keyword">fun </span><span class="identifier">canRead</span><span class="symbol">(</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a></code></td>
 </tr>
 <tr>
 <td>
-<p><a href="can-write.html">canWrite</a></p>
+<h4><a href="can-write.html">canWrite</a></h4>
 </td>
 <td>
-<code><span class="keyword">abstract</span> <span class="keyword">fun </span><span class="identifier">canWrite</span><span class="symbol">(</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a></code>
 <p>Returns true if the formatter supports writing to a stream.</p>
-</td>
+<code><span class="keyword">abstract</span> <span class="keyword">fun </span><span class="identifier">canWrite</span><span class="symbol">(</span><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html"><span class="identifier">Boolean</span></a></code></td>
 </tr>
 <tr>
 <td>
-<p><a href="read.html">read</a></p>
+<h4><a href="read.html">read</a></h4>
 </td>
 <td>
-<code><span class="keyword">abstract</span> <span class="keyword">fun </span><span class="identifier">read</span><span class="symbol">(</span><span class="identifier" id="org.akop.ararat.io.CrosswordFormatter$read(org.akop.ararat.core.Crossword.Builder, java.io.InputStream)/builder">builder</span><span class="symbol">:</span>&nbsp;<a href="../../org.akop.ararat.core/-crossword/-builder/index.html"><span class="identifier">Builder</span></a><span class="symbol">, </span><span class="identifier" id="org.akop.ararat.io.CrosswordFormatter$read(org.akop.ararat.core.Crossword.Builder, java.io.InputStream)/inputStream">inputStream</span><span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/java/io/InputStream.html"><span class="identifier">InputStream</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code>
 <p>Reads contents of an <a href="read.html#org.akop.ararat.io.CrosswordFormatter$read(org.akop.ararat.core.Crossword.Builder, java.io.InputStream)/inputStream">inputStream</a> into a <a href="read.html#org.akop.ararat.io.CrosswordFormatter$read(org.akop.ararat.core.Crossword.Builder, java.io.InputStream)/builder">builder</a>. Check <a href="can-read.html">canRead</a>
 to ensure reading is supported.</p>
-</td>
+<code><span class="keyword">abstract</span> <span class="keyword">fun </span><span class="identifier">read</span><span class="symbol">(</span><span class="identifier" id="org.akop.ararat.io.CrosswordFormatter$read(org.akop.ararat.core.Crossword.Builder, java.io.InputStream)/builder">builder</span><span class="symbol">:</span>&nbsp;<span class="identifier">Builder</span><span class="symbol">, </span><span class="identifier" id="org.akop.ararat.io.CrosswordFormatter$read(org.akop.ararat.core.Crossword.Builder, java.io.InputStream)/inputStream">inputStream</span><span class="symbol">:</span>&nbsp;<a href="https://docs.oracle.com/javase/6/docs/api/java/io/InputStream.html"><span class="identifier">InputStream</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code></td>
 </tr>
 <tr>
 <td>
-<p><a href="set-encoding.html">setEncoding</a></p>
+<h4><a href="set-encoding.html">setEncoding</a></h4>
 </td>
 <td>
-<code><span class="keyword">abstract</span> <span class="keyword">fun </span><span class="identifier">setEncoding</span><span class="symbol">(</span><span class="identifier" id="org.akop.ararat.io.CrosswordFormatter$setEncoding(kotlin.String)/encoding">encoding</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code>
 <p>Sets the stream <a href="set-encoding.html#org.akop.ararat.io.CrosswordFormatter$setEncoding(kotlin.String)/encoding">encoding</a> for subsequent reads/writes. Almost all
 formatters are expected to have a default encoding, and not all will
 support all encodings, due to format restrictions or other reasons.</p>
-</td>
+<code><span class="keyword">abstract</span> <span class="keyword">fun </span><span class="identifier">setEncoding</span><span class="symbol">(</span><span class="identifier" id="org.akop.ararat.io.CrosswordFormatter$setEncoding(kotlin.String)/encoding">encoding</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html"><span class="identifier">String</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code></td>
 </tr>
 <tr>
 <td>
-<p><a href="write.html">write</a></p>
+<h4><a href="write.html">write</a></h4>
 </td>
 <td>
-<code><span class="keyword">abstract</span> <span class="keyword">fun </span><span class="identifier">write</span><span class="symbol">(</span><span class="identifier" id="org.akop.ararat.io.CrosswordFormatter$write(org.akop.ararat.core.Crossword, java.io.OutputStream)/crossword">crossword</span><span class="symbol">:</span>&nbsp;<a href="../../org.akop.ararat.core/-crossword/index.html"><span class="identifier">Crossword</span></a><span class="symbol">, </span><span class="identifier" id="org.akop.ararat.io.CrosswordFormatter$write(org.akop.ararat.core.Crossword, java.io.OutputStream)/outputStream">outputStream</span><span class="symbol">:</span>&nbsp;<a href="https://developer.android.com/reference/java/io/OutputStream.html"><span class="identifier">OutputStream</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code>
 <p>Writes contents of a <a href="write.html#org.akop.ararat.io.CrosswordFormatter$write(org.akop.ararat.core.Crossword, java.io.OutputStream)/crossword">crossword</a> to an <a href="write.html#org.akop.ararat.io.CrosswordFormatter$write(org.akop.ararat.core.Crossword, java.io.OutputStream)/outputStream">outputStream</a>. Check <a href="can-write.html">canWrite</a>
 to ensure reading is supported.</p>
-</td>
+<code><span class="keyword">abstract</span> <span class="keyword">fun </span><span class="identifier">write</span><span class="symbol">(</span><span class="identifier" id="org.akop.ararat.io.CrosswordFormatter$write(org.akop.ararat.core.Crossword, java.io.OutputStream)/crossword">crossword</span><span class="symbol">:</span>&nbsp;<a href="../../org.akop.ararat.core/-crossword/index.html"><span class="identifier">Crossword</span></a><span class="symbol">, </span><span class="identifier" id="org.akop.ararat.io.CrosswordFormatter$write(org.akop.ararat.core.Crossword, java.io.OutputStream)/outputStream">outputStream</span><span class="symbol">:</span>&nbsp;<a href="https://docs.oracle.com/javase/6/docs/api/java/io/OutputStream.html"><span class="identifier">OutputStream</span></a><span class="symbol">)</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html"><span class="identifier">Unit</span></a></code></td>
 </tr>
 </tbody>
 </table>
@@ -70,45 +65,44 @@ to ensure reading is supported.</p>
 <tbody>
 <tr>
 <td>
-<p><a href="../-crossword-compiler-formatter/index.html">CrosswordCompilerFormatter</a></p>
+<h4><a href="../-crossword-compiler-formatter/index.html">CrosswordCompilerFormatter</a></h4>
 </td>
 <td>
 <code><span class="keyword">class </span><span class="identifier">CrosswordCompilerFormatter</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="../-simple-xml-parser/index.html"><span class="identifier">SimpleXmlParser</span></a><span class="symbol">, </span><a href="./index.html"><span class="identifier">CrosswordFormatter</span></a></code></td>
 </tr>
 <tr>
 <td>
-<p><a href="../-puz-formatter/index.html">PuzFormatter</a></p>
+<h4><a href="../-puz-formatter/index.html">PuzFormatter</a></h4>
 </td>
 <td>
-<code><span class="keyword">class </span><span class="identifier">PuzFormatter</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="./index.html"><span class="identifier">CrosswordFormatter</span></a></code>
 <p><a href="../-puz-formatter/index.html">PuzFormatter</a> reads puzzles in Across Lite's .puz format, which is arguably
 the most popular format for exchanging crosswords.</p>
-</td>
+<code><span class="keyword">class </span><span class="identifier">PuzFormatter</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="./index.html"><span class="identifier">CrosswordFormatter</span></a></code></td>
 </tr>
 <tr>
 <td>
-<p><a href="../-pzzl-formatter/index.html">PzzlFormatter</a></p>
+<h4><a href="../-pzzl-formatter/index.html">PzzlFormatter</a></h4>
 </td>
 <td>
 <code><span class="keyword">class </span><span class="identifier">PzzlFormatter</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="./index.html"><span class="identifier">CrosswordFormatter</span></a></code></td>
 </tr>
 <tr>
 <td>
-<p><a href="../-u-click-formatter/index.html">UClickFormatter</a></p>
+<h4><a href="../-u-click-formatter/index.html">UClickFormatter</a></h4>
 </td>
 <td>
 <code><span class="keyword">class </span><span class="identifier">UClickFormatter</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="../-simple-xml-parser/index.html"><span class="identifier">SimpleXmlParser</span></a><span class="symbol">, </span><a href="./index.html"><span class="identifier">CrosswordFormatter</span></a></code></td>
 </tr>
 <tr>
 <td>
-<p><a href="../-u-click-json-formatter/index.html">UClickJsonFormatter</a></p>
+<h4><a href="../-u-click-json-formatter/index.html">UClickJsonFormatter</a></h4>
 </td>
 <td>
 <code><span class="keyword">class </span><span class="identifier">UClickJsonFormatter</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="./index.html"><span class="identifier">CrosswordFormatter</span></a></code></td>
 </tr>
 <tr>
 <td>
-<p><a href="../-w-s-j-formatter/index.html">WSJFormatter</a></p>
+<h4><a href="../-w-s-j-formatter/index.html">WSJFormatter</a></h4>
 </td>
 <td>
 <code><span class="keyword">class </span><span class="identifier">WSJFormatter</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="./index.html"><span class="identifier">CrosswordFormatter</span></a></code></td>

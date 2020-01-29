@@ -70,7 +70,7 @@ class CrosswordCompilerFormatter : SimpleXmlParser(), CrosswordFormatter {
 
     override fun canWrite(): Boolean = false
 
-    override fun onStartElement(path: SimpleXmlParser.SimpleXmlPath, parser: XmlPullParser) {
+    override fun onStartElement(path: SimpleXmlPath, parser: XmlPullParser) {
         super.onStartElement(path, parser)
 
         if (!path.startsWith("?", "rectangular-puzzle")) return
@@ -160,7 +160,7 @@ class CrosswordCompilerFormatter : SimpleXmlParser(), CrosswordFormatter {
         }
     }
 
-    override fun onTextContent(path: SimpleXmlParser.SimpleXmlPath, text: String) {
+    override fun onTextContent(path: SimpleXmlPath, text: String) {
         super.onTextContent(path, text)
 
         if (!path.startsWith("?", "rectangular-puzzle")) return
