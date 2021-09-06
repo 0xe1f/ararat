@@ -20,6 +20,8 @@
 
 package org.akop.crosswordtest
 
+import android.graphics.Shader
+import android.graphics.drawable.BitmapDrawable
 import androidx.annotation.RawRes
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -27,6 +29,7 @@ import android.view.Menu
 import android.view.MenuItem
 import android.widget.TextView
 import android.widget.Toast
+import androidx.core.content.ContextCompat
 
 import org.akop.ararat.core.Crossword
 import org.akop.ararat.core.buildCrossword
@@ -38,7 +41,7 @@ import org.akop.ararat.view.CrosswordView
 // http://www.inkwellxwords.com/iwxpuzzles.html
 class MainActivity : AppCompatActivity(), CrosswordView.OnLongPressListener, CrosswordView.OnStateChangeListener, CrosswordView.OnSelectionChangeListener {
 
-    private var crosswordView: CrosswordView? = null
+    private lateinit var crosswordView: CrosswordView
     private var hint: TextView? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -49,34 +52,35 @@ class MainActivity : AppCompatActivity(), CrosswordView.OnLongPressListener, Cro
         crosswordView = findViewById(R.id.crossword)
         hint = findViewById(R.id.hint)
 
-        val crossword = readPuzzle(R.raw.puzzle)
+        val puzzle = readPuzzle(R.raw.puzzle)
 
         title = getString(R.string.title_by_author,
-                crossword.title, crossword.author)
+                puzzle.title, puzzle.author)
 
-        crosswordView!!.let { cv ->
-            cv.crossword = crossword
-            cv.onLongPressListener = this
-            cv.onStateChangeListener = this
-            cv.onSelectionChangeListener = this
-            cv.inputValidator = { ch -> !ch.first().isISOControl() }
-            cv.undoMode = CrosswordView.UNDO_NONE
-            cv.markerDisplayMode = CrosswordView.MARKER_CHEAT
-
-            onSelectionChanged(cv, cv.selectedWord, cv.selectedCell)
+        with (crosswordView) {
+            crossword = puzzle
+            onLongPressListener = this@MainActivity
+            onStateChangeListener = this@MainActivity
+            onSelectionChangeListener = this@MainActivity
+            inputValidator = { ch -> !ch.first().isISOControl() }
+            undoMode = CrosswordView.UNDO_NONE
+            markerDisplayMode = CrosswordView.MARKER_CHEAT
         }
+        onSelectionChanged(crosswordView,
+                crosswordView.selectedWord,
+                crosswordView.selectedCell)
     }
 
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
         super.onRestoreInstanceState(savedInstanceState)
 
-        crosswordView!!.restoreState(savedInstanceState.getParcelable("state")!!)
+        crosswordView.restoreState(savedInstanceState.getParcelable("state")!!)
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
 
-        outState.putParcelable("state", crosswordView!!.state)
+        outState.putParcelable("state", crosswordView.state)
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -86,26 +90,17 @@ class MainActivity : AppCompatActivity(), CrosswordView.OnLongPressListener, Cro
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
-            R.id.menu_restart -> {
-                crosswordView!!.reset()
-                return true
-            }
-            R.id.menu_solve_cell -> {
-                crosswordView!!.solveChar(crosswordView!!.selectedWord!!,
-                        crosswordView!!.selectedCell)
-                return true
-            }
-            R.id.menu_solve_word -> {
-                crosswordView!!.solveWord(crosswordView!!.selectedWord!!)
-                return true
-            }
-            R.id.menu_solve_puzzle -> {
-                crosswordView!!.solveCrossword()
-                return true
-            }
+            R.id.menu_restart -> crosswordView.reset()
+            R.id.menu_solve_cell -> crosswordView.solveChar(
+                    crosswordView.selectedWord!!,
+                    crosswordView.selectedCell)
+            R.id.menu_solve_word -> crosswordView.solveWord(
+                    crosswordView.selectedWord!!)
+            R.id.menu_solve_puzzle -> crosswordView.solveCrossword()
+            else -> return super.onOptionsItemSelected(item)
         }
 
-        return super.onOptionsItemSelected(item)
+        return true
     }
 
     override fun onCellLongPressed(view: CrosswordView,
