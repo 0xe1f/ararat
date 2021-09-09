@@ -22,7 +22,6 @@ package org.akop.ararat.io
 
 import org.akop.ararat.core.Crossword
 import org.akop.ararat.core.buildWord
-import org.json.JSONArray
 import org.json.JSONObject
 
 import java.io.IOException
@@ -52,10 +51,19 @@ class AmuseFormatter : CrosswordFormatter {
         builder.height = root.optInt("h")
         builder.date = root.optLong("publishTime")
 
+        val attrMap = Array(builder.height) { IntArray(builder.width) { 0 } }
+        root.optJSONArray("cellInfos")?.let { array ->
+            (0 until array.length())
+                    .map { i -> array.optJSONObject(i) }
+                    .filter { it.optBoolean("isCircled", false) }
+                    .forEach {
+                        attrMap[it.optInt("y")][it.optInt("x")] = Crossword.Cell.ATTR_CIRCLED
+                    }
+        }
         root.optJSONArray("placedWords")?.let { array ->
             (0 until array.length())
-                    .map { array.optJSONObject(it) }
-                    .mapTo(builder.words, this::parseWord)
+                    .map { i -> array.optJSONObject(i) }
+                    .mapTo(builder.words) { parseWord(it, attrMap) }
         }
     }
 
@@ -68,16 +76,25 @@ class AmuseFormatter : CrosswordFormatter {
 
     override fun canWrite(): Boolean = false
 
-    private fun parseWord(jsonWord: JSONObject) = buildWord {
-        direction = if (jsonWord.optBoolean("acrossNotDown")) Crossword.Word.DIR_ACROSS else Crossword.Word.DIR_DOWN
+    private fun parseWord(jsonWord: JSONObject,
+                          attrMap: Array<IntArray>) = buildWord {
+        direction = if (jsonWord.optBoolean("acrossNotDown")) {
+            Crossword.Word.DIR_ACROSS
+        } else {
+            Crossword.Word.DIR_DOWN
+        }
         hint = jsonWord.optJSONObject("clue")?.optString("clue")
         number = jsonWord.optInt("clueNum")
         startColumn = jsonWord.optInt("x")
         startRow = jsonWord.optInt("y")
         jsonWord.optString("word")
                 .toCharArray()
-                .forEach { ch ->
-                    addCell(ch)
+                .forEachIndexed { i, ch ->
+                    addCell(ch, when (direction) {
+                        Crossword.Word.DIR_ACROSS -> attrMap[startRow][startColumn + i]
+                        Crossword.Word.DIR_DOWN -> attrMap[startRow + i][startColumn]
+                        else -> 0
+                    })
                 }
     }
 
