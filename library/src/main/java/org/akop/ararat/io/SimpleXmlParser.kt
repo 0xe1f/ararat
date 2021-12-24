@@ -88,7 +88,7 @@ abstract class SimpleXmlParser {
                     onStartElement(SimpleXmlPath(stack), parser)
                 }
                 XmlPullParser.END_TAG -> stack.pop()
-                XmlPullParser.TEXT -> onTextContent(SimpleXmlPath(stack), parser.text)
+                XmlPullParser.TEXT -> onTextContent(SimpleXmlPath(stack), parser)
             }
 
             eventType = parser.next()
@@ -97,7 +97,10 @@ abstract class SimpleXmlParser {
 
     protected open fun onStartElement(path: SimpleXmlPath, parser: XmlPullParser) {}
 
-    protected open fun onTextContent(path: SimpleXmlPath, text: String) {}
+    protected open fun onTextContent(path: SimpleXmlPath, parser: XmlPullParser) {}
+
+    protected fun XmlPullParser.doubleValue(name: String, defaultValue: Double): Double =
+            stringValue(name)?.toDoubleOrNull() ?: defaultValue
 
     protected fun XmlPullParser.intValue(name: String, defaultValue: Int): Int =
             stringValue(name)?.toIntOrNull() ?: defaultValue

@@ -160,25 +160,25 @@ class CrosswordCompilerFormatter : SimpleXmlParser(), CrosswordFormatter {
         }
     }
 
-    override fun onTextContent(path: SimpleXmlPath, text: String) {
-        super.onTextContent(path, text)
+    override fun onTextContent(path: SimpleXmlPath, parser: XmlPullParser) {
+        super.onTextContent(path, parser)
 
         if (!path.startsWith("?", "rectangular-puzzle")) return
 
         if (path.startsWith("metadata")) {
             when {
                 path.isEqualTo("title") -> // ?/rectangular-puzzle/metadata/title
-                    builder!!.title = text
+                    builder!!.title = parser.text
                 path.isEqualTo("creator") -> // ?/rectangular-puzzle/metadata/creator
-                    builder!!.author = text
+                    builder!!.author = parser.text
                 path.isEqualTo("copyright") -> // ?/rectangular-puzzle/metadata/copyright
-                    builder!!.copyright = text
+                    builder!!.copyright = parser.text
                 path.isEqualTo("description") -> // ?/rectangular-puzzle/metadata/description
-                    builder!!.description = text
+                    builder!!.description = parser.text
             }
         } else if (path.isEqualTo("crossword", "clues", "clue")) {
             // ?/rectangular-puzzle/crossword/clues/clue
-            currentWordBuilder!!.hint = text
+            currentWordBuilder!!.hint = parser.text
         }
     }
 
