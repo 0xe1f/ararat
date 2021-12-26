@@ -29,22 +29,19 @@ import org.junit.Test
 
 class TestUnicodeDataInputStream {
 
-    private val TEST_STRING = "abcdefghijkl"
+    private val TEST_STRING = "abcd\u1234efghijkl\u5678"
     private val stream = UnicodeDataInputStream(TEST_STRING)
 
     @Test
     fun givenTestStream_ensureRead() {
-        var pos = 0
-        while (pos < TEST_STRING.length) {
-            assertEquals(TEST_STRING[pos++].toInt(), stream.read())
+        TEST_STRING.forEach {
+            assertEquals(it.toInt(), stream.read())
         }
-        assertEquals(pos, TEST_STRING.length)
     }
 
     @Test
     fun givenTestStream_ensureCanRead() {
-        var pos = 0
-        while (pos++ < TEST_STRING.length) {
+        repeat(TEST_STRING.length) {
             assertTrue(stream.canRead())
             stream.read()
         }

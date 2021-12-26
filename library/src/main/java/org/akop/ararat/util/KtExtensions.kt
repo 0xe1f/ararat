@@ -25,6 +25,7 @@ import android.os.Parcelable
 import android.text.TextUtils
 import android.util.AttributeSet
 import android.view.inputmethod.InputMethodManager
+import com.google.gson.Gson
 import org.akop.ararat.io.FormatException
 import java.security.MessageDigest
 
@@ -124,3 +125,5 @@ fun String.encodeUnicode() = buildString {
         }
     }
 }
+
+inline fun <reified T> Gson.fromJson(json: String) = this.fromJson<T>(json, T::class.java)
