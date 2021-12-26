@@ -26,7 +26,6 @@ import org.xmlpull.v1.XmlPullParser
 
 import java.io.IOException
 import java.io.InputStream
-import java.io.OutputStream
 
 
 class CrosswordCompilerFormatter : SimpleXmlParser(), CrosswordFormatter {
@@ -60,15 +59,6 @@ class CrosswordCompilerFormatter : SimpleXmlParser(), CrosswordFormatter {
             builder.words += v.build()
         }
     }
-
-    @Throws(IOException::class)
-    override fun write(crossword: Crossword, outputStream: OutputStream) {
-        throw UnsupportedOperationException("Writing not supported")
-    }
-
-    override fun canRead(): Boolean = true
-
-    override fun canWrite(): Boolean = false
 
     override fun onStartElement(path: SimpleXmlPath, parser: XmlPullParser) {
         super.onStartElement(path, parser)

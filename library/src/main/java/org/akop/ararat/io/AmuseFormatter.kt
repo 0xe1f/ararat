@@ -26,7 +26,6 @@ import org.json.JSONObject
 
 import java.io.IOException
 import java.io.InputStream
-import java.io.OutputStream
 import java.nio.charset.Charset
 
 
@@ -66,15 +65,6 @@ class AmuseFormatter : CrosswordFormatter {
                     .mapTo(builder.words) { parseWord(it, attrMap) }
         }
     }
-
-    @Throws(IOException::class)
-    override fun write(crossword: Crossword, outputStream: OutputStream) {
-        throw UnsupportedOperationException("Writing not supported")
-    }
-
-    override fun canRead(): Boolean = true
-
-    override fun canWrite(): Boolean = false
 
     private fun parseWord(jsonWord: JSONObject,
                           attrMap: Array<IntArray>) = buildWord {

@@ -24,7 +24,6 @@ import org.akop.ararat.core.Crossword
 
 import java.io.IOException
 import java.io.InputStream
-import java.io.OutputStream
 
 
 /**
@@ -41,26 +40,8 @@ interface CrosswordFormatter {
     fun setEncoding(encoding: String)
 
     /**
-     * Reads contents of an [inputStream] into a [builder]. Check [canRead]
-     * to ensure reading is supported.
+     * Reads contents of an [inputStream] into a [builder].
      */
     @Throws(IOException::class)
     fun read(builder: Crossword.Builder, inputStream: InputStream)
-
-    /**
-     * Writes contents of a [crossword] to an [outputStream]. Check [canWrite]
-     * to ensure reading is supported.
-     */
-    @Throws(IOException::class)
-    fun write(crossword: Crossword, outputStream: OutputStream)
-
-    /**
-     * Returns true if the formatter supports reading from a stream.
-     */
-    fun canRead(): Boolean
-
-    /**
-     * Returns true if the formatter supports writing to a stream.
-     */
-    fun canWrite(): Boolean
 }

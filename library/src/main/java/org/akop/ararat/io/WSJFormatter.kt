@@ -29,10 +29,9 @@ import org.json.JSONObject
 
 import java.io.IOException
 import java.io.InputStream
-import java.io.OutputStream
 import java.nio.charset.Charset
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Locale
 
 
 class WSJFormatter : CrosswordFormatter {
@@ -69,15 +68,6 @@ class WSJFormatter : CrosswordFormatter {
 
         readClues(builder, copyObj, grid)
     }
-
-    @Throws(IOException::class)
-    override fun write(crossword: Crossword, outputStream: OutputStream) {
-        throw UnsupportedOperationException("Writing not supported")
-    }
-
-    override fun canRead(): Boolean = true
-
-    override fun canWrite(): Boolean = false
 
     private fun readClues(builder: Crossword.Builder, copyObj: JSONObject, grid: Grid) {
         val cluesArray = copyObj.optJSONArray("clues")

@@ -26,7 +26,6 @@ import org.akop.ararat.core.buildWord
 import java.io.IOException
 import java.io.InputStream
 import java.io.InputStreamReader
-import java.io.OutputStream
 import java.util.ArrayList
 
 
@@ -135,15 +134,6 @@ class PzzlFormatter : CrosswordFormatter {
         // Complete word information given the 2D map
         mapOutWords(builder, hintsAcross, hintsDown, cellMap!!)
     }
-
-    @Throws(IOException::class)
-    override fun write(crossword: Crossword, outputStream: OutputStream) {
-        throw UnsupportedOperationException("Writing not supported")
-    }
-
-    override fun canRead(): Boolean = true
-
-    override fun canWrite(): Boolean = false
 
     private fun mapOutWords(cb: Crossword.Builder,
                             hintsAcross: List<String>,

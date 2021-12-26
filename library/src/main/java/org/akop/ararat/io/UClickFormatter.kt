@@ -26,7 +26,6 @@ import org.xmlpull.v1.XmlPullParser
 
 import java.io.IOException
 import java.io.InputStream
-import java.io.OutputStream
 import java.net.URLDecoder
 import java.util.regex.Pattern
 
@@ -42,15 +41,6 @@ class UClickFormatter : SimpleXmlParser(), CrosswordFormatter {
         this.builder = builder
         parseXml(inputStream)
     }
-
-    @Throws(IOException::class)
-    override fun write(crossword: Crossword, outputStream: OutputStream) {
-        throw UnsupportedOperationException("Writing not supported")
-    }
-
-    override fun canRead(): Boolean = true
-
-    override fun canWrite(): Boolean = false
 
     override fun onStartElement(path: SimpleXmlParser.SimpleXmlPath, parser: XmlPullParser) {
         super.onStartElement(path, parser)

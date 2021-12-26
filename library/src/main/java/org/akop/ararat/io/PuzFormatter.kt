@@ -27,7 +27,6 @@ import org.akop.ararat.util.SparseArray
 import java.io.IOException
 import java.io.InputStream
 import java.io.InputStreamReader
-import java.io.OutputStream
 import java.nio.charset.Charset
 import java.util.HashSet
 
@@ -253,26 +252,6 @@ class PuzFormatter : CrosswordFormatter {
 
         buildWords(builder, clues, charMap, attrMap, rebusMap, rebusSols, hasSolution)
     }
-
-    /**
-     * Writes [crossword] to [outputStream]. Currently not implemented.
-     */
-    @Throws(IOException::class)
-    override fun write(crossword: Crossword, outputStream: OutputStream) {
-        throw UnsupportedOperationException("Writing not supported")
-    }
-
-    /**
-     * Returns true if formatter supports reading. Always true for
-     * [PuzFormatter].
-     */
-    override fun canRead(): Boolean = true
-
-    /**
-     * Returns true if formatter supports writing. Always false for
-     * [PuzFormatter].
-     */
-    override fun canWrite(): Boolean = false
 
     private fun buildWords(cb: Crossword.Builder,
                            clues: List<String>,

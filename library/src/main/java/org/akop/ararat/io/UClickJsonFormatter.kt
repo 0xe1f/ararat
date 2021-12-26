@@ -161,8 +161,7 @@ class UClickJsonFormatter : CrosswordFormatter {
         return map
     }
 
-    @Throws(IOException::class)
-    override fun write(crossword: Crossword, outputStream: OutputStream) {
+    fun write(crossword: Crossword, outputStream: OutputStream) {
         val writer = JsonWriter(outputStream.writer(Charset.forName(encoding)))
 
         writer.beginObject()
@@ -177,7 +176,7 @@ class UClickJsonFormatter : CrosswordFormatter {
         writer.name("DownClue").value(crossword.wordsDown
                 .joinToString("\n", postfix = "\nend\n") { "${"%02d".format(it.number)}|${it.hint}" })
 
-        val layoutMap = Array(crossword.height, { IntArray(crossword.width) })
+        val layoutMap = Array(crossword.height) { IntArray(crossword.width) }
 
         writer.name("Solution").beginObject()
         val allAnswers = buildString {
@@ -200,14 +199,6 @@ class UClickJsonFormatter : CrosswordFormatter {
         writer.name("AllAnswer").value(allAnswers)
         writer.endObject()
         writer.flush()
-    }
-
-    override fun canRead(): Boolean {
-        return true
-    }
-
-    override fun canWrite(): Boolean {
-        return true
     }
 
     companion object {
