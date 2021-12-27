@@ -26,7 +26,6 @@ import android.text.TextUtils
 import android.util.AttributeSet
 import android.view.inputmethod.InputMethodManager
 import com.google.gson.Gson
-import org.akop.ararat.io.FormatException
 import java.security.MessageDigest
 
 
@@ -84,46 +83,4 @@ internal fun Context.withStyledAttributes(attrs: IntArray,
 internal val Context.inputMethodManager: InputMethodManager?
     get() = getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
 
-/**
- * Decodes a JS-formatted Unicode string
- */
-fun String.decodeJsUnicode() = buildString {
-    val encoded = this@decodeJsUnicode
-    var start = 0
-    var index = encoded.indexOf('%')
-    while (index > -1) {
-        try {
-            append(encoded.substring(start, index))
-            start = if (encoded[index + 1] == 'u') {
-                // 2-byte unicode
-                append(encoded.substring(index + 2, index + 6).toInt(16).toChar())
-                index + 6
-            } else {
-                // 1-byte ascii
-                append(encoded.substring(index + 1, index + 3).toInt(16).toChar())
-                index + 3
-            }
-        } catch (e: StringIndexOutOfBoundsException) {
-            throw FormatException("Unexpected format", e)
-        }
-        index = encoded.indexOf('%', start)
-    }
-    append(encoded.substring(start))
-}
-
-/**
- * Returns string, replacing unicode characters with unicode markers
- * (e.g. \u1234).
- */
-fun String.encodeUnicode() = buildString {
-    this@encodeUnicode.toCharArray().forEach { ch ->
-        val intValue = ch.toInt()
-        if (intValue == 0 || intValue > 128) {
-            append("\\u${"%04x".format(intValue)}")
-        } else {
-            append(ch)
-        }
-    }
-}
-
-inline fun <reified T> Gson.fromJson(json: String) = this.fromJson<T>(json, T::class.java)
+inline fun <reified T> Gson.fromJson(json: String) = this.fromJson(json, T::class.java)

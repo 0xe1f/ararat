@@ -32,6 +32,7 @@ class TestJSUnescapingStream {
                 .byteInputStream()
         val jsUnescapeStream = JSUnescapingStream(inStream)
                 .reader()
+
         assertEquals(JAVA_ENCODED_STRING, buildString {
             var byte = jsUnescapeStream.read()
             while (byte != -1) {
