@@ -18,31 +18,13 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-package org.akop.ararat.util
+package org.akop.ararat.stream
 
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNull
-import org.junit.Test
+import java.lang.RuntimeException
 
-
-class TestLZStringDecompressor {
-
-    private val COMPRESSED_CONTENT =
-            "\u0485\u1032\u60f2@\u6204\ua902\ucb40\u8260\u02b1\u5061\u4419\u5f20\u0000"
-    private val UNCOMPRESSED_CONTENT = "HELLO FROM ALPHACROSS"
-    private val RANDOM_DATA = "a\u1234bcdefg\u02b1h"
-    private val decompressor = LZStringDecompressor()
-
-    @Test
-    fun givenValidCompressedContent_ensureDecompressed() {
-        val stream = UnicodeDataInputStream(COMPRESSED_CONTENT)
-        assertEquals(UNCOMPRESSED_CONTENT,
-                decompressor.decompress(stream))
-    }
-
-    @Test
-    fun givenInvalidCompressedContent_ensureNull() {
-        val stream = UnicodeDataInputStream(RANDOM_DATA)
-        assertNull(decompressor.decompress(stream))
-    }
-}
+/**
+ * Thrown as a result of compression/decompression error.
+ */
+class CompressionException(
+        message: String? = null,
+        cause: Throwable? = null): RuntimeException(message, cause)

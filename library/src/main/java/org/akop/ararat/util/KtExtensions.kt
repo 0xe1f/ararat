@@ -18,7 +18,11 @@ package org.akop.ararat.util
 
 import android.content.Context
 import android.content.res.TypedArray
-import android.graphics.*
+import android.graphics.Bitmap
+import android.graphics.Color
+import android.graphics.Path
+import android.graphics.PointF
+import android.graphics.RectF
 import android.os.Build
 import android.os.Parcel
 import android.os.Parcelable

@@ -18,40 +18,45 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-package org.akop.ararat.util
+package org.akop.ararat.stream
 
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
 import org.junit.Assert.assertThrows
-import org.junit.Assert.assertTrue
 import org.junit.Test
 
 
-class TestUnicodeDataInputStream {
-
-    private val TEST_STRING = "abcd\u1234efghijkl\u5678"
-    private val stream = UnicodeDataInputStream(TEST_STRING)
+class TestLZStringDecompressorStream {
 
     @Test
-    fun givenTestStream_ensureRead() {
-        TEST_STRING.forEach {
-            assertEquals(it.toInt(), stream.read())
-        }
+    fun givenCompressedContent_ensureDecompresses() {
+        val inStream = COMPRESSED_CONTENT
+                .byteInputStream()
+        val lzStringDecompressor = LZStringDecompressorStream(inStream)
+                .reader()
+
+        assertEquals(UNCOMPRESSED_CONTENT, buildString {
+            var byte = lzStringDecompressor.read()
+            while (byte != -1) {
+                append(byte.toChar())
+                byte = lzStringDecompressor.read()
+            }
+        })
     }
 
     @Test
-    fun givenTestStream_ensureCanRead() {
-        repeat(TEST_STRING.length) {
-            assertTrue(stream.canRead())
-            stream.read()
+    fun givenBadCompressionData_ensureThrows() {
+        val inStream = RANDOM_DATA.byteInputStream()
+        assertThrows(CompressionException::class.java) {
+            LZStringDecompressorStream(inStream).reader().use { it.readText() }
         }
-        assertFalse(stream.canRead())
     }
 
-    @Test
-    fun givenTestStream_ensureEventuallyThrows() {
-        assertThrows(Exception::class.java) {
-            repeat(TEST_STRING.length + 1) { stream.read() }
-        }
+    companion object {
+        private val COMPRESSED_CONTENT =
+                "\u0485\u1032\u60f2@\u6204\ua902\ucb50\u8ca0\u800d\u0421" +
+                "\ua817\u0fea\u0400\u0000"
+        private val UNCOMPRESSED_CONTENT =
+                "HELLO FROM \u0531\u0580\u0561\u0580\u0561\u057f"
+        private val RANDOM_DATA = "a\u1234bcdefg\u02b1h"
     }
 }
