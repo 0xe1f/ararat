@@ -42,8 +42,8 @@ class NYTFormatter : CrosswordFormatter {
         this.encoding = Charset.forName(encoding)
     }
 
-    @Throws(IOException::class)
-    override fun read(builder: Crossword.Builder, inputStream: InputStream) {
+    override fun read(builder: Crossword.Builder,
+                      inputStream: InputStream) {
         val decodedString = inputStream
                 .bufferedReader(encoding)
                 .use { it.readText() }

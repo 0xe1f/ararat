@@ -20,11 +20,10 @@
 
 package org.akop.ararat.io
 
+import com.google.gson.Gson
 import org.akop.ararat.core.Crossword
 import org.akop.ararat.core.buildWord
-import org.json.JSONObject
-
-import java.io.IOException
+import org.akop.ararat.util.fromJson
 import java.io.InputStream
 import java.nio.charset.Charset
 
@@ -37,47 +36,39 @@ class AmuseFormatter : CrosswordFormatter {
         this.encoding = Charset.forName(encoding)
     }
 
-    @Throws(IOException::class)
-    override fun read(builder: Crossword.Builder, inputStream: InputStream) {
+    override fun read(builder: Crossword.Builder,
+                      inputStream: InputStream) {
         val json = inputStream.bufferedReader(encoding).use { it.readText() }
-        val root = JSONObject(json)
+        val doc: Doc = Gson().fromJson(json)
 
-        builder.title = root.optString("title")
-        builder.description = root.optString("description")
-        builder.copyright = root.optString("copyright")
-        builder.author = root.optString("author")
-        builder.width = root.optInt("w")
-        builder.height = root.optInt("h")
-        builder.date = root.optLong("publishTime")
+        builder.title = doc.title
+        builder.description = doc.description
+        builder.copyright = doc.copyright
+        builder.author = doc.author
+        builder.width = doc.w
+        builder.height = doc.h
+        builder.date = doc.publishTime
 
         val attrMap = Array(builder.height) { IntArray(builder.width) { 0 } }
-        root.optJSONArray("cellInfos")?.let { array ->
-            (0 until array.length())
-                    .map { i -> array.optJSONObject(i) }
-                    .filter { it.optBoolean("isCircled", false) }
-                    .forEach {
-                        attrMap[it.optInt("y")][it.optInt("x")] = Crossword.Cell.ATTR_CIRCLED
-                    }
-        }
-        root.optJSONArray("placedWords")?.let { array ->
-            (0 until array.length())
-                    .map { i -> array.optJSONObject(i) }
-                    .mapTo(builder.words) { parseWord(it, attrMap) }
-        }
+        doc.cellInfos
+                ?.filter { it.isCircled == true }
+                ?.forEach { attrMap[it.y][it.x] = Crossword.Cell.ATTR_CIRCLED }
+        doc.placedWords
+                .mapTo(builder.words) { parseWord(it, attrMap) }
     }
 
-    private fun parseWord(jsonWord: JSONObject,
+    private fun parseWord(placedWord: PlacedWord,
                           attrMap: Array<IntArray>) = buildWord {
-        direction = if (jsonWord.optBoolean("acrossNotDown")) {
+        direction = if (placedWord.acrossNotDown) {
             Crossword.Word.DIR_ACROSS
         } else {
             Crossword.Word.DIR_DOWN
         }
-        hint = jsonWord.optJSONObject("clue")?.optString("clue")
-        number = jsonWord.optInt("clueNum")
-        startColumn = jsonWord.optInt("x")
-        startRow = jsonWord.optInt("y")
-        jsonWord.optString("word")
+        hint = placedWord.clue.clue
+        number = placedWord.clueNum
+        startColumn = placedWord.x
+        startRow = placedWord.y
+        placedWord.word
                 .toCharArray()
                 .forEachIndexed { i, ch ->
                     addCell(ch, when (direction) {
@@ -87,6 +78,34 @@ class AmuseFormatter : CrosswordFormatter {
                     })
                 }
     }
+
+    private data class Doc(
+            val title: String?,
+            val description: String?,
+            val copyright: String?,
+            val author: String?,
+            val w: Int,
+            val h: Int,
+            val publishTime: Long,
+            val cellInfos: List<CellInfo>?,
+            val placedWords: List<PlacedWord>,
+    )
+    private data class CellInfo(
+            val x: Int,
+            val y: Int,
+            val isCircled: Boolean?,
+    )
+    private data class PlacedWord(
+            val acrossNotDown: Boolean,
+            val clueNum: Int,
+            val x: Int,
+            val y: Int,
+            val clue: Clue,
+            val word: String,
+    )
+    private data class Clue(
+            val clue: String,
+    )
 
     companion object {
         private const val DEFAULT_ENCODING = "UTF-8"

@@ -1,27 +1,16 @@
 {
   "gamePageData":{
     "meta":{
-      "category":0,
       "constructors":[
         "Noki Trias and Lawrence Barrett"
       ],
       "copyright":"2021",
       "editor":"Will Shortz",
-      "id":19772,
-      "lastUpdated":"2021-12-13 18:12:46 +0000 UTC",
-      "publicationDate":"2021-12-22",
-      "relatedContent":{
-        "text":"Read and comment on the Wordplay blog",
-        "url":"https://www.nytimes.com/2021/12/21/crosswords/daily-puzzle-2021-12-22.html"
-      },
-      "goldStarCutoff":"2021-12-22T23:59:59-08:00",
-      "publishStream":"daily"
+      "publicationDate":"2021-12-22"
     },
     "dimensions":{
       "rowCount":15,
-      "columnCount":15,
-      "aspectRatio":1,
-      "cellSize":33
+      "columnCount":15
     },
     "cells":[
       {
