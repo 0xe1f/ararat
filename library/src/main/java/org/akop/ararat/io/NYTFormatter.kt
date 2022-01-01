@@ -24,6 +24,7 @@ import com.google.gson.Gson
 import org.akop.ararat.core.Crossword
 import org.akop.ararat.core.buildWord
 import org.akop.ararat.util.fromJson
+import org.akop.ararat.util.stripHtmlEntities
 
 import java.io.IOException
 import java.io.InputStream
@@ -58,9 +59,9 @@ class NYTFormatter : CrosswordFormatter {
             builder.height = rowCount
         }
         with (doc.gamePageData.meta) {
-            builder.author = constructors.joinToString(", ")
-            builder.copyright = copyright
-            builder.comment = notes.firstOrNull()?.text
+            builder.author = constructors.joinToString(", ").stripHtmlEntities()
+            builder.copyright = copyright.stripHtmlEntities()
+            builder.comment = notes?.firstOrNull()?.text?.stripHtmlEntities()
             builder.date = PUBLISH_DATE_FORMAT.parse(publicationDate)?.time ?: 0
         }
         doc.gamePageData.clues.forEach { clue ->
@@ -77,7 +78,7 @@ class NYTFormatter : CrosswordFormatter {
                     DIRECTION_DOWN -> Crossword.Word.DIR_DOWN
                     else -> error("$dir is not a valid direction")
                 }
-                hint = clue.text
+                hint = clue.text.stripHtmlEntities()
                 cells.forEach { cell ->
                     addCell(cell.answer, when (cell.type) {
                         TYPE_CIRCLED -> Crossword.Cell.ATTR_CIRCLED
@@ -106,7 +107,7 @@ class NYTFormatter : CrosswordFormatter {
     private data class Meta(
             val constructors: List<String>,
             val copyright: String,
-            val notes: List<Note>,
+            val notes: List<Note>?,
             val publicationDate: String,
     )
 
