@@ -21,12 +21,11 @@
 package org.akop.ararat.io
 
 import com.google.gson.Gson
+import org.akop.ararat.annotations.DontObfuscate
 import org.akop.ararat.core.Crossword
 import org.akop.ararat.core.buildWord
 import org.akop.ararat.util.fromJson
 import org.akop.ararat.util.stripHtmlEntities
-
-import java.io.IOException
 import java.io.InputStream
 import java.nio.charset.Charset
 import java.text.SimpleDateFormat
@@ -89,39 +88,40 @@ class NYTFormatter : CrosswordFormatter {
         }
     }
 
+    @DontObfuscate
     private data class Doc(
             val gamePageData: GamePageData,
     )
-
+    @DontObfuscate
     private data class GamePageData(
             val meta: Meta,
             val dimensions: Dimensions,
             val cells: List<Cell>,
             val clues: List<Clue>,
     )
-
+    @DontObfuscate
     private data class Note(
             val text: String,
     )
-
+    @DontObfuscate
     private data class Meta(
             val constructors: List<String>,
             val copyright: String,
             val notes: List<Note>?,
             val publicationDate: String,
     )
-
+    @DontObfuscate
     private data class Dimensions(
             val rowCount: Int,
             val columnCount: Int,
     )
-
+    @DontObfuscate
     private data class Cell(
             val type: Int,
             val answer: String,
             val index: Int,
     )
-
+    @DontObfuscate
     private data class Clue(
             val cells: List<Int>,
             val direction: String,

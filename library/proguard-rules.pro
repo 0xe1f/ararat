@@ -20,4 +20,9 @@
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
 
--keep class org.akop.ararat.formatter.** { *; }
+-keep class org.akop.ararat.io.** { *; }
+-keep,allowobfuscation @interface org.akop.ararat.annotations.DontObfuscate
+-keep @org.akop.ararat.annotations.DontObfuscate class *
+-keepclassmembers class * {
+    @org.akop.ararat.annotations.DontObfuscate *;
+}

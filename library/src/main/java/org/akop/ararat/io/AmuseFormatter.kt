@@ -21,6 +21,7 @@
 package org.akop.ararat.io
 
 import com.google.gson.Gson
+import org.akop.ararat.annotations.DontObfuscate
 import org.akop.ararat.core.Crossword
 import org.akop.ararat.core.buildWord
 import org.akop.ararat.util.fromJson
@@ -79,6 +80,7 @@ class AmuseFormatter : CrosswordFormatter {
                 }
     }
 
+    @DontObfuscate
     private data class Doc(
             val title: String?,
             val description: String?,
@@ -87,14 +89,17 @@ class AmuseFormatter : CrosswordFormatter {
             val w: Int,
             val h: Int,
             val publishTime: Long,
+            val publishTimeZone: String?,
             val cellInfos: List<CellInfo>?,
             val placedWords: List<PlacedWord>,
     )
+    @DontObfuscate
     private data class CellInfo(
             val x: Int,
             val y: Int,
             val isCircled: Boolean?,
     )
+    @DontObfuscate
     private data class PlacedWord(
             val acrossNotDown: Boolean,
             val clueNum: Int,
@@ -103,6 +108,7 @@ class AmuseFormatter : CrosswordFormatter {
             val clue: Clue,
             val word: String,
     )
+    @DontObfuscate
     private data class Clue(
             val clue: String,
     )
