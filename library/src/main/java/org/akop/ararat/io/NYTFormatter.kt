@@ -48,36 +48,38 @@ class NYTFormatter : CrosswordFormatter {
                 .use { it.readText() }
 
         val doc: Doc = Gson().fromJson(decodedString)
-        val cellMap = doc.gamePageData.cells.associateBy { it.index }
+        val body = doc.body.first()
 
-        with (doc.gamePageData.dimensions) {
-            if (rowCount < 1 || columnCount < 1) {
-                throw FormatException("Puzzle has bad dimensions (${columnCount}x${rowCount}")
+        with (body.dimensions) {
+            if (height < 1 || width < 1) {
+                throw FormatException("Puzzle has bad dimensions (${width}x${height}")
             }
-            builder.width = columnCount
-            builder.height = rowCount
+            builder.width = width
+            builder.height = height
         }
-        with (doc.gamePageData.meta) {
+        with (doc) {
             builder.author = constructors.joinToString(", ").stripHtmlEntities()
             builder.copyright = copyright.stripHtmlEntities()
             builder.comment = notes?.firstOrNull()?.text?.stripHtmlEntities()
             builder.date = PUBLISH_DATE_FORMAT.parse(publicationDate)?.time ?: 0
         }
-        doc.gamePageData.clues.forEach { clue ->
+        body.clues.forEach { clue ->
+            val firstCellIndex = clue.cells.first()
             val cells = clue
                     .cells
-                    .map { cellMap[it] ?: error("Cell $it not found") }
-            val firstCell = cells.first()
+                    .map { body.cells[it] }
             builder.addWord(buildWord {
-                startColumn = firstCell.index % builder.width
-                startRow = firstCell.index / builder.width
+                startColumn = firstCellIndex % builder.width
+                startRow = firstCellIndex / builder.width
                 number = clue.label
                 direction = when (val dir = clue.direction) {
                     DIRECTION_ACROSS -> Crossword.Word.DIR_ACROSS
                     DIRECTION_DOWN -> Crossword.Word.DIR_DOWN
                     else -> error("$dir is not a valid direction")
                 }
-                hint = clue.text.stripHtmlEntities()
+                val text = clue.text.first()
+                hint = text.formatted?.stripHtmlEntities()
+                    ?: text.plain
                 cells.forEach { cell ->
                     addCell(cell.answer, when (cell.type) {
                         TYPE_CIRCLED -> Crossword.Cell.ATTR_CIRCLED
@@ -90,43 +92,43 @@ class NYTFormatter : CrosswordFormatter {
 
     @DontObfuscate
     private data class Doc(
-            val gamePageData: GamePageData,
+        val body: List<Body>,
+        val constructors: List<String>,
+        val copyright: String,
+        val notes: List<Note>?,
+        val publicationDate: String,
     )
     @DontObfuscate
-    private data class GamePageData(
-            val meta: Meta,
-            val dimensions: Dimensions,
-            val cells: List<Cell>,
-            val clues: List<Clue>,
+    private data class Body(
+        val dimensions: Dimensions,
+        val cells: List<Cell>,
+        val clues: List<Clue>,
     )
     @DontObfuscate
     private data class Note(
-            val text: String,
-    )
-    @DontObfuscate
-    private data class Meta(
-            val constructors: List<String>,
-            val copyright: String,
-            val notes: List<Note>?,
-            val publicationDate: String,
+        val text: String,
     )
     @DontObfuscate
     private data class Dimensions(
-            val rowCount: Int,
-            val columnCount: Int,
+        val height: Int,
+        val width: Int,
     )
     @DontObfuscate
     private data class Cell(
-            val type: Int,
-            val answer: String,
-            val index: Int,
+        val type: Int,
+        val answer: String,
     )
     @DontObfuscate
     private data class Clue(
-            val cells: List<Int>,
-            val direction: String,
-            val label: Int,
-            val text: String,
+        val cells: List<Int>,
+        val direction: String,
+        val label: Int,
+        val text: List<Text>,
+    )
+    @DontObfuscate
+    private data class Text(
+        val plain: String,
+        val formatted: String?,
     )
 
     companion object {
