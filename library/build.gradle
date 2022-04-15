@@ -4,18 +4,15 @@ apply plugin: 'org.jetbrains.dokka'
 apply from: 'maven-push.gradle'
 
 android {
-    compileSdkVersion 30
-    buildToolsVersion '30.0.1'
+    compileSdkVersion 31
 
     compileOptions {
         kotlinOptions.freeCompilerArgs += ['-module-name', "$GROUP.$POM_ARTIFACT_ID"]
     }
 
     defaultConfig {
-        minSdkVersion 16
-        targetSdkVersion 30
-        versionCode 1
-        versionName "1.0"
+        minSdkVersion 19
+        targetSdkVersion 31
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
