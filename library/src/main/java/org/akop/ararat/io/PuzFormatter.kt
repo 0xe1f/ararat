@@ -304,7 +304,7 @@ class PuzFormatter : CrosswordFormatter {
                 }
 
                 if ((i == 0 || i > 0 && charMap[i - 1][j] == EMPTY)
-                        && i + 1 < iend && charMap[i + 1][j] != EMPTY) {
+                        && i + 1 <= iend && charMap[i + 1][j] != EMPTY) {
                     // Start of a new Down word
                     if (!incremented) number++
 
