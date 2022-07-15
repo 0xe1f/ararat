@@ -82,14 +82,12 @@ class PuzFormatter : CrosswordFormatter {
         if (key != null && key !in (0..9999))
             throw IllegalArgumentException("Key is out of range")
 
-        val reader = inputStream.reader(Charset.forName(encoding))
-
         // Overall checksum
-        reader.ensureSkip(2)
+        inputStream.ensureSkip(2)
 
         // Magic string
-        val temp = CharArray(128)
-        if (reader.read(temp, 0, MAGIC_STRING.length) != MAGIC_STRING.length)
+        val temp = ByteArray(128)
+        if (inputStream.read(temp, 0, MAGIC_STRING.length) != MAGIC_STRING.length)
             throw FormatException("Magic string incomplete")
 
         val magic = String(temp, 0, MAGIC_STRING.length)
@@ -97,16 +95,22 @@ class PuzFormatter : CrosswordFormatter {
             throw FormatException("Magic string mismatch (got '$magic')")
 
         // Checksums
-        reader.ensureSkip(2) // CIB checksum
-        reader.ensureSkip(4) // Masked low checksum
-        reader.ensureSkip(4) // Masked high checksum
+        inputStream.ensureSkip(2) // CIB checksum
+        inputStream.ensureSkip(4) // Masked low checksum
+        inputStream.ensureSkip(4) // Masked high checksum
 
         // Version
-        if (reader.read(temp, 0, 4) != 4)
+        if (inputStream.read(temp, 0, 4) != 4)
             throw FormatException("Version information incomplete")
-        val version = String(temp, 0, 4)
-        val verNum = version.substring(0..2).toFloat()
-        val verRev = if (version.length > 2) version.last() else '\u0000'
+        val version = String(temp, 0, 3)
+        val verNum = version.toFloat()
+
+        // AcrossLite uses UTF-8 as of v2
+        if (verNum >= 2f) {
+            setEncoding(ALTERNATE_ENCODING)
+        }
+
+        val reader = inputStream.reader(Charset.forName(encoding))
 
         // Garbage
         reader.ensureSkip(2)
@@ -483,6 +487,12 @@ class PuzFormatter : CrosswordFormatter {
         }
     }
 
+    private fun InputStream.ensureSkip(len: Long) {
+        val skipped = skip(len)
+        if (skipped != len)
+            throw FormatException("Skip failed ($skipped instead of $len)")
+    }
+
     private fun InputStreamReader.ensureSkip(len: Long) {
         val skipped = skip(len)
         if (skipped != len)
@@ -498,5 +508,6 @@ class PuzFormatter : CrosswordFormatter {
 
         private const val EMPTY = '.'
         private const val DEFAULT_ENCODING = "ISO-8859-1"
+        private const val ALTERNATE_ENCODING = "UTF-8"
     }
 }
