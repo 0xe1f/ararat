@@ -1,7 +1,6 @@
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 apply plugin: 'org.jetbrains.dokka'
-apply from: 'maven-push.gradle'
 
 android {
     compileSdkVersion 31
@@ -66,3 +65,5 @@ dokka {
     outputFormat = 'html'
     outputDirectory = "$rootDir/docs"
 }
+
+apply plugin: "com.vanniktech.maven.publish"
